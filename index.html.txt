@@ -1,0 +1,14 @@
+Html
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Corazón Studio AI</title>
+</head>
+<body style="font-family: Arial; text-align:center; margin-top:60px;">
+  <h1>💙 Corazón Studio AI</h1>
+  <p>Tu plataforma de inteligencia artificial con propósito.</p>
+  <p>Backend activo y conectado.</p>
+</body>
+</html>
