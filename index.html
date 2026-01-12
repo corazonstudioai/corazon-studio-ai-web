@@ -1,37 +1,48 @@
-Html
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title> Corazón Studio AI </title>
+  <meta charset="UTF-8" />
+  <title>Corazón Studio AI</title>
 </head>
+
 <body style="font-family: Arial; text-align: center; margin-top: 60px;">
 
-  <h1>💙 Corazón Studio AI</h1>
-  <p>Tu plataforma de inteligencia artificial con propósito.</p>
+  <h1>💙 Corazón Studio AI</h1>
+  <p>Tu plataforma de inteligencia artificial con propósito.</p>
 
-  <button onclick="probarBackend()" style="padding:10px 20px; font-size:16px;">
-    Probar conexión con la IA
-  </button>
+  <button onclick="probarBackend()" style="padding:10px 20px; font-size:16px;">
+    Probar conexión con la IA
+  </button>
 
-  <p id="respuesta" style="margin-top:20px; font-weight:bold;"></p>
+  <p id="respuesta" style="margin-top:20px; font-weight:bold;"></p>
 
-  <script>
-    async function probarBackend() {
-      document.getElementById("respuesta").innerText = "Conectando...";
-      try {
-        const res = await fetch("https://corazon-studio-ai-backend.onrender.com/");
-        const data = await res.json();
-        document.getElementById("respuesta").innerText = data.mensaje;
-      } catch (error) {
-        document.getElementById("respuesta").innerText = "Error al conectar con el backend";
-      }
-    }
-  </script>
+  <script>
+    async function probarBackend() {
+      document.getElementById("respuesta").innerText = "Conectando...";
+
+      try {
+        const res = await fetch(
+          "https://corazon-studio-ai-backend-3.onrender.com/chat",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              message: "Hola, estoy probando la app desde la web"
+            })
+          }
+        );
+
+        const data = await res.json();
+        document.getElementById("respuesta").innerText = data.mensaje;
+
+      } catch (error) {
+        document.getElementById("respuesta").innerText =
+          "Error al conectar con el backend";
+      }
+    }
+  </script>
 
 </body>
 </html>
-
-
-
