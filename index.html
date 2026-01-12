@@ -4,42 +4,36 @@
   <meta charset="UTF-8" />
   <title>Corazón Studio AI</title>
 </head>
-
 <body style="font-family: Arial; text-align: center; margin-top: 60px;">
 
-  <h1>💙 Corazón Studio AI</h1>
+  <h2>💙 Corazón Studio AI</h2>
   <p>Tu plataforma de inteligencia artificial con propósito.</p>
 
-  <button onclick="probarBackend()" style="padding:10px 20px; font-size:16px;">
-    Probar conexión con la IA
-  </button>
+  <button onclick="probarIA()">Probar conexión con la IA</button>
 
-  <p id="respuesta" style="margin-top:20px; font-weight:bold;"></p>
+  <p id="respuesta" style="margin-top: 20px; font-weight: bold;"></p>
 
   <script>
-    async function probarBackend() {
-      document.getElementById("respuesta").innerText = "Conectando...";
+    async function probarIA() {
+      const backendURL = "https://corazon-studio-ai-backend-3.onrender.com/chat";
 
       try {
-        const res = await fetch(
-          "https://corazon-studio-ai-backend-3.onrender.com/chat",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              message: "Hola, estoy probando la app desde la web"
-            })
-          }
-        );
+        const res = await fetch(backendURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: "Hola, probando conexión desde GitHub Pages"
+          })
+        });
 
         const data = await res.json();
-        document.getElementById("respuesta").innerText = data.mensaje;
+        document.getElementById("respuesta").innerText = data.respuesta;
 
       } catch (error) {
         document.getElementById("respuesta").innerText =
-          "Error al conectar con el backend";
+          "❌ Error al conectar con el backend";
       }
     }
   </script>
