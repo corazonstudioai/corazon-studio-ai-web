@@ -2,138 +2,171 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Corazón Studio AI</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; }
-    .card { max-width: 560px; margin: 0 auto; padding: 24px; border: 1px solid #ddd; border-radius: 14px; }
-    h1 { margin: 0 0 8px; }
-    p { margin: 8px 0 18px; color: #444; }
-    select, textarea, button { width: 100%; max-width: 520px; padding: 12px; margin: 8px 0; font-size: 16px; }
-    textarea { height: 110px; }
-    button { cursor: pointer; }
-    .out { margin-top: 18px; font-size: 16px; text-align: left; white-space: pre-wrap; }
-    .ok { color: #0a7a2f; font-weight: 600; }
-    .err { color: #b00020; font-weight: 600; }
-    .muted { color: #777; font-size: 14px; }
-  </style>
 </head>
-<body>
-  <div class="card">
-    <h1>💙 Corazón Studio AI</h1>
-    <p id="subtitle">Tu plataforma de inteligencia artificial con propósito.</p>
 
-    <label for="lang" class="muted">Idioma / Language</label>
-    <select id="lang" onchange="onLangChange()">
+<body style="font-family: Arial; text-align:center; padding: 24px;">
+  <h1 style="margin-bottom: 6px;">💙 Corazón Studio AI</h1>
+  <p style="margin-top: 0; opacity: 0.8;">Tu plataforma de inteligencia artificial con propósito.</p>
+
+  <!-- Selector de idioma (solo 1 a la vez) -->
+  <div style="margin: 16px 0;">
+    <label for="lang"><b>Idioma:</b></label>
+    <select id="lang" style="padding: 8px; margin-left: 8px;">
       <option value="es" selected>Español</option>
       <option value="en">English</option>
     </select>
+  </div>
 
-    <button onclick="probarConexion()" id="btnTest">Probar conexión</button>
+  <!-- Estado -->
+  <div style="margin: 12px 0;">
+    <button onclick="probarConexion()" style="padding: 10px 14px;">Probar conexión con IA</button>
+    <div id="estado" style="margin-top: 10px; font-weight: bold;"></div>
+  </div>
 
-    <textarea id="msg" placeholder="Escribe tu mensaje aquí..."></textarea>
-    <button onclick="enviarMensaje()" id="btnSend">Enviar</button>
+  <hr style="max-width: 720px; margin: 22px auto; opacity: 0.25;"/>
 
-    <div id="status" class="out muted"></div>
-    <div id="respuesta" class="out"></div>
+  <!-- CHAT -->
+  <div style="max-width: 720px; margin: 0 auto; text-align: left;">
+    <h2>💬 Chat</h2>
+    <textarea id="chatInput" rows="4" style="width: 100%; padding: 10px;" placeholder="Escribe tu mensaje..."></textarea>
+    <div style="margin-top: 10px;">
+      <button onclick="enviarChat()" style="padding: 10px 14px;">Enviar</button>
+    </div>
+    <div id="chatRespuesta" style="white-space: pre-wrap; margin-top: 12px; padding: 12px; border: 1px solid #ddd; border-radius: 8px;"></div>
+  </div>
+
+  <hr style="max-width: 720px; margin: 22px auto; opacity: 0.25;"/>
+
+  <!-- IMÁGENES -->
+  <div style="max-width: 720px; margin: 0 auto; text-align: left;">
+    <h2>🖼️ Imágenes</h2>
+    <input id="imgPrompt" style="width: 100%; padding: 10px;" placeholder="Describe la imagen que quieres..." />
+    <div style="margin-top: 10px;">
+      <button onclick="generarImagen()" style="padding: 10px 14px;">Generar imagen</button>
+    </div>
+    <div id="imgEstado" style="margin-top: 10px; font-weight: bold;"></div>
+    <img id="imgResultado" alt="" style="max-width:100%; margin-top: 12px; border-radius: 10px; display:none;" />
+  </div>
+
+  <hr style="max-width: 720px; margin: 22px auto; opacity: 0.25;"/>
+
+  <!-- VIDEO -->
+  <div style="max-width: 720px; margin: 0 auto; text-align: left;">
+    <h2>🎬 Video</h2>
+    <input id="videoPrompt" style="width: 100%; padding: 10px;" placeholder="Describe el video que quieres..." />
+    <div style="margin-top: 10px;">
+      <button onclick="generarVideo()" style="padding: 10px 14px;">Generar video</button>
+    </div>
+    <div id="videoEstado" style="margin-top: 10px; font-weight: bold;"></div>
+    <video id="videoResultado" controls style="width: 100%; margin-top: 12px; border-radius: 10px; display:none;"></video>
   </div>
 
   <script>
-    // ✅ Pega aquí tu URL de Render (la tuya)
-    const BACKEND_URL = "https://corazon-studio-ai-backend-3.onrender.com";
+    // ✅ Pega aquí tu URL de Render (backend)
+    const BACKEND = "TU_BACKEND_RENDER_URL_AQUI"; // ejemplo: https://corazon-studio-ai-backend-3.onrender.com
 
-    function t() {
-      const lang = document.getElementById("lang").value;
-      return {
-        es: {
-          test: "Probar conexión",
-          send: "Enviar",
-          placeholder: "Escribe tu mensaje aquí...",
-          connected: "✅ Conectado correctamente",
-          connecting: "Conectando...",
-          sending: "Enviando...",
-          err: "❌ Error: ",
-          replyTitle: "Respuesta:"
-        },
-        en: {
-          test: "Test connection",
-          send: "Send",
-          placeholder: "Type your message here...",
-          connected: "✅ Connected successfully",
-          connecting: "Connecting...",
-          sending: "Sending...",
-          err: "❌ Error: ",
-          replyTitle: "Reply:"
-        }
-      }[lang];
-    }
-
-    function onLangChange() {
-      const lang = document.getElementById("lang").value;
-      document.documentElement.lang = lang;
-      document.getElementById("btnTest").innerText = t().test;
-      document.getElementById("btnSend").innerText = t().send;
-      document.getElementById("msg").placeholder = t().placeholder;
-      document.getElementById("status").innerText = "";
-      document.getElementById("respuesta").innerText = "";
+    function getLang() {
+      return document.getElementById("lang").value;
     }
 
     async function probarConexion() {
-      const status = document.getElementById("status");
-      const out = document.getElementById("respuesta");
-      status.className = "out muted";
-      out.innerText = "";
-      status.innerText = t().connecting;
-
+      const estado = document.getElementById("estado");
+      estado.textContent = "Probando...";
       try {
-        const res = await fetch(`${BACKEND_URL}/health`, { method: "GET" });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        status.className = "out ok";
-        status.innerText = t().connected;
+        const res = await fetch(`${BACKEND}/health`);
+        const data = await res.json();
+        estado.textContent = data.mensaje || "✅ Conectado correctamente";
       } catch (e) {
-        status.className = "out err";
-        status.innerText = t().err + e.message;
+        estado.textContent = "❌ No se pudo conectar. Revisa backend/CORS.";
       }
     }
 
-    async function enviarMensaje() {
-      const status = document.getElementById("status");
-      const out = document.getElementById("respuesta");
-      const msg = document.getElementById("msg").value.trim();
-      const lang = document.getElementById("lang").value;
+    async function enviarChat() {
+      const box = document.getElementById("chatRespuesta");
+      const msg = document.getElementById("chatInput").value.trim();
+      if (!msg) return;
 
-      out.innerText = "";
-      status.className = "out muted";
-      status.innerText = t().sending;
-
-      if (!msg) {
-        status.className = "out err";
-        status.innerText = (lang === "es") ? "❌ Escribe un mensaje primero." : "❌ Please type a message first.";
-        return;
-      }
-
+      box.textContent = "Pensando...";
       try {
-        const res = await fetch(`${BACKEND_URL}/chat`, {
+        const res = await fetch(`${BACKEND}/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: msg, language: lang })
+          body: JSON.stringify({ message: msg, lang: getLang() })
         });
-
         const data = await res.json();
-        if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
-
-        status.className = "out ok";
-        status.innerText = t().connected;
-
-        out.innerText = `${t().replyTitle}\n${data.reply}`;
+        box.textContent = data.reply || "Sin respuesta.";
       } catch (e) {
-        status.className = "out err";
-        status.innerText = t().err + e.message;
+        box.textContent = "❌ Error conectando con el backend.";
       }
     }
 
-    // Iniciar textos correctos
-    onLangChange();
+    async function generarImagen() {
+      const estado = document.getElementById("imgEstado");
+      const img = document.getElementById("imgResultado");
+      // reset
+      img.style.display = "none";
+      img.src = "";
+      estado.textContent = "";
+
+      const prompt = document.getElementById("imgPrompt").value.trim();
+      if (!prompt) return;
+
+      estado.textContent = "Generando imagen...";
+      try {
+        const res = await fetch(`${BACKEND}/image`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt, lang: getLang() })
+        });
+        const data = await res.json();
+
+        if (!data.data_url) {
+          estado.textContent = "❌ No se recibió imagen.";
+          return;
+        }
+        img.src = data.data_url;
+        img.style.display = "block";
+        estado.textContent = "✅ Imagen lista";
+      } catch (e) {
+        estado.textContent = "❌ Error generando imagen.";
+      }
+    }
+
+    async function generarVideo() {
+      const estado = document.getElementById("videoEstado");
+      const vid = document.getElementById("videoResultado");
+      // reset
+      vid.style.display = "none";
+      vid.src = "";
+      estado.textContent = "";
+
+      const prompt = document.getElementById("videoPrompt").value.trim();
+      if (!prompt) return;
+
+      estado.textContent = "Generando video (puede tardar)...";
+      try {
+        const res = await fetch(`${BACKEND}/video`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt, lang: getLang() })
+        });
+        const data = await res.json();
+
+        if (!data.video_id) {
+          estado.textContent = "❌ No se recibió video_id.";
+          return;
+        }
+
+        // Backend sirve el mp4 desde /video/{id}
+        vid.src = `${BACKEND}/video/${data.video_id}`;
+        vid.style.display = "block";
+        estado.textContent = "✅ Video listo";
+      } catch (e) {
+        estado.textContent = "❌ Error generando video.";
+      }
+    }
   </script>
 </body>
 </html>
