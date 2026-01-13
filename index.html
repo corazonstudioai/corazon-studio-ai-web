@@ -2,47 +2,138 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Corazón Studio AI</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; }
+    .card { max-width: 560px; margin: 0 auto; padding: 24px; border: 1px solid #ddd; border-radius: 14px; }
+    h1 { margin: 0 0 8px; }
+    p { margin: 8px 0 18px; color: #444; }
+    select, textarea, button { width: 100%; max-width: 520px; padding: 12px; margin: 8px 0; font-size: 16px; }
+    textarea { height: 110px; }
+    button { cursor: pointer; }
+    .out { margin-top: 18px; font-size: 16px; text-align: left; white-space: pre-wrap; }
+    .ok { color: #0a7a2f; font-weight: 600; }
+    .err { color: #b00020; font-weight: 600; }
+    .muted { color: #777; font-size: 14px; }
+  </style>
 </head>
+<body>
+  <div class="card">
+    <h1>💙 Corazón Studio AI</h1>
+    <p id="subtitle">Tu plataforma de inteligencia artificial con propósito.</p>
 
-<body style="font-family: Arial; text-align: center; padding: 40px;">
+    <label for="lang" class="muted">Idioma / Language</label>
+    <select id="lang" onchange="onLangChange()">
+      <option value="es" selected>Español</option>
+      <option value="en">English</option>
+    </select>
 
-  <h2>💙 Corazón Studio AI</h2>
-  <p>Tu plataforma de inteligencia artificial</p>
+    <button onclick="probarConexion()" id="btnTest">Probar conexión</button>
 
-  <button onclick="probarIA()">Probar conexión con IA</button>
+    <textarea id="msg" placeholder="Escribe tu mensaje aquí..."></textarea>
+    <button onclick="enviarMensaje()" id="btnSend">Enviar</button>
 
-  <p id="respuesta" style="margin-top: 20px; font-size: 18px;"></p>
+    <div id="status" class="out muted"></div>
+    <div id="respuesta" class="out"></div>
+  </div>
 
   <script>
-    async function probarIA() {
-      const backendURL = "https://corazon-studio-ai-backend-3.onrender.com/chat";
+    // ✅ Pega aquí tu URL de Render (la tuya)
+    const BACKEND_URL = "https://corazon-studio-ai-backend-3.onrender.com";
 
-      document.getElementById("respuesta").innerText = "⏳ Conectando con la IA...";
+    function t() {
+      const lang = document.getElementById("lang").value;
+      return {
+        es: {
+          test: "Probar conexión",
+          send: "Enviar",
+          placeholder: "Escribe tu mensaje aquí...",
+          connected: "✅ Conectado correctamente",
+          connecting: "Conectando...",
+          sending: "Enviando...",
+          err: "❌ Error: ",
+          replyTitle: "Respuesta:"
+        },
+        en: {
+          test: "Test connection",
+          send: "Send",
+          placeholder: "Type your message here...",
+          connected: "✅ Connected successfully",
+          connecting: "Connecting...",
+          sending: "Sending...",
+          err: "❌ Error: ",
+          replyTitle: "Reply:"
+        }
+      }[lang];
+    }
+
+    function onLangChange() {
+      const lang = document.getElementById("lang").value;
+      document.documentElement.lang = lang;
+      document.getElementById("btnTest").innerText = t().test;
+      document.getElementById("btnSend").innerText = t().send;
+      document.getElementById("msg").placeholder = t().placeholder;
+      document.getElementById("status").innerText = "";
+      document.getElementById("respuesta").innerText = "";
+    }
+
+    async function probarConexion() {
+      const status = document.getElementById("status");
+      const out = document.getElementById("respuesta");
+      status.className = "out muted";
+      out.innerText = "";
+      status.innerText = t().connecting;
 
       try {
-        const res = await fetch(backendURL, {
+        const res = await fetch(`${BACKEND_URL}/health`, { method: "GET" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        status.className = "out ok";
+        status.innerText = t().connected;
+      } catch (e) {
+        status.className = "out err";
+        status.innerText = t().err + e.message;
+      }
+    }
+
+    async function enviarMensaje() {
+      const status = document.getElementById("status");
+      const out = document.getElementById("respuesta");
+      const msg = document.getElementById("msg").value.trim();
+      const lang = document.getElementById("lang").value;
+
+      out.innerText = "";
+      status.className = "out muted";
+      status.innerText = t().sending;
+
+      if (!msg) {
+        status.className = "out err";
+        status.innerText = (lang === "es") ? "❌ Escribe un mensaje primero." : "❌ Please type a message first.";
+        return;
+      }
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/chat`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            message: "Hola, prueba de conexión desde el frontend"
-          })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg, language: lang })
         });
 
         const data = await res.json();
+        if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
 
-        // 👇 AQUÍ ESTÁ LA CLAVE CORRECTA
-        document.getElementById("respuesta").innerText =
-          data.mensaje || data.reply || "✅ Conectado correctamente";
+        status.className = "out ok";
+        status.innerText = t().connected;
 
-      } catch (error) {
-        document.getElementById("respuesta").innerText =
-          "❌ Error al conectar con el backend";
+        out.innerText = `${t().replyTitle}\n${data.reply}`;
+      } catch (e) {
+        status.className = "out err";
+        status.innerText = t().err + e.message;
       }
     }
-  </script>
 
+    // Iniciar textos correctos
+    onLangChange();
+  </script>
 </body>
 </html>
