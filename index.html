@@ -4,18 +4,21 @@
   <meta charset="UTF-8" />
   <title>Corazón Studio AI</title>
 </head>
-<body style="font-family: Arial; text-align: center; margin-top: 60px;">
+
+<body style="font-family: Arial; text-align: center; padding: 40px;">
 
   <h2>💙 Corazón Studio AI</h2>
-  <p>Tu plataforma de inteligencia artificial con propósito.</p>
+  <p>Tu plataforma de inteligencia artificial</p>
 
-  <button onclick="probarIA()">Probar conexión con la IA</button>
+  <button onclick="probarIA()">Probar conexión con IA</button>
 
-  <p id="respuesta" style="margin-top: 20px; font-weight: bold;"></p>
+  <p id="respuesta" style="margin-top: 20px; font-size: 16px;"></p>
 
   <script>
     async function probarIA() {
       const backendURL = "https://corazon-studio-ai-backend-3.onrender.com/chat";
+
+      document.getElementById("respuesta").innerText = "Conectando con la IA...";
 
       try {
         const res = await fetch(backendURL, {
@@ -24,7 +27,7 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            message: "Hola, probando conexión desde GitHub Pages"
+            message: "Hola, estoy probando Corazón Studio AI"
           })
         });
 
