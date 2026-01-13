@@ -12,13 +12,13 @@
 
   <button onclick="probarIA()">Probar conexión con IA</button>
 
-  <p id="respuesta" style="margin-top: 20px; font-size: 16px;"></p>
+  <p id="respuesta" style="margin-top: 20px; font-size: 18px;"></p>
 
   <script>
     async function probarIA() {
       const backendURL = "https://corazon-studio-ai-backend-3.onrender.com/chat";
 
-      document.getElementById("respuesta").innerText = "Conectando con la IA...";
+      document.getElementById("respuesta").innerText = "⏳ Conectando con la IA...";
 
       try {
         const res = await fetch(backendURL, {
@@ -27,12 +27,15 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            message: "Hola, estoy probando Corazón Studio AI"
+            message: "Hola, prueba de conexión desde el frontend"
           })
         });
 
         const data = await res.json();
-        document.getElementById("respuesta").innerText = data.respuesta;
+
+        // 👇 AQUÍ ESTÁ LA CLAVE CORRECTA
+        document.getElementById("respuesta").innerText =
+          data.mensaje || data.reply || "✅ Conectado correctamente";
 
       } catch (error) {
         document.getElementById("respuesta").innerText =
