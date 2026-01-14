@@ -1,268 +1,343 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Corazón Studio AI</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; padding: 18px; background:#f7f7f9; color:#111; }
+    .container { max-width: 920px; margin: 0 auto; }
+    h1 { margin: 6px 0 18px; }
+    .card { background:#fff; border:1px solid #e6e6ef; border-radius: 14px; padding: 14px; margin: 12px 0; box-shadow: 0 1px 10px rgba(0,0,0,.04); }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
+    input, textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #d7d7e6; font-size: 16px; }
+    textarea { min-height: 90px; resize: vertical; }
+    button { padding: 12px 14px; border-radius: 12px; border: 0; cursor: pointer; background:#2563eb; color: #fff; font-weight: 700; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .muted { color:#666; font-size: 14px; }
+    .ok { background:#e8fff0; border:1px solid #b7f0c8; color:#0f5132; padding: 10px 12px; border-radius: 12px; margin-top: 10px; }
+    .err { background:#fff0f0; border:1px solid #ffcccc; color:#7a1b1b; padding: 10px 12px; border-radius: 12px; margin-top: 10px; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; white-space: pre-wrap; word-break: break-word; background:#0b1220; color:#dbeafe; padding: 12px; border-radius: 12px; }
+    img { max-width: 100%; border-radius: 14px; border:1px solid #eee; }
+    video { width: 100%; border-radius: 14px; border:1px solid #eee; background:#000; }
+    .small { font-size: 13px; }
+    .pill { display:inline-block; padding:4px 10px; border-radius: 999px; background:#eef2ff; color:#3730a3; font-weight:700; font-size: 12px; }
+  </style>
 </head>
 
-<body style="font-family: Arial; text-align: center; padding: 20px;">
-  <h1>💙 Corazón Studio AI</h1>
-  <p>Tu plataforma de inteligencia artificial con propósito.</p>
+<body>
+  <div class="container">
+    <h1>Corazón Studio AI <span class="pill">Web</span></h1>
 
-  <!-- ✅ IMPORTANTE: tu backend -->
-  <script>
-    const API_URL = "https://corazon-studio-ai-backend-3.onrender.com";
-  </script>
-
-  <div style="margin: 15px 0;">
-    <label style="font-weight: bold;">Idioma:&nbsp;</label>
-    <select id="idioma" style="padding: 8px;">
-      <option value="es" selected>Español</option>
-      <option value="en">English</option>
-    </select>
-  </div>
-
-  <button onclick="probarConexion()" style="padding: 12px 18px; font-size: 16px; cursor: pointer;">
-    Probar conexión con IA
-  </button>
-
-  <p id="conexion" style="margin-top: 12px; font-weight: bold;"></p>
-
-  <hr style="margin: 25px 0;" />
-
-  <!-- 💬 CHAT -->
-  <h2 style="text-align:left; max-width: 720px; margin: 0 auto;">💬 Chat</h2>
-
-  <div style="max-width: 720px; margin: 10px auto; text-align:left;">
-    <textarea id="chatInput" placeholder="Escribe tu mensaje..." rows="5"
-      style="width:100%; padding: 12px; font-size: 16px;"></textarea>
-
-    <button onclick="enviarChat()" style="margin-top: 10px; padding: 10px 16px; cursor: pointer;">
-      Enviar
-    </button>
-
-    <div id="chatOutput"
-      style="margin-top: 12px; padding: 12px; border: 1px solid #ddd; min-height: 40px; background: #fafafa;">
+    <div class="card">
+      <div class="row" style="justify-content:space-between;">
+        <div>
+          <div class="muted">Backend</div>
+          <div id="apiBaseLabel" class="small"></div>
+        </div>
+        <button id="btnHealth">Probar /health</button>
+      </div>
+      <div id="healthOut"></div>
     </div>
-  </div>
 
-  <hr style="margin: 25px 0;" />
-
-  <!-- 🖼️ IMÁGENES -->
-  <h2 style="text-align:left; max-width: 720px; margin: 0 auto;">🖼️ Imágenes</h2>
-
-  <div style="max-width: 720px; margin: 10px auto; text-align:left;">
-    <input id="imgPrompt" placeholder="Describe la imagen que quieres..."
-      style="width:100%; padding: 12px; font-size: 16px;" />
-
-    <button onclick="generarImagen()" style="margin-top: 10px; padding: 10px 16px; cursor: pointer;">
-      Generar imagen
-    </button>
-
-    <div id="imgOutput" style="margin-top: 12px;"></div>
-  </div>
-
-  <hr style="margin: 25px 0;" />
-
-  <!-- 🎬 VIDEO -->
-  <h2 style="text-align:left; max-width: 720px; margin: 0 auto;">🎬 Video</h2>
-
-  <div style="max-width: 720px; margin: 10px auto; text-align:left;">
-    <input id="videoPrompt" placeholder="Describe el video que quieres..."
-      style="width:100%; padding: 12px; font-size: 16px;" />
-
-    <button onclick="generarVideo()" style="margin-top: 10px; padding: 10px 16px; cursor: pointer;">
-      Generar video
-    </button>
-
-    <div id="videoOutput"
-      style="margin-top: 12px; padding: 12px; border: 1px solid #ddd; min-height: 40px; background: #fafafa;">
+    <!-- CHAT -->
+    <div class="card">
+      <h2>💬 Chat</h2>
+      <textarea id="chatInput" placeholder="Escribe tu mensaje..."></textarea>
+      <div class="row" style="margin-top:10px;">
+        <button id="btnChat">Enviar</button>
+      </div>
+      <div id="chatOut" style="margin-top:10px;"></div>
     </div>
+
+    <!-- IMAGEN -->
+    <div class="card">
+      <h2>🖼️ Imágenes</h2>
+      <input id="imgPrompt" placeholder="Describe la imagen (ej: un perrito negro con una niña jugando, estilo realista)" />
+      <div class="row" style="margin-top:10px;">
+        <select id="imgSize" style="max-width: 220px;">
+          <option value="1024x1024">1024x1024</option>
+          <option value="1024x1536">1024x1536</option>
+          <option value="1536x1024">1536x1024</option>
+        </select>
+        <button id="btnImg">Generar imagen</button>
+      </div>
+
+      <div id="imgMsg" style="margin-top:10px;"></div>
+      <div id="imgOut" style="margin-top:10px;"></div>
+      <div class="muted" style="margin-top:8px;">Si no aparece la imagen, te muestro el error exacto abajo.</div>
+      <div id="imgDebug" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- VIDEO -->
+    <div class="card">
+      <h2>🎬 Video</h2>
+      <input id="vidPrompt" placeholder="Describe el video que quieres..." />
+      <div class="row" style="margin-top:10px;">
+        <button id="btnVid">Generar video</button>
+      </div>
+      <div id="vidMsg" style="margin-top:10px;"></div>
+      <div id="vidOut" style="margin-top:10px;"></div>
+      <div id="vidDebug" style="margin-top:10px;"></div>
+    </div>
+
   </div>
 
   <script>
-    function getIdioma() {
-      return document.getElementById("idioma").value || "es";
+    // ✅ CAMBIA SOLO ESTO si tu backend tiene otra URL:
+    const API_BASE = "https://corazon-studio-ai-backend-3.onrender.com";
+
+    // UI
+    const apiBaseLabel = document.getElementById("apiBaseLabel");
+    apiBaseLabel.textContent = API_BASE;
+
+    const healthOut = document.getElementById("healthOut");
+    const btnHealth = document.getElementById("btnHealth");
+
+    const chatInput = document.getElementById("chatInput");
+    const btnChat = document.getElementById("btnChat");
+    const chatOut = document.getElementById("chatOut");
+
+    const imgPrompt = document.getElementById("imgPrompt");
+    const imgSize = document.getElementById("imgSize");
+    const btnImg = document.getElementById("btnImg");
+    const imgOut = document.getElementById("imgOut");
+    const imgMsg = document.getElementById("imgMsg");
+    const imgDebug = document.getElementById("imgDebug");
+
+    const vidPrompt = document.getElementById("vidPrompt");
+    const btnVid = document.getElementById("btnVid");
+    const vidMsg = document.getElementById("vidMsg");
+    const vidOut = document.getElementById("vidOut");
+    const vidDebug = document.getElementById("vidDebug");
+
+    function setHtml(el, html) { el.innerHTML = html || ""; }
+    function okBox(msg) { return `<div class="ok">✅ ${escapeHtml(msg)}</div>`; }
+    function errBox(msg) { return `<div class="err">❌ ${escapeHtml(msg)}</div>`; }
+    function codeBox(obj) { return `<div class="code">${escapeHtml(typeof obj === "string" ? obj : JSON.stringify(obj, null, 2))}</div>`; }
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
-    async function probarConexion() {
-      const el = document.getElementById("conexion");
-      el.textContent = "⏳ Probando...";
+    async function apiGet(path) {
+      const r = await fetch(`${API_BASE}${path}`, { method: "GET" });
+      const text = await r.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = text; }
+      if (!r.ok) throw { status: r.status, data };
+      return data;
+    }
+
+    async function apiPost(path, body) {
+      const r = await fetch(`${API_BASE}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const text = await r.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = text; }
+      if (!r.ok) throw { status: r.status, data };
+      return data;
+    }
+
+    // ---- HEALTH ----
+    btnHealth.addEventListener("click", async () => {
+      btnHealth.disabled = true;
+      setHtml(healthOut, "");
       try {
-        const res = await fetch(`${API_URL}/health`, { method: "GET" });
-        const data = await res.json();
-        if (res.ok) {
-          el.textContent = "✅ Conectado correctamente";
+        const data = await apiGet("/health");
+        setHtml(healthOut, okBox("Backend está vivo ✅") + codeBox(data));
+      } catch (e) {
+        setHtml(healthOut, errBox(`Error en /health (status ${e?.status ?? "?"})`) + codeBox(e?.data ?? e));
+      } finally {
+        btnHealth.disabled = false;
+      }
+    });
+
+    // ---- CHAT ----
+    btnChat.addEventListener("click", async () => {
+      const message = (chatInput.value || "").trim();
+      if (!message) return setHtml(chatOut, errBox("Escribe un mensaje primero."));
+      btnChat.disabled = true;
+      setHtml(chatOut, okBox("Enviando..."));
+      try {
+        // Ajustado a lo típico: { message }
+        const data = await apiPost("/chat", { message });
+        // Soporta varias formas: {text}, {output}, {message}
+        const text =
+          data?.text ??
+          data?.output_text ??
+          data?.output ??
+          data?.message ??
+          JSON.stringify(data);
+
+        setHtml(chatOut, okBox("Respuesta:") + `<div class="card" style="border-radius:12px; margin-top:10px;">${escapeHtml(text)}</div>`);
+      } catch (e) {
+        setHtml(chatOut, errBox(`Error en /chat (status ${e?.status ?? "?"})`) + codeBox(e?.data ?? e));
+      } finally {
+        btnChat.disabled = false;
+      }
+    });
+
+    // ---- IMAGEN ----
+    function normalizeImageToDataUrl(imgObjOrString) {
+      // Acepta:
+      // - "data:image/png;base64,...."
+      // - base64 puro "iVBORw0KGgo...."
+      // - { data: "data:image/..." } o { data: "base64..." , mime_type: "image/png" }
+      // - { url: "https://..." }
+      if (!imgObjOrString) return null;
+
+      if (typeof imgObjOrString === "string") {
+        if (imgObjOrString.startsWith("data:image/")) return imgObjOrString;
+        // base64 puro (asumimos png)
+        return `data:image/png;base64,${imgObjOrString}`;
+      }
+
+      const url = imgObjOrString.url || imgObjOrString.href;
+      if (url && typeof url === "string") return url;
+
+      const data = imgObjOrString.data;
+      if (typeof data === "string") {
+        if (data.startsWith("data:image/")) return data;
+        const mime = imgObjOrString.mime_type || imgObjOrString.mime || "image/png";
+        return `data:${mime};base64,${data}`;
+      }
+
+      return null;
+    }
+
+    btnImg.addEventListener("click", async () => {
+      const prompt = (imgPrompt.value || "").trim();
+      const size = imgSize.value;
+      if (!prompt) return setHtml(imgMsg, errBox("Escribe una descripción primero."));
+      btnImg.disabled = true;
+
+      setHtml(imgMsg, okBox("Generando imagen..."));
+      setHtml(imgOut, "");
+      setHtml(imgDebug, "");
+
+      try {
+        const data = await apiPost("/image", { prompt, size });
+
+        // Esperado: { ok:true, image:{data:"...", mime_type:"..."} } o variaciones
+        const imgCandidate = data?.image ?? data?.data ?? data?.result ?? data;
+        const dataUrl = normalizeImageToDataUrl(imgCandidate);
+
+        if (!dataUrl) {
+          setHtml(imgMsg, errBox("Respuesta recibida, pero no encontré la imagen. Mira el debug."));
+          setHtml(imgDebug, codeBox(data));
         } else {
-          el.textContent = "❌ Error de conexión";
-          console.log(data);
+          setHtml(imgMsg, okBox("¡Imagen lista! ✅"));
+          setHtml(imgOut, `<img alt="Imagen generada" src="${dataUrl}">`);
+          // debug opcional (por si algo falla luego)
+          setHtml(imgDebug, `<div class="muted small">Debug (por si lo necesitas):</div>` + codeBox(data));
         }
       } catch (e) {
-        el.textContent = "❌ No se pudo conectar";
-        console.error(e);
+        setHtml(imgMsg, errBox(`Error en /image (status ${e?.status ?? "?"})`));
+        setHtml(imgDebug, codeBox(e?.data ?? e));
+      } finally {
+        btnImg.disabled = false;
       }
-    }
+    });
 
-    async function enviarChat() {
-      const input = document.getElementById("chatInput").value.trim();
-      const out = document.getElementById("chatOutput");
+    // ---- VIDEO ----
+    // Esto intenta:
+    // 1) POST /video {prompt}
+    // 2) Si devuelve {video_id} o {id}, hace polling a GET /video/{id}
+    // 3) Si existe /video/{id}/content, lo intenta cargar como blob
+    async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-      if (!input) {
-        out.textContent = "⚠️ Escribe un mensaje.";
-        return;
-      }
+    btnVid.addEventListener("click", async () => {
+      const prompt = (vidPrompt.value || "").trim();
+      if (!prompt) return setHtml(vidMsg, errBox("Escribe una descripción primero."));
+      btnVid.disabled = true;
 
-      out.textContent = "⏳ Pensando...";
-      try {
-        const res = await fetch(`${API_URL}/chat`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: input,
-            lang: getIdioma()
-          })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          out.textContent = "❌ Error en chat.";
-          console.log(data);
-          return;
-        }
-
-        out.textContent = data.reply ?? data.message ?? JSON.stringify(data);
-      } catch (e) {
-        out.textContent = "❌ Error de red en chat.";
-        console.error(e);
-      }
-    }
-
-    async function generarImagen() {
-      const prompt = document.getElementById("imgPrompt").value.trim();
-      const out = document.getElementById("imgOutput");
-
-      if (!prompt) {
-        out.innerHTML = "<p>⚠️ Escribe una descripción para la imagen.</p>";
-        return;
-      }
-
-      out.innerHTML = "<p>⏳ Generando imagen...</p>";
+      setHtml(vidMsg, okBox("Iniciando video..."));
+      setHtml(vidOut, "");
+      setHtml(vidDebug, "");
 
       try {
-        const res = await fetch(`${API_URL}/image`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt,
-            lang: getIdioma()
-          })
-        });
+        const start = await apiPost("/video", { prompt });
 
-        const data = await res.json();
+        const videoId = start?.video_id ?? start?.id ?? start?.video?.id;
+        setHtml(vidDebug, `<div class="muted small">Debug start:</div>` + codeBox(start));
 
-        if (!res.ok) {
-          out.innerHTML = "<p>❌ Error generando imagen.</p>";
-          console.log(data);
+        if (!videoId) {
+          setHtml(vidMsg, errBox("No recibí video_id. Mira debug."));
           return;
         }
 
-        // Acepta varios formatos: image_url, url, base64
-        const imageUrl = data.image_url || data.url || null;
-        const base64 = data.base64 || data.image_base64 || null;
+        setHtml(vidMsg, okBox(`Video iniciado. ID: ${videoId}. Esperando estado...`));
 
-        if (imageUrl) {
-          out.innerHTML = `
-            <p>✅ Imagen lista:</p>
-            <img src="${imageUrl}" alt="Imagen generada" style="max-width:100%; border:1px solid #ddd;" />
-          `;
+        // Poll status
+        let statusData = null;
+        for (let i = 0; i < 30; i++) {
+          await sleep(4000);
+          try {
+            statusData = await apiGet(`/video/${encodeURIComponent(videoId)}`);
+          } catch (e) {
+            // Si falla el status, seguimos intentando un poco
+            statusData = { error: e };
+          }
+
+          const status =
+            statusData?.status ??
+            statusData?.state ??
+            statusData?.video_status ??
+            statusData?.video?.status;
+
+          setHtml(vidDebug, `<div class="muted small">Debug status:</div>` + codeBox(statusData));
+
+          if (status && String(status).toLowerCase().includes("failed")) {
+            setHtml(vidMsg, errBox("El video falló. Mira debug."));
+            return;
+          }
+
+          if (status && (String(status).toLowerCase().includes("done") || String(status).toLowerCase().includes("completed") || String(status).toLowerCase().includes("ready"))) {
+            break;
+          }
+
+          // si el backend devuelve una URL directa
+          const url = statusData?.url ?? statusData?.video_url ?? statusData?.video?.url;
+          if (url) {
+            setHtml(vidMsg, okBox("Video listo ✅"));
+            setHtml(vidOut, `<video controls src="${url}"></video>`);
+            return;
+          }
+        }
+
+        // Intentar content endpoint
+        setHtml(vidMsg, okBox("Intentando descargar contenido del video..."));
+        const contentUrl = `${API_BASE}/video/${encodeURIComponent(videoId)}/content`;
+
+        const r = await fetch(contentUrl, { method: "GET" });
+        if (!r.ok) {
+          const t = await r.text();
+          setHtml(vidMsg, errBox("No pude obtener el contenido del video. Mira debug."));
+          setHtml(vidDebug, `<div class="muted small">Respuesta /content:</div>` + codeBox(t));
           return;
         }
 
-        if (base64) {
-          out.innerHTML = `
-            <p>✅ Imagen lista:</p>
-            <img src="data:image/png;base64,${base64}" alt="Imagen generada" style="max-width:100%; border:1px solid #ddd;" />
-          `;
-          return;
-        }
+        const blob = await r.blob();
+        const objectUrl = URL.createObjectURL(blob);
 
-        out.innerHTML = `<p>✅ Respuesta recibida, pero no vino la imagen. Mira consola.</p>`;
-        console.log("Respuesta /image:", data);
+        setHtml(vidMsg, okBox("Video listo ✅"));
+        setHtml(vidOut, `<video controls src="${objectUrl}"></video>`);
       } catch (e) {
-        out.innerHTML = "<p>❌ Error de red en imagen.</p>";
-        console.error(e);
+        setHtml(vidMsg, errBox(`Error en /video (status ${e?.status ?? "?"})`));
+        setHtml(vidDebug, codeBox(e?.data ?? e));
+      } finally {
+        btnVid.disabled = false;
       }
-    }
-
-    async function generarVideo() {
-      const prompt = document.getElementById("videoPrompt").value.trim();
-      const out = document.getElementById("videoOutput");
-
-      if (!prompt) {
-        out.textContent = "⚠️ Escribe una descripción para el video.";
-        return;
-      }
-
-      out.textContent = "⏳ Generando video...";
-
-      try {
-        const res = await fetch(`${API_URL}/video`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt,
-            lang: getIdioma()
-          })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          out.textContent = "❌ Error generando video.";
-          console.log(data);
-          return;
-        }
-
-        // Posibles respuestas:
-        // - { video_url: "https://..." }
-        // - { url: "https://..." }
-        // - { video_id: "abc123" }
-        const videoUrl = data.video_url || data.url || null;
-        const videoId = data.video_id || data.id || null;
-
-        if (videoUrl) {
-          out.innerHTML = `
-            ✅ Video listo:
-            <div style="margin-top:10px;">
-              <a href="${videoUrl}" target="_blank">Abrir video</a>
-            </div>
-          `;
-          return;
-        }
-
-        if (videoId) {
-          const link = `${API_URL}/video/${videoId}`;
-          out.innerHTML = `
-            ✅ Video creado con ID: <b>${videoId}</b>
-            <div style="margin-top:10px;">
-              <a href="${link}" target="_blank">Abrir /video/${videoId}</a>
-            </div>
-            <div style="margin-top:10px; font-size: 14px;">
-              Si aún no está listo, vuelve a abrir el enlace en 10–30 segundos.
-            </div>
-          `;
-          return;
-        }
-
-        out.textContent = "✅ Respuesta recibida, pero no vino URL ni ID de video. Mira consola.";
-        console.log("Respuesta /video:", data);
-      } catch (e) {
-        out.textContent = "❌ Error de red en video.";
-        console.error(e);
-      }
-    }
+    });
   </script>
 </body>
 </html>
