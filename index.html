@@ -1,496 +1,116 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Corazón Studio AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
-    :root{
-      --bg:#0b0f17;
-      --card:#121a2a;
-      --muted:#8aa0c6;
-      --text:#e9f0ff;
-      --line:#22304d;
-      --btn:#2d6bff;
-      --btn2:#1f2b44;
-      --ok:#21c07a;
-      --bad:#ff4d4d;
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0b1220;
+      color: #fff;
+      padding: 20px;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:linear-gradient(180deg,var(--bg),#080b12);
-      color:var(--text);
+    h1 {
+      margin-bottom: 10px;
     }
-    .wrap{
-      max-width: 920px;
-      margin: 0 auto;
-      padding: 18px;
+    textarea {
+      width: 100%;
+      height: 80px;
+      border-radius: 8px;
+      padding: 10px;
+      border: none;
     }
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding: 10px 0 18px;
-      border-bottom:1px solid var(--line);
-      margin-bottom:18px;
+    button {
+      margin-top: 10px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      background: #3b82f6;
+      color: white;
+      font-size: 16px;
     }
-    .brand{
-      display:flex;align-items:center;gap:10px
+    .status {
+      margin-top: 15px;
+      font-size: 14px;
+      opacity: 0.9;
     }
-    .logo{
-      width:38px;height:38px;border-radius:12px;
-      display:grid;place-items:center;
-      background:linear-gradient(135deg,#ff4fd8,#6b7bff);
-      font-weight:800;
-    }
-    h1{font-size:18px;margin:0}
-    .sub{font-size:13px;color:var(--muted);margin:2px 0 0}
-    .card{
-      background: rgba(18,26,42,.9);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:14px;
-      margin: 14px 0;
-      box-shadow:0 10px 30px rgba(0,0,0,.25);
-    }
-    .card h2{
-      margin:0 0 10px;
-      font-size:18px;
-      display:flex;align-items:center;gap:10px
-    }
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    input, textarea, select{
-      width:100%;
-      background:#0d1424;
-      border:1px solid var(--line);
-      color:var(--text);
-      border-radius:12px;
-      padding:12px;
-      font-size:15px;
-      outline:none;
-    }
-    textarea{min-height:110px;resize:vertical}
-    .btn{
-      border:0;
-      background:var(--btn);
-      color:white;
-      padding:12px 14px;
-      border-radius:12px;
-      font-weight:700;
-      cursor:pointer;
-    }
-    .btn.secondary{background:var(--btn2);border:1px solid var(--line)}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .small{font-size:12px;color:var(--muted)}
-    .status{
-      margin-top:10px;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:#0d1424;
-      display:none;
-    }
-    .status.ok{display:block;border-color:rgba(33,192,122,.35)}
-    .status.bad{display:block;border-color:rgba(255,77,77,.35)}
-    .status .dot{
-      display:inline-block;width:8px;height:8px;border-radius:50%;
-      margin-right:8px;vertical-align:middle
-    }
-    .status.ok .dot{background:var(--ok)}
-    .status.bad .dot{background:var(--bad)}
-    .imgbox{
-      margin-top:12px;
-      display:none;
-      border-radius:16px;
-      overflow:hidden;
-      border:1px solid var(--line);
-      background:#0b1020;
-    }
-    .imgbox img{width:100%;display:block}
-    .debug{
-      margin-top:10px;
-      padding:12px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:#050a14;
-      color:#bcd0ff;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size:12px;
-      overflow:auto;
-      display:none; /* ✅ oculto por defecto */
-      white-space:pre-wrap;
-      word-break:break-word;
-    }
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:999px;
-      border:1px solid var(--line);
-      background:#0d1424;
-      color:var(--muted);
-      font-size:12px;
-    }
-    .two{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:14px;
-    }
-    @media (min-width: 820px){
-      .two{grid-template-columns: 1fr 1fr;}
+    video {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 12px;
+      display: none;
     }
   </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo">C</div>
-        <div>
-          <h1>Corazón Studio AI</h1>
-          <div class="sub">Frontend (Static Site) conectado a tu backend en Render</div>
-        </div>
-      </div>
-      <span class="pill" id="apiBadge">API: verificando…</span>
-    </header>
 
-    <div class="card">
-      <h2>🔗 Configuración</h2>
-      <div class="small">Si cambiaste el link del backend, ponlo aquí. (Se guarda solo en tu navegador.)</div>
-      <div class="row" style="margin-top:10px">
-        <input id="backendUrl" placeholder="https://tu-backend.onrender.com" />
-        <button class="btn secondary" id="saveBackend">Guardar</button>
-      </div>
-      <div class="small" style="margin-top:8px">
-        Tip: tu backend actual es <b>https://corazon-studio-ai-backend-3.onrender.com</b>
-      </div>
-    </div>
+  <h1>🎬 Generador de Video</h1>
 
-    <div class="two">
-      <!-- CHAT -->
-      <div class="card">
-        <h2>💬 Chat</h2>
-        <textarea id="chatInput" placeholder="Escribe tu mensaje..."></textarea>
-        <div class="row" style="margin-top:10px">
-          <button class="btn" id="chatBtn">Enviar</button>
-          <button class="btn secondary" id="chatClear">Limpiar</button>
-        </div>
-        <div class="status" id="chatStatus"><span class="dot"></span><span id="chatStatusText"></span></div>
-        <textarea id="chatOutput" placeholder="Respuesta..." readonly style="margin-top:10px; min-height:140px"></textarea>
-        <pre class="debug" id="chatDebug"></pre>
-      </div>
+  <textarea id="prompt" placeholder="Describe el video que quieres..."></textarea>
+  <br>
+  <button onclick="generarVideo()">Generar video</button>
 
-      <!-- IMÁGENES -->
-      <div class="card">
-        <h2>🖼️ Imágenes</h2>
-        <input id="imgPrompt" placeholder='Ej: "Un perrito negro con una niña jugando, fotografía realista"' />
-        <div class="row" style="margin-top:10px">
-          <select id="imgSize" style="max-width:180px">
-            <option value="1024x1024">1024x1024</option>
-            <option value="1024x1536">1024x1536</option>
-            <option value="1536x1024">1536x1024</option>
-          </select>
-          <button class="btn" id="imgBtn">Generar imagen</button>
-        </div>
+  <div class="status" id="status"></div>
 
-        <div class="status" id="imgStatus"><span class="dot"></span><span id="imgStatusText"></span></div>
-
-        <div class="imgbox" id="imgBox">
-          <img id="imgResult" alt="Resultado" />
-        </div>
-
-        <div class="small" style="margin-top:10px">
-          Si no aparece la imagen, te muestro el error exacto abajo.
-        </div>
-        <pre class="debug" id="imgDebug"></pre>
-      </div>
-    </div>
-
-    <!-- VIDEO -->
-    <div class="card">
-      <h2>🎬 Video</h2>
-      <input id="videoPrompt" placeholder="Describe el video que quieres..." />
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="videoBtn">Generar video</button>
-        <button class="btn secondary" id="videoCheckBtn">Ver estado</button>
-      </div>
-      <div class="status" id="videoStatus"><span class="dot"></span><span id="videoStatusText"></span></div>
-      <textarea id="videoOutput" placeholder="Aquí te muestro el id/estado y links si aplica..." readonly style="margin-top:10px; min-height:120px"></textarea>
-      <pre class="debug" id="videoDebug"></pre>
-      <div class="small" style="margin-top:8px">
-        Nota: Esto depende de cómo tu backend implemente /video. Si tu backend regresa un <b>video_id</b>, aquí lo usamos.
-      </div>
-    </div>
-
-    <div class="small" style="margin:18px 0 30px">
-      Hecho para que se vea limpio: el Debug solo aparece cuando hay error ✅
-    </div>
-  </div>
+  <video id="video" controls></video>
 
 <script>
-(() => {
-  // ✅ Backend por defecto (tu backend de Render)
-  const DEFAULT_BACKEND = "https://corazon-studio-ai-backend-3.onrender.com";
+const BACKEND = "https://corazon-studio-ai-backend-3.onrender.com";
 
-  // Helpers UI
-  const $ = (id) => document.getElementById(id);
+let currentVideoId = null;
 
-  function setBadge(ok, text){
-    const b = $("apiBadge");
-    b.textContent = text;
-    b.style.color = ok ? "#9ff2cf" : "#ffb3b3";
-    b.style.borderColor = ok ? "rgba(33,192,122,.35)" : "rgba(255,77,77,.35)";
-  }
+async function generarVideo() {
+  const prompt = document.getElementById("prompt").value;
+  const status = document.getElementById("status");
+  const video = document.getElementById("video");
 
-  function setStatus(el, ok, text){
-    el.classList.remove("ok","bad");
-    el.style.display = "block";
-    el.classList.add(ok ? "ok" : "bad");
-    el.querySelector(".dot").style.background = ok ? "var(--ok)" : "var(--bad)";
-    const t = el.querySelector("span:last-child");
-    if (t) t.textContent = text;
-  }
+  video.style.display = "none";
+  status.textContent = "⏳ Enviando solicitud...";
 
-  function hide(el){ el.style.display = "none"; }
-
-  function showDebug(preEl, obj){
-    preEl.textContent = (typeof obj === "string") ? obj : JSON.stringify(obj, null, 2);
-    preEl.style.display = "block";
-  }
-
-  function clearDebug(preEl){
-    preEl.textContent = "";
-    preEl.style.display = "none";
-  }
-
-  function getBackend(){
-    return localStorage.getItem("CORAZON_BACKEND") || DEFAULT_BACKEND;
-  }
-
-  function setBackend(url){
-    localStorage.setItem("CORAZON_BACKEND", url);
-  }
-
-  async function api(path, payload){
-    const base = getBackend().replace(/\/+$/, "");
-    const res = await fetch(base + path, {
-      method: "POST",
-      headers: { "Content-Type":"application/json" },
-      body: JSON.stringify(payload || {})
-    });
-
-    const contentType = res.headers.get("content-type") || "";
-    let data;
-    if (contentType.includes("application/json")) {
-      data = await res.json();
-    } else {
-      data = await res.text();
-    }
-
-    if (!res.ok) {
-      const err = new Error("HTTP " + res.status);
-      err.data = data;
-      throw err;
-    }
-    return data;
-  }
-
-  async function ping(){
-    try{
-      const base = getBackend().replace(/\/+$/, "");
-      const res = await fetch(base + "/");
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data && (data.ok === true || data.message)) {
-        setBadge(true, "API: conectada ✅");
-      } else {
-        setBadge(false, "API: sin respuesta");
-      }
-    }catch(e){
-      setBadge(false, "API: error");
-    }
-  }
-
-  // Setup backend UI
-  $("backendUrl").value = getBackend();
-  $("saveBackend").addEventListener("click", () => {
-    const v = $("backendUrl").value.trim();
-    if (!v) return;
-    setBackend(v);
-    ping();
+  const res = await fetch(`${BACKEND}/video`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt })
   });
 
-  // CHAT
-  $("chatBtn").addEventListener("click", async () => {
-    const msg = $("chatInput").value.trim();
-    const status = $("chatStatus");
-    const debug = $("chatDebug");
-    clearDebug(debug);
-    hide(status);
+  const data = await res.json();
 
-    if (!msg) {
-      setStatus(status, false, "Escribe un mensaje primero.");
-      return;
-    }
+  if (!data.video_id) {
+    status.textContent = "❌ Error creando video";
+    return;
+  }
 
-    $("chatBtn").disabled = true;
-    $("chatBtn").textContent = "Enviando...";
+  currentVideoId = data.video_id;
+  status.textContent = "🎥 Video en cola...";
 
-    try{
-      // Ajusta el payload si tu backend usa otra clave (message/prompt/text)
-      const out = await api("/chat", { message: msg });
+  revisarEstado();
+}
 
-      $("chatOutput").value =
-        (out && (out.text || out.output || out.reply || out.message)) ?
-          (out.text || out.output || out.reply || out.message) :
-          (typeof out === "string" ? out : JSON.stringify(out, null, 2));
+async function revisarEstado() {
+  const status = document.getElementById("status");
+  const video = document.getElementById("video");
 
-      setStatus(status, true, "Respuesta lista ✅");
-    }catch(e){
-      $("chatOutput").value = "";
-      setStatus(status, false, "Hubo un error en /chat. Abajo está el detalle.");
-      showDebug(debug, e.data || e.message || e);
-    }finally{
-      $("chatBtn").disabled = false;
-      $("chatBtn").textContent = "Enviar";
-    }
-  });
+  const res = await fetch(`${BACKEND}/video/${currentVideoId}`);
+  const data = await res.json();
 
-  $("chatClear").addEventListener("click", () => {
-    $("chatInput").value = "";
-    $("chatOutput").value = "";
-    hide($("chatStatus"));
-    clearDebug($("chatDebug"));
-  });
+  status.textContent = `📊 Estado: ${data.status}`;
 
-  // IMAGES
-  $("imgBtn").addEventListener("click", async () => {
-    const prompt = $("imgPrompt").value.trim();
-    const size = $("imgSize").value;
-    const status = $("imgStatus");
-    const debug = $("imgDebug");
-    const box = $("imgBox");
-    const img = $("imgResult");
+  if (data.status === "done") {
+    const videoRes = await fetch(`${BACKEND}/video/${currentVideoId}/content`);
+    const blob = await videoRes.blob();
 
-    clearDebug(debug);
-    hide(status);
-    box.style.display = "none";
-    img.src = "";
-
-    if (!prompt) {
-      setStatus(status, false, "Escribe una descripción primero.");
-      return;
-    }
-
-    $("imgBtn").disabled = true;
-    $("imgBtn").textContent = "Generando...";
-
-    try{
-      const out = await api("/image", { prompt, size });
-
-      // Puede venir como:
-      // 1) { ok:true, image:"data:image/png;base64,...." }
-      // 2) { ok:true, image:"iVBORw0..." } (sin prefijo)
-      const raw = out && (out.image || out.data || out.result);
-      if (!raw) throw new Error("La API no devolvió 'image'.");
-
-      let src = raw;
-      if (typeof raw === "string" && !raw.startsWith("data:image")) {
-        // asumimos base64 PNG
-        src = "data:image/png;base64," + raw;
-      }
-
-      img.src = src;
-      box.style.display = "block";
-      setStatus(status, true, "¡Imagen lista! ✅");
-    }catch(e){
-      setStatus(status, false, "Respuesta recibida, pero no vino la imagen. Mira el error abajo.");
-      showDebug(debug, e.data || e.message || e);
-    }finally{
-      $("imgBtn").disabled = false;
-      $("imgBtn").textContent = "Generar imagen";
-    }
-  });
-
-  // VIDEO (depende de tu backend)
-  let lastVideoId = "";
-
-  $("videoBtn").addEventListener("click", async () => {
-    const prompt = $("videoPrompt").value.trim();
-    const status = $("videoStatus");
-    const debug = $("videoDebug");
-    clearDebug(debug);
-    hide(status);
-    $("videoOutput").value = "";
-
-    if (!prompt) {
-      setStatus(status, false, "Describe el video primero.");
-      return;
-    }
-
-    $("videoBtn").disabled = true;
-    $("videoBtn").textContent = "Generando...";
-
-    try{
-      const out = await api("/video", { prompt });
-
-      // Esperamos algo como { ok:true, video_id:"..." } o { id:"..." }
-      lastVideoId = (out && (out.video_id || out.id || out.videoId)) || "";
-
-      $("videoOutput").value = JSON.stringify(out, null, 2);
-
-      if (lastVideoId) {
-        setStatus(status, true, "Pedido creado ✅ video_id guardado.");
-      } else {
-        setStatus(status, true, "Respuesta recibida ✅ (si tu backend no devuelve video_id, está bien).");
-      }
-    }catch(e){
-      setStatus(status, false, "Error en /video. Mira el detalle abajo.");
-      showDebug(debug, e.data || e.message || e);
-    }finally{
-      $("videoBtn").disabled = false;
-      $("videoBtn").textContent = "Generar video";
-    }
-  });
-
-  $("videoCheckBtn").addEventListener("click", async () => {
-    const status = $("videoStatus");
-    const debug = $("videoDebug");
-    clearDebug(debug);
-    hide(status);
-
-    if (!lastVideoId) {
-      setStatus(status, false, "No tengo un video_id todavía. Primero genera un video.");
-      return;
-    }
-
-    $("videoCheckBtn").disabled = true;
-    $("videoCheckBtn").textContent = "Consultando...";
-
-    try{
-      // Si tu backend tiene GET /video/{video_id} tal vez no funcione con POST.
-      // Pero en tu swagger vi GET /video/{video_id}. Aquí lo hacemos con fetch GET:
-      const base = getBackend().replace(/\/+$/, "");
-      const res = await fetch(`${base}/video/${encodeURIComponent(lastVideoId)}`);
-      const data = await res.json().catch(async () => await res.text());
-
-      if (!res.ok) throw Object.assign(new Error("HTTP " + res.status), { data });
-
-      $("videoOutput").value = (typeof data === "string") ? data : JSON.stringify(data, null, 2);
-      setStatus(status, true, "Estado actualizado ✅");
-    }catch(e){
-      setStatus(status, false, "No pude consultar el estado. Mira el detalle abajo.");
-      showDebug(debug, e.data || e.message || e);
-    }finally{
-      $("videoCheckBtn").disabled = false;
-      $("videoCheckBtn").textContent = "Ver estado";
-    }
-  });
-
-  // Init
-  ping();
-})();
+    const url = URL.createObjectURL(blob);
+    video.src = url;
+    video.style.display = "block";
+    status.textContent = "✅ Video listo";
+  } else {
+    setTimeout(revisarEstado, 3000);
+  }
+}
 </script>
+
 </body>
 </html>
