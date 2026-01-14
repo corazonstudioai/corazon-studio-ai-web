@@ -1,624 +1,128 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
   <title>Corazón Studio AI</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root{
-      --bg1:#061226;
-      --bg2:#0b1f3b;
-      --card:#0f2343cc;
-      --card2:#0a1a33cc;
-      --text:#eaf2ff;
-      --muted:#a9bfdc;
-      --accent:#3b82f6;
-      --border:#2b466e;
-      --ok:#22c55e;
-      --bad:#ef4444;
-      --shadow: 0 20px 60px rgba(0,0,0,.35);
-      --radius: 18px;
+    body {
+      background: #0f172a;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 20px;
     }
-
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--text);
-      background: radial-gradient(1000px 600px at 30% 10%, #1a3d7a55, transparent 60%),
-                  radial-gradient(900px 700px at 80% 30%, #7c3aed33, transparent 55%),
-                  linear-gradient(180deg, var(--bg1), var(--bg2));
-      min-height:100vh;
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
     }
-
-    .wrap{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 18px 14px 60px;
+    .box {
+      background: #020617;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
     }
-
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin: 10px 0 18px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-
-    .logo{
-      width:44px;height:44px;border-radius:14px;
-      background: radial-gradient(circle at 30% 30%, #f472b6, #8b5cf6 55%, #2563eb);
-      box-shadow: var(--shadow);
-      display:grid;place-items:center;
-      font-weight:800;
-    }
-
-    .title h1{
-      margin:0;
-      font-size: 20px;
-      line-height:1.15;
-    }
-    .title p{
-      margin:2px 0 0;
-      color:var(--muted);
-      font-size: 13px;
-    }
-
-    .pill{
-      padding:8px 10px;
-      border:1px solid var(--border);
-      border-radius:999px;
-      background: #0b2040aa;
-      color: var(--muted);
-      font-size:13px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      white-space:nowrap;
-    }
-    .dot{
-      width:10px;height:10px;border-radius:99px;
-      background: var(--bad);
-      box-shadow: 0 0 0 4px rgba(239,68,68,.18);
-    }
-    .dot.ok{
-      background: var(--ok);
-      box-shadow: 0 0 0 4px rgba(34,197,94,.18);
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:14px;
-    }
-
-    .card{
-      border:1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--card);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-
-    .card h2{
-      margin:0;
-      padding: 16px 16px 10px;
-      font-size: 18px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-
-    .card .body{
-      padding: 0 16px 16px;
-    }
-
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-
-    input[type="text"], textarea, select{
-      width:100%;
-      box-sizing:border-box;
-      background: #0a1a33;
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px 12px;
-      outline: none;
-      font-size: 15px;
-    }
-
-    textarea{
-      min-height: 110px;
-      resize: vertical;
-    }
-
-    .btn{
-      appearance:none;
-      border:0;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-weight: 700;
-      font-size: 15px;
-      cursor:pointer;
-      background: var(--accent);
-      color: white;
-      box-shadow: 0 16px 30px rgba(59,130,246,.25);
-    }
-
-    .btn.secondary{
-      background:#132d55;
-      border:1px solid var(--border);
-      color: var(--text);
-      box-shadow:none;
-    }
-
-    .small{
-      font-size: 13px;
-      color: var(--muted);
-      margin-top:10px;
-    }
-
-    .status{
-      margin-top:10px;
-      font-weight:700;
-      color: var(--muted);
-      display:flex;
-      gap:8px;
-      align-items:center;
-    }
-    .status .badge{
-      font-size:12px;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:#0b2040aa;
-      color:var(--muted);
-    }
-
-    .out{
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px dashed #315b9a;
-      background: #081a33aa;
-      color: #dbeafe;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .media{
-      margin-top: 12px;
-      display:grid;
-      place-items:center;
-    }
-
-    img.preview{
-      max-width: 100%;
-      border-radius: 18px;
-      border:1px solid #355c93;
-      box-shadow: 0 20px 60px rgba(0,0,0,.35);
-      background:#061226;
-    }
-
-    video.preview{
-      max-width: 100%;
+    textarea {
       width: 100%;
-      border-radius: 18px;
-      border:1px solid #355c93;
-      box-shadow: 0 20px 60px rgba(0,0,0,.35);
-      background:#061226;
+      height: 90px;
+      border-radius: 8px;
+      border: none;
+      padding: 10px;
+      font-size: 16px;
     }
-
-    .hide{ display:none !important; }
-
-    @media (min-width: 900px){
-      .grid{ grid-template-columns: 1fr 1fr; }
-      .span2{ grid-column: 1 / -1; }
+    button {
+      margin-top: 10px;
+      padding: 10px 16px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+    }
+    video {
+      width: 100%;
+      margin-top: 15px;
+      border-radius: 12px;
+      display: none;
+      background: black;
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 15px;
     }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo">C</div>
-        <div class="title">
-          <h1>Corazón Studio AI</h1>
-          <p>Frontend (Static Site) conectado a tu backend en Render</p>
-        </div>
-      </div>
+  <h1>🎬 Corazón Studio AI</h1>
 
-      <div class="pill">
-        <span id="apiDot" class="dot"></span>
-        <span id="apiText">API: comprobando…</span>
-      </div>
-    </header>
-
-    <div class="grid">
-      <!-- CONFIG -->
-      <section class="card span2">
-        <h2>🔗 Configuración</h2>
-        <div class="body">
-          <div class="row">
-            <input id="backendUrl" type="text" placeholder="Pega tu backend aquí (Render)" />
-            <button id="saveBackend" class="btn secondary">Guardar</button>
-          </div>
-          <div class="small" id="backendTip"></div>
-        </div>
-      </section>
-
-      <!-- CHAT -->
-      <section class="card">
-        <h2>💬 Chat</h2>
-        <div class="body">
-          <textarea id="chatInput" placeholder="Escribe tu mensaje..."></textarea>
-          <div class="row" style="margin-top:10px;">
-            <button id="chatSend" class="btn">Enviar</button>
-            <button id="chatClear" class="btn secondary">Limpiar</button>
-          </div>
-          <div id="chatOut" class="out hide"></div>
-        </div>
-      </section>
-
-      <!-- IMAGES -->
-      <section class="card">
-        <h2>🖼️ Imágenes</h2>
-        <div class="body">
-          <input id="imgPrompt" type="text" placeholder='Ej: "Un perrito negro con una niña jugando, estilo realista"' />
-          <div class="row" style="margin-top:10px;">
-            <select id="imgSize">
-              <option value="1024x1024" selected>1024x1024</option>
-              <option value="512x512">512x512</option>
-            </select>
-            <button id="imgGen" class="btn">Generar imagen</button>
-          </div>
-
-          <div id="imgStatus" class="status hide"></div>
-          <div class="media">
-            <img id="imgPreview" class="preview hide" alt="Imagen generada" />
-          </div>
-        </div>
-      </section>
-
-      <!-- VIDEO -->
-      <section class="card span2">
-        <h2>🎬 Generador de Video</h2>
-        <div class="body">
-          <textarea id="videoPrompt" placeholder="Describe el video que quieres..."></textarea>
-          <div class="row" style="margin-top:10px;">
-            <button id="videoGen" class="btn">Generar video</button>
-            <button id="videoCheck" class="btn secondary">Ver estado</button>
-          </div>
-
-          <div id="videoStatus" class="status hide"></div>
-
-          <div class="media">
-            <video id="videoPlayer" class="preview hide" controls playsinline></video>
-          </div>
-
-          <div class="small" style="margin-top:12px;">
-            Nota: el video puede tardar un poco. Cuando esté listo, aparecerá aquí automáticamente.
-          </div>
-        </div>
-      </section>
-    </div>
+  <div class="box">
+    <h3>Generador de Video</h3>
+    <textarea id="prompt" placeholder="Ej: Una niña jugando con un perrito negro en el parque, estilo realista, 5 segundos"></textarea>
+    <button onclick="generarVideo()">Generar video</button>
+    <div class="status" id="estado"></div>
+    <video id="video" controls></video>
   </div>
 
   <script>
-    // ========= CONFIG =========
-    const DEFAULT_BACKEND = "https://corazon-studio-ai-backend-3.onrender.com";
-    const LS_KEY = "CSAI_BACKEND_URL";
-    let currentVideoId = null;
-    let videoPollTimer = null;
+    const BACKEND = "https://corazon-studio-ai-backend-3.onrender.com";
+    let videoId = null;
+    let polling = null;
 
-    const el = (id) => document.getElementById(id);
-
-    function getBackend() {
-      return (localStorage.getItem(LS_KEY) || DEFAULT_BACKEND).replace(/\/+$/,'');
-    }
-
-    function setBackend(url) {
-      const clean = (url || "").trim().replace(/\/+$/,'');
-      if (!clean) return;
-      localStorage.setItem(LS_KEY, clean);
-    }
-
-    function apiDot(ok) {
-      const dot = el("apiDot");
-      const text = el("apiText");
-      if (ok) {
-        dot.classList.add("ok");
-        text.textContent = "API: conectada ✅";
-      } else {
-        dot.classList.remove("ok");
-        text.textContent = "API: sin conexión ❌";
-      }
-    }
-
-    function showStatus(targetId, message, kind="info") {
-      const box = el(targetId);
-      box.classList.remove("hide");
-      const badge = kind === "ok" ? "✅" : (kind === "bad" ? "⚠️" : "ℹ️");
-      box.innerHTML = `<span class="badge">${badge}</span><span>${message}</span>`;
-    }
-
-    function hideStatus(targetId) {
-      el(targetId).classList.add("hide");
-      el(targetId).innerHTML = "";
-    }
-
-    function safeJsonParse(text) {
-      try { return JSON.parse(text); } catch { return null; }
-    }
-
-    async function pingApi() {
-      try{
-        const r = await fetch(getBackend() + "/", { method:"GET" });
-        apiDot(r.ok);
-      } catch {
-        apiDot(false);
-      }
-    }
-
-    // ========= INIT UI =========
-    function init() {
-      el("backendUrl").value = getBackend();
-      el("backendTip").textContent = "Tip: tu backend actual es " + getBackend();
-      pingApi();
-
-      el("saveBackend").addEventListener("click", () => {
-        setBackend(el("backendUrl").value);
-        el("backendUrl").value = getBackend();
-        el("backendTip").textContent = "Guardado ✅  Backend: " + getBackend();
-        pingApi();
-      });
-
-      // Chat
-      el("chatSend").addEventListener("click", onChatSend);
-      el("chatClear").addEventListener("click", () => {
-        el("chatInput").value = "";
-        el("chatOut").classList.add("hide");
-        el("chatOut").textContent = "";
-      });
-
-      // Image
-      el("imgGen").addEventListener("click", onImageGen);
-
-      // Video
-      el("videoGen").addEventListener("click", onVideoGen);
-      el("videoCheck").addEventListener("click", async () => {
-        if (!currentVideoId) {
-          showStatus("videoStatus", "No hay video_id aún. Primero genera un video.", "bad");
-          return;
-        }
-        await checkVideoStatus(currentVideoId, true);
-      });
-    }
-
-    // ========= CHAT =========
-    async function onChatSend() {
-      const msg = el("chatInput").value.trim();
-      if (!msg) return;
-
-      el("chatOut").classList.remove("hide");
-      el("chatOut").textContent = "Enviando...";
-
-      try{
-        const r = await fetch(getBackend() + "/chat", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ message: msg, language: "es" })
-        });
-
-        const text = await r.text();
-        const data = safeJsonParse(text);
-
-        if (!r.ok) {
-          el("chatOut").textContent = "Error: " + (data?.detail || text || r.status);
-          return;
-        }
-
-        // Tu backend probablemente devuelve string directo o JSON. Mostramos lo que venga.
-        if (typeof data === "string") el("chatOut").textContent = data;
-        else el("chatOut").textContent = data?.reply || data?.message || text;
-
-      } catch(e) {
-        el("chatOut").textContent = "Error de red. Revisa tu backend. (" + e.message + ")";
-      }
-    }
-
-    // ========= IMAGE =========
-    async function onImageGen() {
-      const prompt = el("imgPrompt").value.trim();
-      const size = el("imgSize").value;
-
+    async function generarVideo() {
+      const prompt = document.getElementById("prompt").value.trim();
       if (!prompt) {
-        showStatus("imgStatus", "Escribe un prompt para la imagen.", "bad");
+        alert("Escribe una descripción del video");
         return;
       }
 
-      hideStatus("imgStatus");
-      el("imgPreview").classList.add("hide");
-      el("imgPreview").src = "";
+      document.getElementById("estado").textContent = "⏳ Enviando solicitud...";
+      document.getElementById("video").style.display = "none";
 
-      showStatus("imgStatus", "Generando imagen…", "info");
-
-      try{
-        const r = await fetch(getBackend() + "/image", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ prompt, size })
-        });
-
-        const text = await r.text();
-        const data = safeJsonParse(text);
-
-        if (!r.ok) {
-          showStatus("imgStatus", "Error generando imagen: " + (data?.detail || text || r.status), "bad");
-          return;
-        }
-
-        const imgData = data?.image;
-        if (!imgData) {
-          showStatus("imgStatus", "La API respondió, pero no vino la imagen.", "bad");
-          return;
-        }
-
-        el("imgPreview").src = imgData;
-        el("imgPreview").classList.remove("hide");
-        showStatus("imgStatus", "¡Imagen lista! ✅", "ok");
-
-      } catch(e) {
-        showStatus("imgStatus", "Error de red: " + e.message, "bad");
-      }
-    }
-
-    // ========= VIDEO =========
-    async function onVideoGen() {
-      const prompt = el("videoPrompt").value.trim();
-      if (!prompt) {
-        showStatus("videoStatus", "Escribe el prompt del video.", "bad");
-        return;
-      }
-
-      // Reiniciar UI
-      hideStatus("videoStatus");
-      el("videoPlayer").classList.add("hide");
-      el("videoPlayer").src = "";
-      currentVideoId = null;
-
-      // Limpiar polling anterior
-      if (videoPollTimer) {
-        clearInterval(videoPollTimer);
-        videoPollTimer = null;
-      }
-
-      showStatus("videoStatus", "Enviando… (creando video)", "info");
-
-      try{
-        const r = await fetch(getBackend() + "/video", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
+      try {
+        const res = await fetch(`${BACKEND}/video`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt })
         });
 
-        const text = await r.text();
-        const data = safeJsonParse(text);
+        const data = await res.json();
+        videoId = data.video_id;
 
-        if (!r.ok) {
-          showStatus("videoStatus", "Error iniciando video: " + (data?.detail || text || r.status), "bad");
-          return;
-        }
-
-        const vid = data?.video_id;
-        const status = data?.status || "queued";
-
-        if (!vid) {
-          showStatus("videoStatus", "La API respondió, pero no vino video_id.", "bad");
-          return;
-        }
-
-        currentVideoId = vid;
-        showStatus("videoStatus", "Estado: " + status + " (ID guardado ✅)", "info");
-
-        // Empezar polling automático cada 2.5s
-        videoPollTimer = setInterval(async () => {
-          if (!currentVideoId) return;
-          await checkVideoStatus(currentVideoId, false);
-        }, 2500);
-
-      } catch(e) {
-        showStatus("videoStatus", "Error de red: " + e.message, "bad");
+        document.getElementById("estado").textContent = "📦 Video en cola...";
+        iniciarPolling();
+      } catch (e) {
+        document.getElementById("estado").textContent = "❌ Error de red";
       }
     }
 
-    async function checkVideoStatus(videoId, manual=false) {
-      try{
-        const r = await fetch(getBackend() + "/video/" + encodeURIComponent(videoId), { method:"GET" });
-        const text = await r.text();
-        const data = safeJsonParse(text);
+    function iniciarPolling() {
+      if (polling) clearInterval(polling);
 
-        if (!r.ok) {
-          showStatus("videoStatus", "Error consultando estado: " + (data?.detail || text || r.status), "bad");
-          if (videoPollTimer) { clearInterval(videoPollTimer); videoPollTimer = null; }
-          return;
-        }
+      polling = setInterval(async () => {
+        try {
+          const res = await fetch(`${BACKEND}/video/${videoId}`);
+          const data = await res.json();
 
-        const status = data?.status || data?.state || "unknown";
-        const progress = (data?.progress !== undefined) ? ` (progreso ${data.progress}%)` : "";
+          document.getElementById("estado").textContent = `📊 Estado: ${data.status}`;
 
-        showStatus("videoStatus", "Estado: " + status + progress, "info");
-
-        if (status === "completed" || status === "succeeded" || status === "done") {
-          if (videoPollTimer) { clearInterval(videoPollTimer); videoPollTimer = null; }
-          showStatus("videoStatus", "Estado: completed ✅ Cargando video…", "ok");
-          await loadVideoContent(videoId);
-        }
-
-        if (status === "failed" || status === "error") {
-          if (videoPollTimer) { clearInterval(videoPollTimer); videoPollTimer = null; }
-          showStatus("videoStatus", "El video falló ❌ Intenta con otro prompt.", "bad");
-        }
-
-        // Si es manual, solo consulta y ya
-        if (manual) return;
-
-      } catch(e) {
-        showStatus("videoStatus", "Error de red: " + e.message, "bad");
-        if (videoPollTimer) { clearInterval(videoPollTimer); videoPollTimer = null; }
-      }
-    }
-
-    async function loadVideoContent(videoId) {
-      try {
-        const url = getBackend() + "/video/" + encodeURIComponent(videoId) + "/content";
-        const r = await fetch(url, { method:"GET" });
-
-        // Caso A: backend devuelve JSON con URL
-        const ct = (r.headers.get("content-type") || "").toLowerCase();
-        if (ct.includes("application/json")) {
-          const data = await r.json();
-          const videoUrl = data?.url || data?.video_url || data?.content_url;
-          if (!videoUrl) {
-            showStatus("videoStatus", "Completed ✅ pero no vino link del video.", "bad");
-            return;
+          if (data.status === "completed") {
+            clearInterval(polling);
+            cargarVideo();
           }
-          el("videoPlayer").src = videoUrl;
-          el("videoPlayer").classList.remove("hide");
-          showStatus("videoStatus", "¡Video listo! ✅", "ok");
-          return;
+        } catch {
+          clearInterval(polling);
+          document.getElementById("estado").textContent = "❌ Error consultando estado";
         }
-
-        // Caso B: backend devuelve MP4 directo (blob)
-        const blob = await r.blob();
-        if (!blob || blob.size === 0) {
-          showStatus("videoStatus", "Completed ✅ pero el video vino vacío.", "bad");
-          return;
-        }
-
-        const blobUrl = URL.createObjectURL(blob);
-        el("videoPlayer").src = blobUrl;
-        el("videoPlayer").classList.remove("hide");
-        showStatus("videoStatus", "¡Video listo! ✅", "ok");
-
-      } catch(e) {
-        showStatus("videoStatus", "No pude cargar el video: " + e.message, "bad");
-      }
+      }, 3000);
     }
 
-    init();
+    function cargarVideo() {
+      const video = document.getElementById("video");
+      video.src = `${BACKEND}/video/${videoId}/content`;
+      video.style.display = "block";
+      document.getElementById("estado").textContent = "✅ Video listo";
+    }
   </script>
 </body>
 </html>
