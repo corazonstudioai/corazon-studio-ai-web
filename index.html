@@ -2,73 +2,267 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Corazón Studio AI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: auto;
-      padding: 20px;
-    }
-    textarea {
-      width: 100%;
-      height: 100px;
-      margin-top: 10px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 10px 15px;
-      font-size: 16px;
-    }
-    #respuesta {
-      margin-top: 20px;
-      padding: 15px;
-      border: 1px solid #ccc;
-      min-height: 40px;
-    }
-  </style>
 </head>
-<body>
 
-  <h2>💙 Corazón Studio AI</h2>
-  <p>Chat con inteligencia artificial</p>
+<body style="font-family: Arial; text-align: center; padding: 20px;">
+  <h1>💙 Corazón Studio AI</h1>
+  <p>Tu plataforma de inteligencia artificial con propósito.</p>
 
-  <textarea id="mensaje" placeholder="Escribe tu mensaje..."></textarea>
-  <br />
-  <button onclick="enviarMensaje()">Enviar</button>
+  <!-- ✅ IMPORTANTE: tu backend -->
+  <script>
+    const API_URL = "https://corazon-studio-ai-backend-3.onrender.com";
+  </script>
 
-  <div id="respuesta"></div>
+  <div style="margin: 15px 0;">
+    <label style="font-weight: bold;">Idioma:&nbsp;</label>
+    <select id="idioma" style="padding: 8px;">
+      <option value="es" selected>Español</option>
+      <option value="en">English</option>
+    </select>
+  </div>
+
+  <button onclick="probarConexion()" style="padding: 12px 18px; font-size: 16px; cursor: pointer;">
+    Probar conexión con IA
+  </button>
+
+  <p id="conexion" style="margin-top: 12px; font-weight: bold;"></p>
+
+  <hr style="margin: 25px 0;" />
+
+  <!-- 💬 CHAT -->
+  <h2 style="text-align:left; max-width: 720px; margin: 0 auto;">💬 Chat</h2>
+
+  <div style="max-width: 720px; margin: 10px auto; text-align:left;">
+    <textarea id="chatInput" placeholder="Escribe tu mensaje..." rows="5"
+      style="width:100%; padding: 12px; font-size: 16px;"></textarea>
+
+    <button onclick="enviarChat()" style="margin-top: 10px; padding: 10px 16px; cursor: pointer;">
+      Enviar
+    </button>
+
+    <div id="chatOutput"
+      style="margin-top: 12px; padding: 12px; border: 1px solid #ddd; min-height: 40px; background: #fafafa;">
+    </div>
+  </div>
+
+  <hr style="margin: 25px 0;" />
+
+  <!-- 🖼️ IMÁGENES -->
+  <h2 style="text-align:left; max-width: 720px; margin: 0 auto;">🖼️ Imágenes</h2>
+
+  <div style="max-width: 720px; margin: 10px auto; text-align:left;">
+    <input id="imgPrompt" placeholder="Describe la imagen que quieres..."
+      style="width:100%; padding: 12px; font-size: 16px;" />
+
+    <button onclick="generarImagen()" style="margin-top: 10px; padding: 10px 16px; cursor: pointer;">
+      Generar imagen
+    </button>
+
+    <div id="imgOutput" style="margin-top: 12px;"></div>
+  </div>
+
+  <hr style="margin: 25px 0;" />
+
+  <!-- 🎬 VIDEO -->
+  <h2 style="text-align:left; max-width: 720px; margin: 0 auto;">🎬 Video</h2>
+
+  <div style="max-width: 720px; margin: 10px auto; text-align:left;">
+    <input id="videoPrompt" placeholder="Describe el video que quieres..."
+      style="width:100%; padding: 12px; font-size: 16px;" />
+
+    <button onclick="generarVideo()" style="margin-top: 10px; padding: 10px 16px; cursor: pointer;">
+      Generar video
+    </button>
+
+    <div id="videoOutput"
+      style="margin-top: 12px; padding: 12px; border: 1px solid #ddd; min-height: 40px; background: #fafafa;">
+    </div>
+  </div>
 
   <script>
-    async function enviarMensaje() {
-      const mensaje = document.getElementById("mensaje").value;
-      const respuestaDiv = document.getElementById("respuesta");
+    function getIdioma() {
+      return document.getElementById("idioma").value || "es";
+    }
 
-      respuestaDiv.innerText = "Pensando...";
-
+    async function probarConexion() {
+      const el = document.getElementById("conexion");
+      el.textContent = "⏳ Probando...";
       try {
-        const res = await fetch(
-          "https://corazon-studio-ai-backend-3.onrender.com/chat",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              message: mensaje
-            })
-          }
-        );
+        const res = await fetch(`${API_URL}/health`, { method: "GET" });
+        const data = await res.json();
+        if (res.ok) {
+          el.textContent = "✅ Conectado correctamente";
+        } else {
+          el.textContent = "❌ Error de conexión";
+          console.log(data);
+        }
+      } catch (e) {
+        el.textContent = "❌ No se pudo conectar";
+        console.error(e);
+      }
+    }
+
+    async function enviarChat() {
+      const input = document.getElementById("chatInput").value.trim();
+      const out = document.getElementById("chatOutput");
+
+      if (!input) {
+        out.textContent = "⚠️ Escribe un mensaje.";
+        return;
+      }
+
+      out.textContent = "⏳ Pensando...";
+      try {
+        const res = await fetch(`${API_URL}/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: input,
+            lang: getIdioma()
+          })
+        });
 
         const data = await res.json();
-        respuestaDiv.innerText = data.reply || "Sin respuesta";
 
-      } catch (error) {
-        respuestaDiv.innerText = "Error al conectar con el servidor";
+        if (!res.ok) {
+          out.textContent = "❌ Error en chat.";
+          console.log(data);
+          return;
+        }
+
+        out.textContent = data.reply ?? data.message ?? JSON.stringify(data);
+      } catch (e) {
+        out.textContent = "❌ Error de red en chat.";
+        console.error(e);
+      }
+    }
+
+    async function generarImagen() {
+      const prompt = document.getElementById("imgPrompt").value.trim();
+      const out = document.getElementById("imgOutput");
+
+      if (!prompt) {
+        out.innerHTML = "<p>⚠️ Escribe una descripción para la imagen.</p>";
+        return;
+      }
+
+      out.innerHTML = "<p>⏳ Generando imagen...</p>";
+
+      try {
+        const res = await fetch(`${API_URL}/image`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt,
+            lang: getIdioma()
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          out.innerHTML = "<p>❌ Error generando imagen.</p>";
+          console.log(data);
+          return;
+        }
+
+        // Acepta varios formatos: image_url, url, base64
+        const imageUrl = data.image_url || data.url || null;
+        const base64 = data.base64 || data.image_base64 || null;
+
+        if (imageUrl) {
+          out.innerHTML = `
+            <p>✅ Imagen lista:</p>
+            <img src="${imageUrl}" alt="Imagen generada" style="max-width:100%; border:1px solid #ddd;" />
+          `;
+          return;
+        }
+
+        if (base64) {
+          out.innerHTML = `
+            <p>✅ Imagen lista:</p>
+            <img src="data:image/png;base64,${base64}" alt="Imagen generada" style="max-width:100%; border:1px solid #ddd;" />
+          `;
+          return;
+        }
+
+        out.innerHTML = `<p>✅ Respuesta recibida, pero no vino la imagen. Mira consola.</p>`;
+        console.log("Respuesta /image:", data);
+      } catch (e) {
+        out.innerHTML = "<p>❌ Error de red en imagen.</p>";
+        console.error(e);
+      }
+    }
+
+    async function generarVideo() {
+      const prompt = document.getElementById("videoPrompt").value.trim();
+      const out = document.getElementById("videoOutput");
+
+      if (!prompt) {
+        out.textContent = "⚠️ Escribe una descripción para el video.";
+        return;
+      }
+
+      out.textContent = "⏳ Generando video...";
+
+      try {
+        const res = await fetch(`${API_URL}/video`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt,
+            lang: getIdioma()
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          out.textContent = "❌ Error generando video.";
+          console.log(data);
+          return;
+        }
+
+        // Posibles respuestas:
+        // - { video_url: "https://..." }
+        // - { url: "https://..." }
+        // - { video_id: "abc123" }
+        const videoUrl = data.video_url || data.url || null;
+        const videoId = data.video_id || data.id || null;
+
+        if (videoUrl) {
+          out.innerHTML = `
+            ✅ Video listo:
+            <div style="margin-top:10px;">
+              <a href="${videoUrl}" target="_blank">Abrir video</a>
+            </div>
+          `;
+          return;
+        }
+
+        if (videoId) {
+          const link = `${API_URL}/video/${videoId}`;
+          out.innerHTML = `
+            ✅ Video creado con ID: <b>${videoId}</b>
+            <div style="margin-top:10px;">
+              <a href="${link}" target="_blank">Abrir /video/${videoId}</a>
+            </div>
+            <div style="margin-top:10px; font-size: 14px;">
+              Si aún no está listo, vuelve a abrir el enlace en 10–30 segundos.
+            </div>
+          `;
+          return;
+        }
+
+        out.textContent = "✅ Respuesta recibida, pero no vino URL ni ID de video. Mira consola.";
+        console.log("Respuesta /video:", data);
+      } catch (e) {
+        out.textContent = "❌ Error de red en video.";
+        console.error(e);
       }
     }
   </script>
-
 </body>
 </html>
