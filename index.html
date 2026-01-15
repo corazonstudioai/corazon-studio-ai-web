@@ -1,207 +1,84 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Corazón Studio AI</title>
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background:#0b1220; color:#e8eefc; }
-    .wrap { max-width: 820px; margin: 0 auto; padding: 18px; }
-    .card { background:#111b33; border-radius:18px; padding:16px; margin: 14px 0; box-shadow: 0 10px 24px rgba(0,0,0,.25); }
-    h1 { margin: 10px 0 0; font-size: 38px; letter-spacing: .5px; }
-    .sub { opacity:.85; margin: 6px 0 0; }
-    label { display:block; margin: 10px 0 6px; opacity:.9;}
-    input, textarea, select { width:100%; box-sizing:border-box; background:#0b1220; color:#e8eefc; border:1px solid rgba(255,255,255,.15); border-radius:12px; padding:12px; outline:none; }
-    textarea { min-height: 88px; }
-    button { width:100%; padding:14px; border:0; border-radius:14px; background:#3a6df0; color:#fff; font-weight:700; font-size:16px; margin-top:10px; }
-    button:active { transform: scale(.99); }
-    .row { display:flex; gap:10px; }
-    .row > div { flex:1; }
-    .ok { color:#44d17d; font-weight:700; }
-    .err { color:#ff6b6b; font-weight:700; }
-    .small { font-size: 13px; opacity:.8; }
-    img { max-width: 100%; border-radius: 14px; margin-top: 10px; }
-    video { width:100%; border-radius: 14px; margin-top: 10px; background:#000; }
-    .btn2 { background:#244aa8; }
-  </style>
+<meta charset="UTF-8">
+<title>Corazón Studio AI</title>
+<style>
+body{font-family:Arial;background:#0f172a;color:white;padding:20px}
+.box{background:#020617;padding:20px;border-radius:12px;margin-bottom:20px}
+button,input,textarea,select{width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none}
+button{background:#2563eb;color:white}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>🎬 Corazón Studio AI</h1>
-    <p class="sub">Chat + Imágenes + Video (Reels MP4 / Runway / Pika)</p>
 
-    <div class="card">
-      <h2 style="margin:0 0 10px;">⚙️ Configuración</h2>
-      <label>Tu backend (Render):</label>
-      <input id="backend" placeholder="https://tu-backend.onrender.com" />
-      <div class="row">
-        <div><button id="save" class="btn2">Guardar</button></div>
-        <div><button id="test">Probar API</button></div>
-      </div>
-      <p id="status" class="small"></p>
-      <p class="small">Ejemplo: https://corazon-studio-ai-backend-3.onrender.com</p>
-    </div>
+<h1>🎬 Corazón Studio AI</h1>
 
-    <div class="card">
-      <h2 style="margin:0 0 10px;">💬 Chat</h2>
-      <textarea id="chatMsg" placeholder="Hola"></textarea>
-      <button id="sendChat">Enviar</button>
-      <div id="chatOut" class="small" style="margin-top:10px;"></div>
-    </div>
+<div class="box">
+<h3>💬 Chat</h3>
+<input id="chatInput" placeholder="Escribe tu mensaje">
+<button onclick="sendChat()">Enviar</button>
+<p id="chatResponse"></p>
+</div>
 
-    <div class="card">
-      <h2 style="margin:0 0 10px;">🖼️ Imágenes</h2>
-      <textarea id="imgPrompt" placeholder='Ej: "Un perrito feliz en un parque..."'></textarea>
-      <button id="genImg">Generar imagen</button>
-      <div id="imgOut"></div>
-    </div>
+<div class="box">
+<h3>🖼 Imagen</h3>
+<input id="imageInput" placeholder="Describe la imagen">
+<button onclick="generateImage()">Generar</button>
+<img id="imageResult" style="width:100%;margin-top:10px">
+</div>
 
-    <div class="card">
-      <h2 style="margin:0 0 10px;">🎞️ Video</h2>
-      <label>Modo de video</label>
-      <select id="mode">
-        <option value="reels">Modo A: Reels (MP4)</option>
-        <option value="runway">Modo B: Video realista (Runway)</option>
-        <option value="pika">Modo C: Video realista (Pika)</option>
-      </select>
+<div class="box">
+<h3>🎥 Video (Runway / Pika)</h3>
 
-      <div class="row">
-        <div>
-          <label>Formato</label>
-          <select id="format">
-            <option value="9:16">9:16</option>
-            <option value="16:9">16:9</option>
-            <option value="1:1">1:1</option>
-          </select>
-        </div>
-        <div>
-          <label>Duración (seg)</label>
-          <input id="duration" type="number" value="6" min="2" max="15"/>
-        </div>
-      </div>
+<select id="provider">
+  <option value="runway">Runway</option>
+  <option value="pika">Pika</option>
+</select>
 
-      <label>Texto</label>
-      <textarea id="videoText" placeholder='Ej: "Dios nunca llega tarde, llega justo a tiempo"'></textarea>
+<textarea id="videoPrompt" placeholder="Describe el video"></textarea>
+<button onclick="generateVideo()">Generar Video</button>
 
-      <button id="genVideo">Generar video</button>
-      <div id="videoOut"></div>
-    </div>
-  </div>
+<pre id="videoResult"></pre>
+</div>
 
 <script>
-  function getApiUrl() {
-    const v = (localStorage.getItem("API_URL") || "").trim();
-    return v;
-  }
+const API_URL = "https://corazon-studio-ai-backend-3.onrender.com";
 
-  function setApiUrl(v) {
-    localStorage.setItem("API_URL", v.trim());
-  }
+async function sendChat() {
+  const r = await fetch(API_URL + "/chat", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({message: chatInput.value})
+  });
+  const d = await r.json();
+  chatResponse.innerText = d.reply;
+}
 
-  function fullUrl(path) {
-    const base = getApiUrl();
-    if (!base) return "";
-    return base.replace(/\/+$/, "") + path;
-  }
+async function generateImage() {
+  const r = await fetch(API_URL + "/image", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({prompt: imageInput.value})
+  });
+  const d = await r.json();
+  imageResult.src = "data:image/png;base64," + d.data[0].b64_json;
+}
 
-  async function postJson(path, body) {
-    const url = fullUrl(path);
-    const r = await fetch(url, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(body)
-    });
-    const text = await r.text();
-    let data = null;
-    try { data = JSON.parse(text); } catch(e) {}
-    if (!r.ok) {
-      throw new Error((data && (data.error || data.detail)) || text || ("HTTP " + r.status));
-    }
-    return data || {};
-  }
-
-  // Init
-  const backendInput = document.getElementById("backend");
-  backendInput.value = getApiUrl() || "https://corazon-studio-ai-backend-3.onrender.com";
-
-  document.getElementById("save").onclick = () => {
-    setApiUrl(backendInput.value);
-    document.getElementById("status").innerHTML = '<span class="ok">Guardado ✅</span>';
-  };
-
-  document.getElementById("test").onclick = async () => {
-    try {
-      setApiUrl(backendInput.value);
-      const r = await fetch(fullUrl("/"));
-      const data = await r.json();
-      document.getElementById("status").innerHTML = '<span class="ok">API conectada ✅</span> ' + (data.message || "");
-    } catch (e) {
-      document.getElementById("status").innerHTML = '<span class="err">No conecta ❌</span> ' + e.message;
-    }
-  };
-
-  // Chat
-  document.getElementById("sendChat").onclick = async () => {
-    const out = document.getElementById("chatOut");
-    out.innerHTML = "Enviando...";
-    try {
-      const msg = document.getElementById("chatMsg").value;
-      const data = await postJson("/chat", {message: msg});
-      if (data.reply) out.innerHTML = "<b>Respuesta:</b><br>" + data.reply;
-      else out.innerHTML = "<span class='err'>Sin reply</span> " + JSON.stringify(data);
-    } catch (e) {
-      out.innerHTML = "<span class='err'>Error:</span> " + e.message;
-    }
-  };
-
-  // Image
-  document.getElementById("genImg").onclick = async () => {
-    const out = document.getElementById("imgOut");
-    out.innerHTML = "Generando...";
-    try {
-      const prompt = document.getElementById("imgPrompt").value;
-      const data = await postJson("/image", {prompt});
-
-      // OpenAI images suele devolver base64 en data[0].b64_json
-      const b64 = data?.data?.[0]?.b64_json;
-      if (!b64) {
-        out.innerHTML = "<span class='err'>No vino imagen.</span><br><pre>" + JSON.stringify(data, null, 2) + "</pre>";
-        return;
-      }
-      out.innerHTML = `<img alt="imagen" src="data:image/png;base64,${b64}">`;
-    } catch (e) {
-      out.innerHTML = "<span class='err'>Error:</span> " + e.message;
-    }
-  };
-
-  // Video
-  document.getElementById("genVideo").onclick = async () => {
-    const out = document.getElementById("videoOut");
-    out.innerHTML = "Generando...";
-    try {
-      const mode = document.getElementById("mode").value;
-      const text = document.getElementById("videoText").value;
-      const duration = Number(document.getElementById("duration").value || 6);
-      const format = document.getElementById("format").value;
-
-      const data = await postJson("/video", {mode, text, duration, format});
-
-      if (data.video_url) {
-        const url = fullUrl(data.video_url);
-        out.innerHTML = `
-          <div class="ok">${data.message || "Listo ✅"}</div>
-          <video controls src="${url}"></video>
-          <a href="${url}" download style="display:block;margin-top:10px;color:#9fb7ff;">⬇️ Descargar MP4</a>
-        `;
-        return;
-      }
-
-      // Runway/Pika muestran result (depende del proveedor)
-      out.innerHTML = "<pre style='white-space:pre-wrap;'>" + JSON.stringify(data, null, 2) + "</pre>";
-    } catch (e) {
-      out.innerHTML = "<span class='err'>Error:</span> " + e.message;
-    }
-  };
+async function generateVideo() {
+  const r = await fetch(API_URL + "/video", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      provider: provider.value,
+      prompt: videoPrompt.value,
+      duration: 6
+    })
+  });
+  const d = await r.json();
+  videoResult.innerText = JSON.stringify(d, null, 2);
+}
 </script>
+
 </body>
 </html>
