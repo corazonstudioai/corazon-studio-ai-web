@@ -1,103 +1,232 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Corazón Studio AI</title>
-<style>
-body{font-family:Arial;background:#0b1220;color:#fff;margin:0;padding:16px}
-.card{background:#121c33;padding:16px;border-radius:16px;margin-bottom:16px}
-textarea,select,input,button{width:100%;padding:12px;border-radius:10px;border:none;margin-top:8px}
-button{background:#2b6bff;color:white;font-weight:bold}
-video{width:100%;margin-top:10px;border-radius:12px}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Corazón Studio AI</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:#0b1220; color:#e8eefc; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 20px; }
+    .card { background: #0f1b33; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 16px; margin: 14px 0; box-shadow: 0 10px 30px rgba(0,0,0,.22); }
+    h1 { margin: 10px 0 6px; font-size: 34px; letter-spacing:.2px; }
+    .muted { opacity:.8; font-size: 14px; }
+    label { display:block; margin: 10px 0 6px; font-weight: 600; }
+    input, textarea, select { width:100%; box-sizing:border-box; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.12); background:#0b1426; color:#e8eefc; outline:none; }
+    textarea { min-height: 90px; resize: vertical; }
+    .row { display:flex; gap: 12px; flex-wrap: wrap; }
+    .row > * { flex: 1; min-width: 160px; }
+    button { width:100%; padding: 12px 14px; border: 0; border-radius: 12px; background:#2a74ff; color:white; font-weight: 700; cursor:pointer; }
+    button:disabled { opacity: .6; cursor:not-allowed; }
+    .pill { display:inline-block; padding: 6px 10px; border-radius: 999px; background: rgba(40,200,120,.18); border: 1px solid rgba(40,200,120,.35); margin-left: 10px; font-weight: 700; }
+    .bad { background: rgba(255,70,70,.12); border-color: rgba(255,70,70,.28); }
+    pre { white-space: pre-wrap; background:#081025; padding: 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.08); overflow:auto; }
+    .img { width: 100%; max-width: 420px; border-radius: 14px; border: 1px solid rgba(255,255,255,.12); display:block; margin-top: 10px; }
+    a { color:#9fc0ff; }
+  </style>
 </head>
 <body>
+  <div class="wrap">
+    <h1>🎬 Corazón Studio AI <span id="apiStatus" class="pill bad">API: no probada</span></h1>
+    <div class="card">
+      <h2>⚙️ Configuración</h2>
+      <div class="muted">Tu backend (Render)</div>
+      <input id="backendUrl" placeholder="https://corazon-studio-ai-backend-3.onrender.com" />
+      <div class="row" style="margin-top:10px;">
+        <button id="saveBtn">Guardar</button>
+        <button id="testBtn">Probar API</button>
+      </div>
+      <div class="muted" style="margin-top:8px;">
+        Ejemplo: <b>https://corazon-studio-ai-backend-3.onrender.com</b>
+      </div>
+    </div>
 
-<div class="card">
-<h2>⚙️ Backend</h2>
-<input id="backend" placeholder="https://corazon-studio-ai-backend-3.onrender.com"/>
-<button onclick="save()">Guardar</button>
-<button onclick="test()">Probar</button>
-<pre id="status"></pre>
-</div>
+    <div class="card">
+      <h2>💬 Chat</h2>
+      <textarea id="chatMsg" placeholder="Escribe tu mensaje"></textarea>
+      <button id="chatBtn">Enviar</button>
+      <div style="margin-top:10px;">
+        <pre id="chatOut"></pre>
+      </div>
+    </div>
 
-<div class="card">
-<h2>💬 Chat</h2>
-<textarea id="chatText"></textarea>
-<button onclick="chat()">Enviar</button>
-<pre id="chatOut"></pre>
-</div>
+    <div class="card">
+      <h2>🖼️ Imágenes</h2>
+      <textarea id="imgPrompt" placeholder='Ej: "Un perrito negro con una niña jugando..."'></textarea>
+      <button id="imgBtn">Generar imagen</button>
+      <img id="imgOut" class="img" style="display:none;" />
+      <pre id="imgErr" style="display:none;"></pre>
+    </div>
 
-<div class="card">
-<h2>🖼️ Imagen</h2>
-<textarea id="imgText"></textarea>
-<button onclick="image()">Generar</button>
-<img id="img" style="width:100%;display:none"/>
-</div>
+    <div class="card">
+      <h2>🎥 Video</h2>
+      <label>Modo de video</label>
+      <select id="videoMode">
+        <option value="reels">Modo A: Reels (MP4 descargable)</option>
+        <option value="runway">Modo B: Video realista (Runway)</option>
+        <option value="pika">Modo C: Video realista (Pika)</option>
+      </select>
 
-<div class="card">
-<h2>🎬 Video</h2>
-<select id="mode">
-<option value="reels">Modo A: Reels (MP4)</option>
-<option value="runway">Modo B: Runway</option>
-<option value="pika">Modo C: Pika</option>
-</select>
-<textarea id="videoText"></textarea>
-<input id="duration" type="number" value="6"/>
-<button onclick="video()">Generar Video</button>
-<div id="videoOut"></div>
-</div>
+      <div class="row">
+        <div>
+          <label>Formato</label>
+          <select id="videoFormat">
+            <option value="9:16">9:16 (Reels)</option>
+            <option value="1:1">1:1</option>
+            <option value="16:9">16:9</option>
+          </select>
+        </div>
+        <div>
+          <label>Duración (seg)</label>
+          <input id="videoDuration" type="number" value="6" min="2" max="20" />
+        </div>
+      </div>
 
-<script>
-function getBase(){
-  return localStorage.getItem("BACKEND") || "";
-}
-function save(){
-  localStorage.setItem("BACKEND", document.getElementById("backend").value.trim());
-}
-async function test(){
-  const r = await fetch(getBase()+"/");
-  document.getElementById("status").textContent = await r.text();
-}
-async function chat(){
-  const r = await fetch(getBase()+"/chat",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({message:chatText.value})
-  });
-  chatOut.textContent = (await r.json()).reply;
-}
-async function image(){
-  const r = await fetch(getBase()+"/image",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({prompt:imgText.value})
-  });
-  const d = await r.json();
-  img.src=d.url; img.style.display="block";
-}
-async function video(){
-  videoOut.textContent="Generando...";
-  const r = await fetch(getBase()+"/video",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      mode:mode.value,
-      text:videoText.value,
-      duration:Number(duration.value)
-    })
-  });
-  const d = await r.json();
-  if(d.video_url){
-    videoOut.innerHTML =
-      `<video controls src="${getBase()}${d.video_url}"></video>
-       <a href="${getBase()}${d.video_url}" download>Descargar MP4</a>`;
-  } else {
-    videoOut.textContent = JSON.stringify(d,null,2);
-  }
-}
-</script>
+      <label>Texto / Prompt</label>
+      <textarea id="videoText" placeholder='Ej: "Dios nunca llega tarde, llega justo a tiempo"'></textarea>
 
+      <button id="videoBtn">Generar video</button>
+
+      <div id="videoLinks" style="margin-top:10px; display:none;">
+        <div class="muted">Resultado:</div>
+        <div id="videoLinkArea"></div>
+      </div>
+
+      <pre id="videoOut"></pre>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function getAPI() {
+      return ($("backendUrl").value || "").trim().replace(/\/+$/,"");
+    }
+
+    function setStatus(ok) {
+      const el = $("apiStatus");
+      if (ok) {
+        el.textContent = "API: conectada ✅";
+        el.classList.remove("bad");
+      } else {
+        el.textContent = "API: no conecta ❌";
+        el.classList.add("bad");
+      }
+    }
+
+    function saveAPI() {
+      const url = getAPI();
+      if (!url) return alert("Pega tu backend URL primero.");
+      localStorage.setItem("CORAZON_API_URL", url);
+      alert("Guardado ✅");
+    }
+
+    async function testAPI() {
+      const url = getAPI();
+      if (!url) return alert("Pega tu backend URL primero.");
+      try {
+        const r = await fetch(url + "/", { method: "GET" });
+        const j = await r.json();
+        setStatus(j && j.status === "ok");
+      } catch (e) {
+        setStatus(false);
+        alert("No conecta. Revisa la URL o CORS.");
+      }
+    }
+
+    async function postJSON(path, body) {
+      const base = getAPI();
+      if (!base) throw new Error("Falta backend URL en Configuración.");
+      const r = await fetch(base + path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const text = await r.text();
+      let json;
+      try { json = JSON.parse(text); } catch(e) { json = { raw: text }; }
+      if (!r.ok) {
+        throw new Error(json.detail ? JSON.stringify(json.detail) : JSON.stringify(json));
+      }
+      return json;
+    }
+
+    // Load saved URL
+    const saved = localStorage.getItem("CORAZON_API_URL");
+    if (saved) $("backendUrl").value = saved;
+
+    $("saveBtn").onclick = saveAPI;
+    $("testBtn").onclick = testAPI;
+
+    $("chatBtn").onclick = async () => {
+      $("chatOut").textContent = "Enviando...";
+      try {
+        const j = await postJSON("/chat", { message: $("chatMsg").value });
+        $("chatOut").textContent = j.reply || JSON.stringify(j, null, 2);
+      } catch (e) {
+        $("chatOut").textContent = "ERROR: " + e.message;
+      }
+    };
+
+    $("imgBtn").onclick = async () => {
+      $("imgOut").style.display = "none";
+      $("imgErr").style.display = "none";
+      $("imgErr").textContent = "";
+      try {
+        const j = await postJSON("/image", { prompt: $("imgPrompt").value });
+        if (j.b64) {
+          $("imgOut").src = "data:image/png;base64," + j.b64;
+          $("imgOut").style.display = "block";
+        } else {
+          $("imgErr").textContent = JSON.stringify(j, null, 2);
+          $("imgErr").style.display = "block";
+        }
+      } catch (e) {
+        $("imgErr").textContent = "ERROR: " + e.message;
+        $("imgErr").style.display = "block";
+      }
+    };
+
+    $("videoBtn").onclick = async () => {
+      $("videoOut").textContent = "Generando...";
+      $("videoLinks").style.display = "none";
+      $("videoLinkArea").innerHTML = "";
+
+      const mode = $("videoMode").value;
+      const format = $("videoFormat").value;
+      const duration = parseInt($("videoDuration").value || "6", 10);
+
+      try {
+        const j = await postJSON("/video", {
+          mode,
+          text: $("videoText").value,
+          duration,
+          format
+        });
+
+        // Reels: devuelve filename
+        if (j.provider === "reels" && j.filename) {
+          const base = getAPI();
+          const fileUrl = base + "/files/" + j.filename;
+
+          $("videoLinks").style.display = "block";
+          $("videoLinkArea").innerHTML = `
+            <p><b>MP4 listo:</b> <a href="${fileUrl}" target="_blank" rel="noopener">Abrir / Descargar MP4</a></p>
+            <video controls style="width:100%;max-width:520px;border-radius:14px;border:1px solid rgba(255,255,255,.12);">
+              <source src="${fileUrl}" type="video/mp4" />
+            </video>
+          `;
+          $("videoOut").textContent = JSON.stringify(j, null, 2);
+          return;
+        }
+
+        // Runway/Pika: muestra resultado tal cual
+        $("videoOut").textContent = JSON.stringify(j, null, 2);
+
+      } catch (e) {
+        $("videoOut").textContent = "ERROR: " + e.message;
+      }
+    };
+  </script>
 </body>
 </html>
