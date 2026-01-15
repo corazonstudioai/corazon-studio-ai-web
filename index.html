@@ -1,105 +1,230 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Corazón Studio AI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body {
-      background: #0b1220;
-      color: white;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    h1 { text-align: center; }
-    textarea, select, input {
-      width: 100%;
-      margin: 6px 0;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      margin-top: 10px;
-    }
-    .box {
-      background: #111827;
-      padding: 15px;
-      border-radius: 14px;
-      margin-bottom: 20px;
-    }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#0b1220;color:#fff}
+    .wrap{max-width:760px;margin:0 auto;padding:20px}
+    .card{background:#0f1a2f;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px;margin:14px 0;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    h1{margin:10px 0 0;font-size:38px}
+    h2{margin:0 0 10px;font-size:26px}
+    input,textarea,select{width:100%;box-sizing:border-box;background:#0b1325;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;font-size:16px}
+    textarea{min-height:80px;resize:vertical}
+    button{width:100%;margin-top:10px;background:#2d6cff;border:0;color:#fff;padding:14px;border-radius:12px;font-size:18px;font-weight:600}
+    .row{display:flex;gap:12px}
+    .row > div{flex:1}
+    .small{opacity:.85;font-size:13px;line-height:1.35}
+    .ok{color:#3cf07f;font-weight:700}
+    .err{color:#ff6b6b;font-weight:700}
+    .out{margin-top:12px;white-space:pre-wrap;background:#0b1325;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px}
+    img{max-width:100%;border-radius:14px;display:block;margin-top:10px}
   </style>
 </head>
 <body>
+  <div class="wrap">
+    <h1>🎬 Corazón Studio AI</h1>
 
-<h1>🎬 Corazón Studio AI</h1>
+    <div class="card">
+      <h2>⚙️ Configuración</h2>
+      <div class="small">Tu backend (Render):</div>
+      <input id="backendUrl" placeholder="https://corazon-studio-ai-backend-3.onrender.com" />
+      <div class="row">
+        <div><button id="btnSave">Guardar</button></div>
+        <div><button id="btnTest">Probar API</button></div>
+      </div>
+      <div id="apiStatus" class="small"></div>
+      <div class="small">Ejemplo: https://corazon-studio-ai-backend-3.onrender.com</div>
+    </div>
 
-<div class="box">
-  <h3>💬 Chat</h3>
-  <textarea id="chatInput" placeholder="Escribe tu mensaje"></textarea>
-  <button onclick="sendChat()">Enviar</button>
-  <p id="chatReply"></p>
-</div>
+    <div class="card">
+      <h2>💬 Chat</h2>
+      <textarea id="chatMsg" placeholder="Escribe tu mensaje...">Hola</textarea>
+      <button id="btnChat">Enviar</button>
+      <div id="chatOut" class="out"></div>
+    </div>
 
-<div class="box">
-  <h3>🖼️ Imágenes</h3>
-  <textarea id="imgPrompt" placeholder="Describe la imagen"></textarea>
-  <button onclick="genImage()">Generar imagen</button>
-</div>
+    <div class="card">
+      <h2>🖼️ Imágenes</h2>
+      <textarea id="imgPrompt" placeholder='Ej: "Un perrito feliz en un parque..."'></textarea>
+      <button id="btnImg">Generar imagen</button>
+      <div id="imgStatus" class="small"></div>
+      <img id="imgResult" alt="" style="display:none" />
+    </div>
 
-<div class="box">
-  <h3>🎥 Video</h3>
-  <select id="videoMode">
-    <option value="reels">Modo A: Reels (texto animado)</option>
-    <option value="runway">Modo B: Video realista (Runway)</option>
-    <option value="pika">Modo C: Video realista (Pika)</option>
-  </select>
-  <textarea id="videoText" placeholder="Texto o descripción del video"></textarea>
-  <button onclick="genVideo()">Generar video</button>
-</div>
+    <div class="card">
+      <h2>🎞️ Video</h2>
+      <div class="small">Modo de video:</div>
+      <select id="videoMode">
+        <option value="reels">Modo A: Reels (texto animado)</option>
+        <option value="runway">Modo B: Video realista (Runway)</option>
+        <option value="pika">Modo C: Video realista (Pika)</option>
+      </select>
 
-<script>
-const API = localStorage.getItem("backend") || "";
+      <div style="height:10px"></div>
+      <div class="small">Texto:</div>
+      <textarea id="videoText" placeholder='Ej: "Dios nunca llega tarde, llega justo a tiempo"'></textarea>
 
-async function sendChat() {
-  const msg = document.getElementById("chatInput").value;
-  const r = await fetch(API + "/chat", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({message: msg})
-  });
-  const d = await r.json();
-  document.getElementById("chatReply").innerText = d.reply;
-}
+      <div class="row">
+        <div>
+          <div class="small">Formato</div>
+          <select id="videoFormat">
+            <option value="9:16">9:16 (Reels)</option>
+            <option value="16:9">16:9</option>
+            <option value="1:1">1:1</option>
+          </select>
+        </div>
+        <div>
+          <div class="small">Duración (seg)</div>
+          <input id="videoDuration" type="number" value="6" min="1" max="30" />
+        </div>
+      </div>
 
-async function genImage() {
-  const p = document.getElementById("imgPrompt").value;
-  await fetch(API + "/image", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({prompt: p})
-  });
-  alert("Imagen solicitada");
-}
+      <button id="btnVideo">Generar video</button>
+      <div id="videoOut" class="out"></div>
+    </div>
 
-async function genVideo() {
-  const mode = document.getElementById("videoMode").value;
-  const text = document.getElementById("videoText").value;
-  await fetch(API + "/video", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({mode, text})
-  });
-  alert("Video solicitado");
-}
-</script>
+  </div>
 
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function normalizeUrl(u) {
+      if (!u) return "";
+      u = u.trim();
+      if (u.endsWith("/")) u = u.slice(0, -1);
+      return u;
+    }
+
+    function getBackend() {
+      return normalizeUrl(localStorage.getItem("BACKEND_URL") || $("backendUrl").value);
+    }
+
+    function setStatus(el, ok, msg) {
+      el.innerHTML = ok ? `<span class="ok">✅ ${msg}</span>` : `<span class="err">❌ ${msg}</span>`;
+    }
+
+    // Load saved URL
+    (function init(){
+      const saved = localStorage.getItem("BACKEND_URL") || "";
+      $("backendUrl").value = saved;
+      $("chatOut").textContent = "Escribe un mensaje y presiona Enviar.";
+      $("videoOut").textContent = "Elige modo y genera.";
+    })();
+
+    $("btnSave").onclick = () => {
+      const u = normalizeUrl($("backendUrl").value);
+      localStorage.setItem("BACKEND_URL", u);
+      setStatus($("apiStatus"), true, "Guardado.");
+    };
+
+    $("btnTest").onclick = async () => {
+      const base = getBackend();
+      if (!base) return setStatus($("apiStatus"), false, "Pega tu URL del backend primero.");
+      try {
+        const r = await fetch(base + "/", { method: "GET" });
+        const data = await r.json();
+        if (r.ok) setStatus($("apiStatus"), true, data.message || "API OK");
+        else setStatus($("apiStatus"), false, "API respondió pero con error.");
+      } catch (e) {
+        setStatus($("apiStatus"), false, "No pude conectar con el backend.");
+      }
+    };
+
+    $("btnChat").onclick = async () => {
+      const base = getBackend();
+      if (!base) return $("chatOut").textContent = "❌ Pega tu URL del backend arriba y guarda.";
+      const msg = $("chatMsg").value.trim();
+      if (!msg) return $("chatOut").textContent = "❌ Escribe un mensaje.";
+
+      $("chatOut").textContent = "⏳ Enviando...";
+      try {
+        const r = await fetch(base + "/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          $("chatOut").textContent = "❌ Error: " + (data.error || "No se pudo");
+          return;
+        }
+        $("chatOut").textContent = data.reply || "(sin respuesta)";
+      } catch (e) {
+        $("chatOut").textContent = "❌ No se pudo conectar. Revisa la URL del backend.";
+      }
+    };
+
+    $("btnImg").onclick = async () => {
+      const base = getBackend();
+      if (!base) return setStatus($("imgStatus"), false, "Pega tu URL del backend arriba y guarda.");
+      const prompt = $("imgPrompt").value.trim();
+      if (!prompt) return setStatus($("imgStatus"), false, "Escribe un prompt.");
+
+      $("imgResult").style.display = "none";
+      setStatus($("imgStatus"), true, "Generando...");
+
+      try {
+        const r = await fetch(base + "/image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await r.json();
+
+        if (!r.ok || data.error) {
+          setStatus($("imgStatus"), false, data.error || "Error generando imagen");
+          return;
+        }
+
+        // OpenAI suele devolver data.data[0].url o base64 (b64_json)
+        const item = data?.data?.[0];
+        const url = item?.url;
+        const b64 = item?.b64_json;
+
+        if (url) {
+          $("imgResult").src = url;
+          $("imgResult").style.display = "block";
+          setStatus($("imgStatus"), true, "Imagen lista ✅");
+        } else if (b64) {
+          $("imgResult").src = "data:image/png;base64," + b64;
+          $("imgResult").style.display = "block";
+          setStatus($("imgStatus"), true, "Imagen lista ✅");
+        } else {
+          setStatus($("imgStatus"), false, "No llegó URL/base64 de la imagen.");
+        }
+      } catch (e) {
+        setStatus($("imgStatus"), false, "No se pudo conectar.");
+      }
+    };
+
+    $("btnVideo").onclick = async () => {
+      const base = getBackend();
+      if (!base) return $("videoOut").textContent = "❌ Pega tu URL del backend arriba y guarda.";
+
+      const mode = $("videoMode").value;
+      const text = $("videoText").value.trim();
+      const duration = parseInt($("videoDuration").value || "6", 10);
+      const format = $("videoFormat").value;
+
+      $("videoOut").textContent = "⏳ Generando...";
+      try {
+        const r = await fetch(base + "/video", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode, text, duration, format })
+        });
+        const data = await r.json();
+        if (!r.ok || data.error) {
+          $("videoOut").textContent = "❌ " + (data.error || "Error en video");
+          return;
+        }
+        $("videoOut").textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        $("videoOut").textContent = "❌ No se pudo conectar.";
+      }
+    };
+  </script>
 </body>
 </html>
