@@ -5,311 +5,245 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Corazón Studio AI</title>
   <style>
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#071224;color:#fff}
-    .wrap{max-width:720px;margin:0 auto;padding:18px}
-    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-    h1{font-size:34px;margin:10px 0 4px}
-    .pill{display:inline-flex;gap:10px;align-items:center;background:rgba(0,0,0,.35);padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.12)}
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#071225;color:#fff}
+    .wrap{max-width:760px;margin:0 auto;padding:18px}
+    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:16px;margin:14px 0}
+    h1{margin:10px 0 14px;font-size:34px}
     label{display:block;margin:10px 0 6px;opacity:.9}
-    input, textarea, select{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;padding:12px 12px;font-size:16px;outline:none}
-    textarea{min-height:88px;resize:vertical}
-    button{width:100%;padding:14px 12px;border:0;border-radius:14px;background:#2f6fff;color:#fff;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px}
-    button:disabled{opacity:.6;cursor:not-allowed}
-    .ok{color:#7CFF9A;margin-top:8px}
-    .err{color:#ff8a8a;margin-top:8px;white-space:pre-wrap}
-    .row{display:flex;gap:12px}
-    .row > div{flex:1}
-    video, img{width:100%;border-radius:14px;margin-top:10px;background:#000}
-    .small{opacity:.8;font-size:13px;margin-top:6px}
+    input,textarea,select{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:#fff;outline:none}
+    textarea{min-height:90px}
+    button{width:100%;padding:14px;border:0;border-radius:14px;background:#2d6cff;color:#fff;font-weight:800;font-size:16px;margin-top:10px}
+    button:disabled{opacity:.6}
+    .badge{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.18);margin-left:8px}
+    .ok{color:#45ff93}
+    .row{display:flex;gap:10px}
+    .row>div{flex:1}
+    .out{margin-top:10px}
+    img,video{width:100%;border-radius:16px;border:1px solid rgba(255,255,255,.12);margin-top:10px;background:#000}
+    .small{font-size:13px;opacity:.85;margin-top:8px;white-space:pre-wrap}
     a{color:#9cc3ff}
   </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <h1>🎬 Corazón Studio AI</h1>
-    <div class="pill" id="apiPill">API: conectando…</div>
+<div class="wrap">
+  <h1>🎬 Corazón Studio AI <span id="apiStatus" class="badge">API: …</span></h1>
 
-    <div class="card">
-      <h2>⚙️ Configuración</h2>
-      <label>Tu backend (Render):</label>
-      <input id="backendUrl" placeholder="https://tu-backend.onrender.com" />
-      <button id="saveBtn">Guardar</button>
-      <div id="saveMsg" class="small"></div>
+  <div class="card">
+    <h2>⚙️ Configuración</h2>
+    <label>Tu backend (Render):</label>
+    <input id="backendUrl" placeholder="https://tu-backend.onrender.com" />
+    <div class="row" style="margin-top:10px">
+      <div><button onclick="saveBackend()">Guardar</button></div>
+      <div><button onclick="checkHealth()">Probar API</button></div>
     </div>
-
-    <div class="card">
-      <h2>💬 Chat</h2>
-      <textarea id="chatMsg" placeholder="Escribe tu mensaje..."></textarea>
-      <button id="chatBtn">Enviar</button>
-      <div id="chatOut" class="card" style="margin-top:12px;display:none"></div>
-    </div>
-
-    <div class="card">
-      <h2>🖼️ Imágenes</h2>
-      <textarea id="imgPrompt" placeholder='Ej: "Un perrito negro con una niña jugando..."'></textarea>
-      <button id="imgBtn">Generar imagen</button>
-      <div id="imgStatus" class="small"></div>
-      <img id="imgResult" alt="Imagen generada" style="display:none" />
-      <div id="imgErr" class="err"></div>
-    </div>
-
-    <div class="card">
-      <h2>🎞️ Generador de Video</h2>
-
-      <label>Modo de video:</label>
-      <select id="videoMode">
-        <option value="reels">Modo A: Reels (texto animado + fondo suave)</option>
-        <option value="realista">Modo B: Realista (IA: Runway / Pika)</option>
-      </select>
-
-      <div id="reelsBox" style="margin-top:10px">
-        <label>Texto del reels:</label>
-        <textarea id="reelsText" placeholder='Ej: "Dios nunca llega tarde, llega justo a tiempo"'></textarea>
-
-        <div class="row">
-          <div>
-            <label>Duración (seg):</label>
-            <input id="reelsSeconds" type="number" value="6" min="3" max="20" />
-          </div>
-          <div>
-            <label>Formato:</label>
-            <select id="reelsRatio">
-              <option value="1080x1920">9:16 (Reels)</option>
-              <option value="1920x1080">16:9</option>
-              <option value="1080x1080">1:1</option>
-            </select>
-          </div>
-        </div>
-
-        <button id="reelsBtn">Generar video (Reels)</button>
-        <div id="reelsMsg" class="small"></div>
-        <video id="reelsVideo" controls playsinline style="display:none"></video>
-        <div id="reelsDownload" class="small"></div>
-      </div>
-
-      <div id="realBox" style="margin-top:10px;display:none">
-        <label>Proveedor IA:</label>
-        <select id="provider">
-          <option value="runway">Runway (text_to_video)</option>
-          <option value="pika">Pika (via Fal.ai)</option>
-        </select>
-
-        <label>Describe tu video:</label>
-        <textarea id="videoPrompt" placeholder='Ej: "Un perrito feliz corriendo en un parque, estilo realista, luz cálida, cámara suave"'></textarea>
-
-        <div class="row">
-          <div>
-            <label>Ratio:</label>
-            <select id="videoRatio">
-              <option value="1080:1920">9:16</option>
-              <option value="1920:1080">16:9</option>
-              <option value="1280:720">1280:720</option>
-              <option value="720:1280">720:1280</option>
-            </select>
-          </div>
-          <div>
-            <label>Duración:</label>
-            <input id="videoSeconds" type="number" value="5" min="4" max="10" />
-          </div>
-        </div>
-
-        <button id="videoBtn">Generar video (IA)</button>
-        <div id="videoMsg" class="small"></div>
-        <video id="videoResult" controls playsinline style="display:none"></video>
-        <div id="videoErr" class="err"></div>
-      </div>
-
-      <div class="small">
-        Nota: el modo <b>Reels</b> siempre se ve limpio (no IA). El modo <b>Realista</b> depende del prompt y del modelo.
-      </div>
-    </div>
+    <div class="small">Ejemplo: https://corazon-studio-ai-backend-3.onrender.com</div>
   </div>
 
+  <div class="card">
+    <h2>💬 Chat</h2>
+    <label>Escribe tu mensaje</label>
+    <textarea id="chatMsg" placeholder="Hola, ¿me ayudas a…?"></textarea>
+    <button onclick="sendChat()">Enviar</button>
+    <div class="out" id="chatOut"></div>
+  </div>
+
+  <div class="card">
+    <h2>🖼️ Imágenes</h2>
+    <label>Describe la imagen</label>
+    <textarea id="imgPrompt" placeholder='Ej: "Un perrito feliz en un parque…"' ></textarea>
+    <button onclick="genImage()">Generar imagen</button>
+    <div class="out" id="imgOut"></div>
+  </div>
+
+  <div class="card">
+    <h2>🎞️ Video</h2>
+
+    <label>Modo de video</label>
+    <select id="videoMode" onchange="toggleMode()">
+      <option value="reels">Modo A: Reels (texto animado)</option>
+      <option value="runway">Modo B: Video realista (Runway)</option>
+      <option value="pika">Modo C: Video realista (Pika vía Fal)</option>
+    </select>
+
+    <div class="row">
+      <div>
+        <label>Formato</label>
+        <select id="ratio">
+          <option value="9:16">9:16</option>
+          <option value="16:9">16:9</option>
+        </select>
+      </div>
+      <div>
+        <label>Duración (seg)</label>
+        <input id="duration" value="6" />
+      </div>
+    </div>
+
+    <label id="promptLabel">Texto / Prompt</label>
+    <textarea id="videoText" placeholder='Ej: "Dios nunca llega tarde, llega justo a tiempo"'></textarea>
+
+    <button id="videoBtn" onclick="genVideo()">Generar video</button>
+    <div class="out" id="vidOut"></div>
+
+    <video id="vidPlayer" controls playsinline style="display:none"></video>
+    <div id="downloadBox" class="small"></div>
+  </div>
+</div>
+
 <script>
-  // -----------------------------
-  // Helpers
-  // -----------------------------
+  const KEY = "CSAI_BACKEND_URL";
   const $ = (id) => document.getElementById(id);
 
-  function getBackend() {
-    return localStorage.getItem("CS_BACKEND") || "";
-  }
+  function getBackend(){ return (localStorage.getItem(KEY) || "").trim().replace(/\/$/,""); }
+  function setBackend(url){ localStorage.setItem(KEY, url.trim().replace(/\/$/,"")); }
 
-  function setBackend(url) {
-    localStorage.setItem("CS_BACKEND", url);
-  }
-
-  function normalizeUrl(u){
-    if(!u) return "";
-    u = u.trim();
-    if(u.endsWith("/")) u = u.slice(0,-1);
-    return u;
-  }
-
-  async function api(path, options = {}) {
-    const base = normalizeUrl(getBackend());
-    if(!base) throw new Error("Primero guarda tu backend en Configuración.");
-    const res = await fetch(base + path, {
-      headers: { "Content-Type": "application/json", ...(options.headers||{}) },
-      ...options,
-    });
-    const text = await res.text();
-    let data;
-    try { data = JSON.parse(text); } catch(e) { data = { raw: text }; }
-    if(!res.ok) throw new Error(data.detail || data.raw || "Error API");
-    return data;
-  }
-
-  // -----------------------------
-  // Init
-  // -----------------------------
-  $("backendUrl").value = getBackend();
-
-  async function ping() {
-    try {
-      const base = normalizeUrl(getBackend());
-      if(!base) { $("apiPill").textContent = "API: no configurada"; return; }
-      const r = await fetch(base + "/");
-      $("apiPill").textContent = r.ok ? "API: conectada ✅" : "API: error ❌";
-    } catch(e) {
-      $("apiPill").textContent = "API: desconectada ❌";
-    }
-  }
-  ping();
-
-  $("saveBtn").onclick = async () => {
-    const url = normalizeUrl($("backendUrl").value);
+  function saveBackend(){
+    const url = $("backendUrl").value.trim().replace(/\/$/,"");
+    if(!url) return alert("Pega la URL del backend");
     setBackend(url);
-    $("saveMsg").textContent = url ? "✅ Guardado" : "❌ Vacío";
-    await ping();
-  };
+    checkHealth();
+  }
 
-  // -----------------------------
-  // Chat
-  // -----------------------------
-  $("chatBtn").onclick = async () => {
-    $("chatOut").style.display = "none";
-    const message = $("chatMsg").value.trim();
-    if(!message) return;
+  async function checkHealth(){
+    const base = getBackend() || $("backendUrl").value.trim().replace(/\/$/,"");
+    if(!base) return alert("Pega la URL del backend primero");
+    setBackend(base);
+    $("backendUrl").value = base;
+
     try{
-      const data = await api("/chat", { method:"POST", body: JSON.stringify({message}) });
-      $("chatOut").style.display = "block";
-      $("chatOut").textContent = data.reply || "(sin respuesta)";
+      const r = await fetch(base + "/health");
+      const j = await r.json();
+      $("apiStatus").textContent = "API: conectada ✅";
+      $("apiStatus").classList.add("ok");
+      console.log("health:", j);
     }catch(e){
-      $("chatOut").style.display = "block";
-      $("chatOut").textContent = "Error: " + e.message;
+      $("apiStatus").textContent = "API: NO conectada ❌";
+      $("apiStatus").classList.remove("ok");
+      alert("No conecta. Revisa URL o que el backend esté LIVE.");
     }
-  };
+  }
 
-  // -----------------------------
-  // Imagen (ARREGLADO: ahora sí muestra <img src=URL>)
-  // -----------------------------
-  $("imgBtn").onclick = async () => {
-    $("imgErr").textContent = "";
-    $("imgStatus").textContent = "⏳ Generando...";
-    $("imgResult").style.display = "none";
+  async function sendChat(){
+    const base = getBackend();
+    const msg = $("chatMsg").value.trim();
+    if(!base) return alert("Configura el backend arriba y guarda.");
+    if(!msg) return alert("Escribe un mensaje.");
 
+    $("chatOut").innerHTML = "⏳ Enviando…";
+    try{
+      const r = await fetch(base + "/chat", {
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({message: msg})
+      });
+      const j = await r.json();
+      $("chatOut").innerHTML = `<div class="small"><b>Respuesta:</b>\n${escapeHtml(j.reply || JSON.stringify(j))}</div>`;
+    }catch(e){
+      $("chatOut").innerHTML = "❌ Error en chat";
+    }
+  }
+
+  async function genImage(){
+    const base = getBackend();
     const prompt = $("imgPrompt").value.trim();
-    if(!prompt){ $("imgStatus").textContent="Escribe un prompt."; return; }
+    if(!base) return alert("Configura el backend arriba y guarda.");
+    if(!prompt) return alert("Escribe un prompt.");
 
+    $("imgOut").innerHTML = "⏳ Generando…";
     try{
-      const data = await api("/image", { method:"POST", body: JSON.stringify({prompt}) });
-      const url = data.url;
-      if(!url) throw new Error("La API no devolvió url de imagen.");
-
-      $("imgResult").src = url;
-      $("imgResult").style.display = "block";
-      $("imgStatus").textContent = "✅ Imagen lista";
+      const r = await fetch(base + "/image", {
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({prompt})
+      });
+      const j = await r.json();
+      if(j.image_url){
+        $("imgOut").innerHTML = `✅ Imagen lista<br><img src="${j.image_url}" alt="imagen">`;
+      } else {
+        $("imgOut").innerHTML = "⚠️ No recibí image_url";
+      }
     }catch(e){
-      $("imgStatus").textContent = "";
-      $("imgErr").textContent = "Error: " + e.message;
+      $("imgOut").innerHTML = "❌ Error generando imagen";
     }
-  };
+  }
 
-  // -----------------------------
-  // Toggle video mode UI
-  // -----------------------------
-  $("videoMode").onchange = () => {
-    const v = $("videoMode").value;
-    $("reelsBox").style.display = v === "reels" ? "block" : "none";
-    $("realBox").style.display = v === "realista" ? "block" : "none";
-  };
+  function toggleMode(){
+    const mode = $("videoMode").value;
+    if(mode === "reels"){
+      $("promptLabel").textContent = "Texto del Reels";
+      $("videoText").placeholder = 'Ej: "Dios nunca llega tarde, llega justo a tiempo"';
+    } else {
+      $("promptLabel").textContent = "Prompt del video realista";
+      $("videoText").placeholder = 'Ej: "Una niña sonriendo en un parque, luz suave, estilo cinematográfico, realista, sin rasgos animales"';
+    }
+  }
 
-  // -----------------------------
-  // VIDEO MODO A: Reels (Canvas + MediaRecorder)
-  // Genera un WEBM (la mayoría de Android lo reproduce)
-  // -----------------------------
-  $("reelsBtn").onclick = async () => {
-    $("reelsMsg").textContent = "";
-    $("reelsVideo").style.display = "none";
-    $("reelsDownload").innerHTML = "";
+  // ======= Modo A: Reels (se genera aquí mismo) =======
+  async function makeReelsWebm(text, duration, ratio){
+    // Canvas sizes
+    let W = 1080, H = 1920;
+    if(ratio === "16:9"){ W = 1280; H = 720; }
 
-    const text = $("reelsText").value.trim();
-    if(!text){ $("reelsMsg").textContent = "Escribe el texto del reels."; return; }
-
-    const seconds = Math.max(3, Math.min(20, parseInt($("reelsSeconds").value || "6", 10)));
-    const size = $("reelsRatio").value;
-
-    let W=1080, H=1920;
-    if(size === "1920x1080"){ W=1920; H=1080; }
-    if(size === "1080x1080"){ W=1080; H=1080; }
-
-    // Canvas
     const canvas = document.createElement("canvas");
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext("2d");
 
-    // Capture stream
     const stream = canvas.captureStream(30);
     const chunks = [];
-    const rec = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" });
 
+    let mime = "video/webm;codecs=vp9";
+    if(!MediaRecorder.isTypeSupported(mime)) mime = "video/webm;codecs=vp8";
+    if(!MediaRecorder.isTypeSupported(mime)) mime = "video/webm";
+
+    const rec = new MediaRecorder(stream, { mimeType: mime });
     rec.ondataavailable = (e) => { if(e.data.size) chunks.push(e.data); };
-    rec.onstop = () => {
-      const blob = new Blob(chunks, { type: "video/webm" });
-      const url = URL.createObjectURL(blob);
 
-      $("reelsVideo").src = url;
-      $("reelsVideo").style.display = "block";
-      $("reelsMsg").textContent = "✅ Video listo (WEBM).";
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "reels.webm";
-      a.textContent = "⬇️ Descargar video";
-      $("reelsDownload").appendChild(a);
-    };
-
-    // Animación
     const start = performance.now();
     rec.start();
 
-    function draw(t){
-      const elapsed = (t - start)/1000;
-      const p = Math.min(1, elapsed / seconds);
+    function wrapLines(txt, maxChars){
+      const words = txt.split(/\s+/);
+      const lines = [];
+      let line = "";
+      for(const w of words){
+        const t = line ? (line + " " + w) : w;
+        if(t.length > maxChars && line){
+          lines.push(line);
+          line = w;
+        } else line = t;
+      }
+      if(line) lines.push(line);
+      return lines.slice(0, 6);
+    }
 
-      // fondo suave (degradado)
-      const g = ctx.createLinearGradient(0,0,W,H);
+    function drawFrame(t){
+      const elapsed = (t - start)/1000;
+      const p = Math.min(1, elapsed / duration);
+
+      // fondo suave
+      const g = ctx.createLinearGradient(0, 0, W, H);
       g.addColorStop(0, "#1b3a6b");
       g.addColorStop(1, "#0a1428");
       ctx.fillStyle = g;
       ctx.fillRect(0,0,W,H);
 
-      // texto animado (entrada y pequeño zoom)
-      const lines = wrapText(ctx, text, Math.floor(W*0.78), "bold 88px system-ui");
-      const yCenter = H/2;
-      const alpha = p < 0.15 ? (p/0.15) : (p > 0.9 ? ((1-p)/0.1) : 1);
-      const scale = 0.92 + 0.08*Math.sin(p*Math.PI);
+      // animación simple
+      const alpha = p < 0.18 ? (p/0.18) : (p > 0.92 ? ((1-p)/0.08) : 1);
+      const scale = 0.96 + 0.04*Math.sin(p*Math.PI);
 
       ctx.save();
       ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
-      ctx.translate(W/2, yCenter);
+      ctx.translate(W/2, H/2);
       ctx.scale(scale, scale);
 
-      // caja suave detrás del texto
-      const boxW = W*0.86, boxH = lines.length*110 + 90;
-      roundRect(ctx, -boxW/2, -boxH/2, boxW, boxH, 28);
+      // caja
+      const pad = Math.floor(W*0.06);
+      const boxW = Math.floor(W*0.86);
+      const lines = wrapLines(text, ratio === "16:9" ? 34 : 22);
+      const lineH = ratio === "16:9" ? 62 : 80;
+      const boxH = lines.length*lineH + pad*2;
+
+      roundRect(ctx, -boxW/2, -boxH/2, boxW, boxH, 26);
       ctx.fillStyle = "rgba(255,255,255,0.10)";
       ctx.fill();
       ctx.strokeStyle = "rgba(255,255,255,0.18)";
@@ -320,102 +254,145 @@
       ctx.fillStyle = "rgba(255,255,255,0.96)";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.font = "bold 88px system-ui";
+      ctx.font = ratio === "16:9" ? "800 56px system-ui" : "800 72px system-ui";
 
-      const totalH = lines.length*110;
+      const totalH = lines.length*lineH;
       lines.forEach((ln, i) => {
-        const y = (i*110) - (totalH/2) + 55;
+        const y = (i*lineH) - (totalH/2) + (lineH/2);
         ctx.fillText(ln, 0, y);
       });
 
       ctx.restore();
 
-      if(elapsed < seconds){
-        requestAnimationFrame(draw);
-      }else{
+      if(elapsed < duration){
+        requestAnimationFrame(drawFrame);
+      } else {
         rec.stop();
       }
     }
-    requestAnimationFrame(draw);
-  };
 
-  function wrapText(ctx, text, maxWidth, font){
-    ctx.font = font;
-    const words = text.split(/\s+/);
-    const lines = [];
-    let line = "";
-    for(const w of words){
-      const test = line ? (line + " " + w) : w;
-      const width = ctx.measureText(test).width;
-      if(width > maxWidth && line){
-        lines.push(line);
-        line = w;
-      }else{
-        line = test;
-      }
+    function roundRect(ctx, x, y, w, h, r){
+      ctx.beginPath();
+      ctx.moveTo(x+r, y);
+      ctx.arcTo(x+w, y, x+w, y+h, r);
+      ctx.arcTo(x+w, y+h, x, y+h, r);
+      ctx.arcTo(x, y+h, x, y, r);
+      ctx.arcTo(x, y, x+w, y, r);
+      ctx.closePath();
     }
-    if(line) lines.push(line);
-    return lines;
+
+    return new Promise((resolve) => {
+      rec.onstop = () => {
+        const blob = new Blob(chunks, { type: "video/webm" });
+        const url = URL.createObjectURL(blob);
+        resolve({ blob, url });
+      };
+      requestAnimationFrame(drawFrame);
+    });
   }
 
-  function roundRect(ctx, x, y, w, h, r){
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.arcTo(x+w, y, x+w, y+h, r);
-    ctx.arcTo(x+w, y+h, x, y+h, r);
-    ctx.arcTo(x, y+h, x, y, r);
-    ctx.arcTo(x, y, x+w, y, r);
-    ctx.closePath();
+  // ======= Modo B/C: Realista (backend polling) =======
+  async function startRealistic(provider, prompt, ratio, duration){
+    const base = getBackend();
+    const r = await fetch(base + "/video/realistic/start",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ provider, prompt, ratio, duration })
+    });
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.detail || "Error start");
+    return j.job_id;
   }
 
-  // -----------------------------
-  // VIDEO MODO B: Realista (IA)
-  // -----------------------------
-  $("videoBtn").onclick = async () => {
-    $("videoErr").textContent = "";
-    $("videoMsg").textContent = "⏳ Iniciando...";
-    $("videoResult").style.display = "none";
+  async function pollRealistic(jobId){
+    const base = getBackend();
+    const r = await fetch(base + "/video/realistic/status/" + jobId);
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.detail || "Error status");
+    return j;
+  }
 
-    const provider = $("provider").value;
-    const prompt = $("videoPrompt").value.trim();
-    const ratio = $("videoRatio").value;
-    const duration = parseInt($("videoSeconds").value || "5", 10);
+  async function genVideo(){
+    const base = getBackend();
+    if(!base) return alert("Configura el backend arriba y guarda.");
 
-    if(!prompt){ $("videoMsg").textContent = "Escribe la descripción del video."; return; }
+    $("vidOut").textContent = "";
+    $("vidPlayer").style.display = "none";
+    $("downloadBox").innerHTML = "";
+
+    const mode = $("videoMode").value;
+    const ratioUI = $("ratio").value;
+    const duration = Math.max(4, Math.min(12, parseInt($("duration").value || "6", 10)));
+    const text = $("videoText").value.trim();
+
+    if(!text) return alert("Escribe el texto/prompt.");
+
+    $("videoBtn").disabled = true;
 
     try{
-      const start = await api("/video/realistic/start", {
-        method:"POST",
-        body: JSON.stringify({ provider, prompt, ratio, duration })
-      });
+      // Modo A: Reels local
+      if(mode === "reels"){
+        $("vidOut").textContent = "⏳ Generando Reels…";
+        const { blob, url } = await makeReelsWebm(text, duration, ratioUI);
+        $("vidPlayer").src = url;
+        $("vidPlayer").style.display = "block";
+        $("vidOut").textContent = "✅ Reels listo (WEBM)";
 
-      const jobId = start.job_id;
-      $("videoMsg").textContent = "⏳ Generando... (esto puede tardar un poco)";
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "corazon_reels.webm";
+        a.textContent = "⬇️ Descargar video";
+        $("downloadBox").appendChild(a);
 
-      // poll
-      for(let i=0; i<60; i++){
+        return;
+      }
+
+      // Modo B: Runway / Modo C: Pika
+      const provider = mode; // "runway" o "pika"
+      const ratioBackend = (ratioUI === "9:16") ? "1080:1920" : "1920:1080";
+
+      $("vidOut").textContent = "⏳ Iniciando video realista…";
+      const jobId = await startRealistic(provider, text, ratioBackend, duration);
+
+      $("vidOut").textContent = "⏳ Generando… (puede tardar 1–3 min)";
+      const start = Date.now();
+      const MAX = 180000;
+
+      while(Date.now() - start < MAX){
         await new Promise(r => setTimeout(r, 3000));
-        const st = await api("/video/realistic/status/" + jobId, { method:"GET" });
+        const st = await pollRealistic(jobId);
 
         if(st.status === "DONE" && st.video_url){
-          $("videoResult").src = st.video_url;
-          $("videoResult").style.display = "block";
-          $("videoMsg").textContent = "✅ Video listo";
+          $("vidPlayer").src = st.video_url;
+          $("vidPlayer").style.display = "block";
+          $("vidOut").textContent = "✅ Video listo";
           return;
         }
         if(st.status === "ERROR"){
-          $("videoMsg").textContent = "";
-          $("videoErr").textContent = "Error: " + JSON.stringify(st.detail || st, null, 2);
+          $("vidOut").textContent = "❌ Error:\n" + JSON.stringify(st.detail || st, null, 2);
           return;
         }
       }
 
-      $("videoMsg").textContent = "⏳ Sigue generando… vuelve a intentar en 1 minuto.";
+      $("vidOut").textContent = "⏳ Tardó demasiado. Intenta otra vez (a veces el proveedor está lento).";
     }catch(e){
-      $("videoMsg").textContent = "";
-      $("videoErr").textContent = "Error: " + e.message;
+      $("vidOut").textContent = "❌ " + (e.message || e);
+    } finally {
+      $("videoBtn").disabled = false;
     }
-  };
+  }
+
+  function escapeHtml(s){
+    return (s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  // init
+  (function(){
+    const saved = getBackend();
+    if(saved) $("backendUrl").value = saved;
+    if(saved) checkHealth();
+    toggleMode();
+  })();
 </script>
 </body>
 </html>
