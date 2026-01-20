@@ -2,310 +2,934 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Corazón Studio AI</title>
   <style>
     :root{
-      --bg:#0b1220;
-      --card:#0f1b33;
-      --card2:#0c1730;
-      --text:#eaf0ff;
-      --muted:#a9b7db;
-      --btn:#2a63ff;
-      --btn2:#1f4ed1;
-      --input:#0b1630;
-      --border:#203059;
+      --bg1:#0B0F1E;
+      --bg2:#1B1536;
+      --card: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.14);
+      --text:#F3F4F6;
+      --muted: rgba(255,255,255,.75);
+      --accent:#7C5CFF;
+      --accent2:#B794F4;
+      --btn: rgba(255,255,255,.10);
+      --btnStroke: rgba(255,255,255,.16);
+      --good:#22c55e;
+      --bad:#ef4444;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 20% -10%, #1a2b5f 0%, rgba(26,43,95,0) 60%),
-                  radial-gradient(1200px 600px at 90% 0%, #153a6b 0%, rgba(21,58,107,0) 55%),
-                  var(--bg);
       color:var(--text);
-      padding:18px;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 20% 10%, #3a2a7a 0%, transparent 60%),
+                  radial-gradient(900px 700px at 80% 30%, #2a6aa6 0%, transparent 55%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+      padding: 18px 14px 40px;
     }
-    .wrap{max-width:860px;margin:0 auto}
-    .title{
-      display:flex;align-items:center;gap:10px;
-      font-weight:800;font-size:22px;margin:10px 0 16px;
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    .hero{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .logo{
+      width:44px;height:44px;border-radius:14px;
+      background: radial-gradient(circle at 30% 30%, var(--accent2), var(--accent));
+      display:flex;align-items:center;justify-content:center;
+      box-shadow: 0 10px 35px rgba(124,92,255,.35);
+      flex:0 0 auto;
+    }
+    .logo span{font-size:20px}
+    h1{
+      font-size: 28px;
+      margin:0;
+      letter-spacing: .2px;
+    }
+    .sub{
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .tabs{
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--stroke);
+      border-radius: 22px;
+      padding: 10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin: 10px 0 16px;
+      backdrop-filter: blur(10px);
+    }
+    .tab{
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text);
+      cursor:pointer;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      opacity:.85;
+    }
+    .tab.active{
+      background: rgba(124,92,255,.22);
+      border-color: rgba(124,92,255,.35);
+      opacity:1;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media(min-width: 980px){
+      .grid.two{
+        grid-template-columns: 1.2fr .8fr;
+      }
     }
     .card{
-      background: linear-gradient(180deg, var(--card) 0%, var(--card2) 100%);
-      border:1px solid rgba(255,255,255,0.06);
-      border-radius:16px;
-      padding:16px;
-      margin:14px 0;
-      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: 22px;
+      padding: 14px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 14px 50px rgba(0,0,0,.25);
     }
-    .card h3{margin:0 0 10px;font-size:16px}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    input, textarea, select{
-      width:100%;
-      background:rgba(255,255,255,0.06);
-      color:var(--text);
-      border:1px solid rgba(255,255,255,0.10);
-      border-radius:10px;
-      padding:12px;
-      outline:none;
+    .card h2{
+      margin:0 0 10px;
+      font-size: 20px;
+      display:flex;
+      align-items:center;
+      gap:10px;
     }
-    textarea{min-height:92px;resize:vertical}
-    .btn{
-      width:100%;
-      background: linear-gradient(180deg, var(--btn) 0%, var(--btn2) 100%);
-      border:0;
-      border-radius:12px;
-      padding:12px;
-      color:white;
-      font-weight:700;
-      cursor:pointer;
-      margin-top:10px;
+    .hint{
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+      line-height:1.35;
     }
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .muted{color:var(--muted);font-size:12px;margin-top:8px}
-    .out{
-      margin-top:12px;
-      padding:12px;
-      border-radius:12px;
-      background:rgba(0,0,0,.22);
-      border:1px solid rgba(255,255,255,.08);
-      overflow:auto;
-      max-height:280px;
-      white-space:pre-wrap;
-      word-break:break-word;
-    }
-    .imgbox img{
-      width:100%;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.10);
-      margin-top:10px;
-    }
-    .smallrow{
+    .row{
       display:grid;
       grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media(max-width: 520px){
+      .row{grid-template-columns:1fr}
+    }
+    label{
+      display:block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    textarea, select, input{
+      width:100%;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      padding: 12px 12px;
+      outline:none;
+    }
+    textarea{min-height: 110px; resize: vertical;}
+    .btnrow{
+      display:flex;
       gap:10px;
-      margin-top:10px;
+      flex-wrap:wrap;
+      margin-top: 12px;
     }
-    @media (max-width:640px){
-      .smallrow{grid-template-columns:1fr}
+    button{
+      border-radius: 14px;
+      border: 1px solid var(--btnStroke);
+      background: var(--btn);
+      color: var(--text);
+      padding: 11px 14px;
+      font-weight: 800;
+      cursor:pointer;
     }
-    .tag{
-      display:inline-block;
-      padding:4px 8px;
-      border-radius:999px;
+    button.primary{
+      background: rgba(124,92,255,.30);
+      border-color: rgba(124,92,255,.42);
+    }
+    button:disabled{opacity:.55; cursor:not-allowed}
+    .status{
+      font-size: 13px;
+      margin-top: 10px;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      word-break: break-word;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:99px;background: rgba(255,255,255,.25);
+    }
+    .dot.good{background: rgba(34,197,94,.85)}
+    .dot.bad{background: rgba(239,68,68,.85)}
+
+    .result{
+      margin-top: 12px;
+    }
+
+    .chip{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
       font-size:12px;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.10);
-      margin-left:8px;
-      color:var(--muted);
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
     }
-    a.link{color:#9ec1ff}
+
+    .switchRow{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      margin-top: 10px;
+    }
+    .switchRow .left{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .switchRow .title{
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .switchRow .desc{
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .toggle{
+      width: 54px; height: 30px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.20);
+      position:relative;
+      cursor:pointer;
+      flex:0 0 auto;
+    }
+    .toggle .knob{
+      width: 24px; height: 24px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.85);
+      position:absolute;
+      top: 2px; left: 2px;
+      transition: all .18s ease;
+    }
+    .toggle.on{
+      background: rgba(124,92,255,.30);
+      border-color: rgba(124,92,255,.42);
+    }
+    .toggle.on .knob{ left: 28px; background: white; }
+
+    .small{
+      font-size:12px;color:var(--muted);
+    }
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="title">🎬 Corazón Studio AI <span class="tag">Chat + Imagen + Video</span></div>
+<div class="wrap">
 
-    <!-- CHAT -->
-    <div class="card">
-      <h3>💬 Chat</h3>
-      <input id="chatInput" placeholder="Escribe tu mensaje" />
-      <button class="btn" id="chatBtn">Enviar</button>
-      <div class="out" id="chatOut" style="display:none"></div>
-      <div class="muted">Tip: si no responde, revisa que el backend esté activo.</div>
+  <div class="hero">
+    <div class="logo"><span>💜</span></div>
+    <div>
+      <h1>Corazón Studio AI</h1>
+      <div class="sub">Chat · Imagen · Reels (voz + música) · Cine (voz + música)</div>
     </div>
+  </div>
 
-    <!-- IMAGEN -->
-    <div class="card">
-      <h3>🖼️ Imagen</h3>
-      <input id="imgPrompt" placeholder="Describe la imagen" />
-      <button class="btn" id="imgBtn">Generar</button>
-      <div class="imgbox" id="imgBox" style="display:none"></div>
-      <div class="out" id="imgOut" style="display:none"></div>
-    </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="cine">🎬 Cine</button>
+    <button class="tab" data-tab="reels">📱 Reels</button>
+    <button class="tab" data-tab="imagen">🖼️ Imagen</button>
+    <button class="tab" data-tab="chat">💬 Chat</button>
+  </div>
 
-    <!-- VIDEO -->
-    <div class="card">
-      <h3>🎥 Video</h3>
-
-      <!-- Selector de modo -->
-      <select id="videoMode">
-        <option value="reels">Modo A: Reels (MP4)</option>
-        <option value="runway">Modo B: Runway (Realista)</option>
-        <option value="pika">Modo C: Pika (Realista)</option>
-      </select>
-
-      <div class="smallrow" id="reelsOptions" style="margin-top:10px;">
-        <input id="reelsDuration" type="number" min="3" max="12" value="6" placeholder="Duración (seg)" />
-        <select id="reelsFormat">
-          <option value="9:16">9:16 (Reels)</option>
-          <option value="16:9">16:9 (Horizontal)</option>
-          <option value="1:1">1:1 (Cuadrado)</option>
+  <!-- PRESETS -->
+  <div class="card">
+    <h2>⭐ Presets (Reels / Cine)</h2>
+    <div class="row">
+      <div>
+        <label>Selecciona un preset</label>
+        <select id="presetSelect">
+          <option value="">—</option>
         </select>
       </div>
+      <div>
+        <label>Nombre para guardar</label>
+        <input id="presetName" placeholder='Ej: "Reels ES Voz F + Música suave"' />
+      </div>
+    </div>
+    <div class="btnrow">
+      <button class="primary" id="btnSavePreset">Guardar</button>
+      <button id="btnApplyPreset">Aplicar</button>
+      <button id="btnDeletePreset">Eliminar</button>
+      <span class="chip" id="presetInfo">Se guardan en tu navegador</span>
+    </div>
+    <div class="hint">Tip: crea un preset “Reels ES Voz F + Música suave” y otro “Cine EN Voz M + Cinematic”.</div>
+  </div>
 
-      <textarea id="videoPrompt" placeholder="Describe el video o escribe el texto para Reels"></textarea>
-      <button class="btn" id="videoBtn">Generar Video</button>
+  <!-- SECCIONES -->
+  <div id="tab-cine" class="grid two">
+    <div class="card">
+      <h2>🎬 Video Cine (con Voz + Música)</h2>
 
-      <div class="out" id="videoOut" style="display:none"></div>
-      <div class="muted" id="videoHint">
-        Reels genera un MP4 descargable. Runway/Pika generan video realista (puede tardar).
+      <label>Describe el video cine...</label>
+      <textarea id="cineText" placeholder="Ej: Una familia feliz caminando al atardecer, estilo cinematográfico, luz cálida..."></textarea>
+
+      <div class="row">
+        <div>
+          <label>🌍 Idioma</label>
+          <select id="cineLang">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div>
+          <label>🎙️ Voz</label>
+          <select id="cineVoiceGender">
+            <option value="female">Femenina</option>
+            <option value="male">Masculina</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>⏱️ Duración</label>
+          <select id="cineDuration">
+            <option value="5">5s</option>
+            <option value="6">6s</option>
+            <option value="7">7s</option>
+            <option value="8">8s</option>
+            <option value="9">9s</option>
+          </select>
+        </div>
+        <div>
+          <label>🎵 Música</label>
+          <select id="cineMusic">
+            <option value="none">Sin música</option>
+            <option value="soft">Suave</option>
+            <option value="cinematic">Cinemática</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Switch premium: Personaje + Narrador -->
+      <div class="switchRow">
+        <div class="left">
+          <div class="title">⭐ Narrador + Personaje</div>
+          <div class="desc">Agrega una línea extra estilo personaje (además del narrador).</div>
+        </div>
+        <div id="cineModeToggle" class="toggle">
+          <div class="knob"></div>
+        </div>
+      </div>
+      <div class="small">Si está apagado: solo narrador. Si está encendido: narrador + personaje.</div>
+
+      <div class="btnrow">
+        <button class="primary" id="btnCine">Crear Cine</button>
+        <button id="btnCineOnly">Crear Cine (sin voz/música)</button>
+      </div>
+
+      <div class="status" id="cineStatus"><span class="dot"></span><span>Listo.</span></div>
+
+      <div class="result" id="cineResult"></div>
+    </div>
+
+    <div class="card">
+      <h2>ℹ️ Tips rápidos</h2>
+      <div class="hint">
+        • Si te sale “Archivo no encontrado”, normalmente es porque estás abriendo solo <b>/files/...</b> sin el dominio completo.<br><br>
+        • Aquí ya lo resolvimos: el botón “Abrir/Descargar” usa la URL completa automáticamente.<br><br>
+        • En Render, los videos se guardan en <b>/tmp</b> y pueden borrarse si reinicia el servicio (normal).
       </div>
     </div>
   </div>
 
+  <div id="tab-reels" class="grid two" style="display:none">
+    <div class="card">
+      <h2>📱 Reels (con Voz + Música)</h2>
+
+      <label>Texto del reels</label>
+      <textarea id="reelsText" placeholder='Ej: "Dios ya estaba trabajando en tu milagro, incluso cuando tú no lo veías..."'></textarea>
+
+      <div class="row">
+        <div>
+          <label>🌍 Idioma</label>
+          <select id="reelsLang">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div>
+          <label>🎙️ Voz</label>
+          <select id="reelsVoiceGender">
+            <option value="female">Femenina</option>
+            <option value="male">Masculina</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>⏱️ Duración</label>
+          <select id="reelsDuration">
+            <option value="5">5s</option>
+            <option value="6">6s</option>
+            <option value="7">7s</option>
+            <option value="8">8s</option>
+            <option value="9" selected>9s</option>
+          </select>
+        </div>
+        <div>
+          <label>🎵 Música</label>
+          <select id="reelsMusic">
+            <option value="none">Sin música</option>
+            <option value="soft" selected>Suave</option>
+            <option value="cinematic">Cinemática</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="switchRow">
+        <div class="left">
+          <div class="title">⭐ Narrador + Personaje</div>
+          <div class="desc">Agrega una línea extra estilo personaje (además del narrador).</div>
+        </div>
+        <div id="reelsModeToggle" class="toggle">
+          <div class="knob"></div>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <button class="primary" id="btnReels">Crear Reels (voz + música)</button>
+        <button id="btnReelsOnly">Crear Reels (sin voz/música)</button>
+      </div>
+
+      <div class="status" id="reelsStatus"><span class="dot"></span><span>Listo.</span></div>
+
+      <div class="result" id="reelsResult"></div>
+    </div>
+
+    <div class="card">
+      <h2>✅ Música</h2>
+      <div class="hint">
+        Ya subiste:<br>
+        • <b>assets/music_soft.mp3</b><br>
+        • <b>assets/music_cinematic.mp3</b><br><br>
+        Si la música no se oye: revisa que no sean archivos de 1 byte, y que realmente tengan varios MB.
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-imagen" class="grid" style="display:none">
+    <div class="card">
+      <h2>🖼️ Imagen</h2>
+      <label>Prompt</label>
+      <textarea id="imgPrompt" placeholder="Ej: Imagen publicitaria realista de una clínica dental, luz cálida, estilo premium..."></textarea>
+      <div class="row">
+        <div>
+          <label>Tamaño</label>
+          <select id="imgSize">
+            <option>1024x1024</option>
+            <option>1024x1536</option>
+            <option>1536x1024</option>
+          </select>
+        </div>
+        <div></div>
+      </div>
+      <div class="btnrow">
+        <button class="primary" id="btnImage">Generar Imagen</button>
+      </div>
+      <div class="status" id="imgStatus"><span class="dot"></span><span>Listo.</span></div>
+      <div class="result" id="imgResult"></div>
+    </div>
+  </div>
+
+  <div id="tab-chat" class="grid" style="display:none">
+    <div class="card">
+      <h2>💬 Chat</h2>
+      <label>Mensaje</label>
+      <textarea id="chatMsg" placeholder="Escribe tu mensaje..."></textarea>
+      <div class="btnrow">
+        <button class="primary" id="btnChat">Enviar</button>
+      </div>
+      <div class="status" id="chatStatus"><span class="dot"></span><span>Listo.</span></div>
+      <div class="result" id="chatResult"></div>
+    </div>
+  </div>
+
+</div>
+
 <script>
-  // ✅ IMPORTANTE: aquí va tu backend real
-  const API_URL = "https://corazon-studio-ai-backend-3.onrender.com";
-
+  // =========================
   // Helpers
+  // =========================
   const $ = (id) => document.getElementById(id);
-  function show(el){ el.style.display = ""; }
-  function hide(el){ el.style.display = "none"; }
 
-  // CHAT
-  $("chatBtn").addEventListener("click", async () => {
-    const message = $("chatInput").value.trim();
-    if(!message) return;
+  function setStatus(elId, type, text){
+    const el = $(elId);
+    if(!el) return;
+    const dot = el.querySelector(".dot");
+    const span = el.querySelector("span:last-child");
+    dot.classList.remove("good","bad");
+    if(type === "good") dot.classList.add("good");
+    if(type === "bad") dot.classList.add("bad");
+    span.textContent = text;
+  }
 
-    $("chatBtn").disabled = true;
-    hide($("chatOut"));
+  function absUrl(maybeRelative){
+    if(!maybeRelative) return "";
+    if(maybeRelative.startsWith("http")) return maybeRelative;
+    const base = window.location.origin;
+    return base + (maybeRelative.startsWith("/") ? maybeRelative : "/" + maybeRelative);
+  }
 
-    try{
-      const r = await fetch(`${API_URL}/chat`, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ message })
-      });
-      const data = await r.json();
-      $("chatOut").textContent = data.reply ?? JSON.stringify(data, null, 2);
-      show($("chatOut"));
-    }catch(e){
-      $("chatOut").textContent = "Error en Chat: " + (e?.message || e);
-      show($("chatOut"));
-    }finally{
-      $("chatBtn").disabled = false;
-    }
-  });
+  async function postJSON(path, payload){
+    const res = await fetch(path, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(()=> ({}));
+    if(!res.ok) throw new Error(data?.message || ("HTTP " + res.status));
+    return data;
+  }
 
-  // IMAGEN
-  $("imgBtn").addEventListener("click", async () => {
-    const prompt = $("imgPrompt").value.trim();
-    if(!prompt) return;
+  // =========================
+  // Render: Video con botones
+  // =========================
+  function renderVideoResult(containerId, videoUrl){
+    const el = $(containerId);
+    if(!el) return;
+    const url = absUrl(videoUrl);
 
-    $("imgBtn").disabled = true;
-    hide($("imgBox"));
-    hide($("imgOut"));
+    el.innerHTML = `
+      <div style="
+        margin-top:12px;
+        padding:14px;
+        border:1px solid rgba(255,255,255,.14);
+        border-radius:18px;
+        background: rgba(255,255,255,.06);
+        backdrop-filter: blur(10px);
+      ">
+        <div style="font-weight:900; margin-bottom:10px;">✅ Video listo</div>
 
-    try{
-      const r = await fetch(`${API_URL}/image`, {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ prompt })
-      });
-      const data = await r.json();
+        <video controls playsinline style="
+          width:100%;
+          max-width:520px;
+          border-radius:14px;
+          border:1px solid rgba(255,255,255,.12);
+          background:#000;
+        ">
+          <source src="${url}" type="video/mp4" />
+          Tu navegador no puede reproducir este video.
+        </video>
 
-      // Soporta respuestas tipo OpenAI (data[0].b64_json) o variantes
-      let b64 = null;
-      if (data?.data?.[0]?.b64_json) b64 = data.data[0].b64_json;
-      else if (data?.b64) b64 = data.b64;
-      else if (data?.image_base64) b64 = data.image_base64;
+        <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+          <a href="${url}" target="_blank" rel="noopener"
+             style="padding:10px 14px; border-radius:12px; background:#7C5CFF; color:#fff; text-decoration:none; font-weight:900;">
+            ▶️ Abrir
+          </a>
 
-      if(b64){
-        $("imgBox").innerHTML = `<img alt="imagen generada" src="data:image/png;base64,${b64}" />`;
-        show($("imgBox"));
-      } else {
-        $("imgOut").textContent = JSON.stringify(data, null, 2);
-        show($("imgOut"));
-      }
-    }catch(e){
-      $("imgOut").textContent = "Error en Imagen: " + (e?.message || e);
-      show($("imgOut"));
-    }finally{
-      $("imgBtn").disabled = false;
-    }
-  });
+          <a href="${url}" download
+             style="padding:10px 14px; border-radius:12px; background:rgba(255,255,255,.12); color:#fff; text-decoration:none; font-weight:900; border:1px solid rgba(255,255,255,.16);">
+            ⬇️ Descargar MP4
+          </a>
 
-  // VIDEO UI
-  function syncVideoUI(){
-    const mode = $("videoMode").value;
-    if(mode === "reels"){
-      show($("reelsOptions"));
-      $("videoPrompt").placeholder = "Escribe el texto que saldrá en el Reel (ej: 'Nunca te rindas...')";
-      $("videoHint").textContent = "Reels: genera MP4 descargable (texto animado).";
-    } else {
-      hide($("reelsOptions"));
-      $("videoPrompt").placeholder = "Describe el video realista (ej: 'Familia caminando al atardecer...')";
-      $("videoHint").textContent = "Video realista: puede tardar. Si devuelve un link, te lo mostramos.";
+          <button id="${containerId}-copy"
+             style="padding:10px 14px; border-radius:12px; background:rgba(255,255,255,.08); color:#fff; font-weight:900; border:1px solid rgba(255,255,255,.16); cursor:pointer;">
+            📋 Copiar link
+          </button>
+        </div>
+
+        <div style="opacity:.75; font-size:12px; margin-top:10px; word-break:break-all;">
+          ${url}
+        </div>
+      </div>
+    `;
+
+    const btn = document.getElementById(containerId + "-copy");
+    if(btn){
+      btn.onclick = async () => {
+        try{
+          await navigator.clipboard.writeText(url);
+          btn.textContent = "✅ Copiado";
+          setTimeout(()=> btn.textContent = "📋 Copiar link", 1200);
+        }catch(e){
+          btn.textContent = "❌ No se pudo copiar";
+          setTimeout(()=> btn.textContent = "📋 Copiar link", 1500);
+        }
+      };
     }
   }
-  $("videoMode").addEventListener("change", syncVideoUI);
-  syncVideoUI();
 
-  // VIDEO
-  $("videoBtn").addEventListener("click", async () => {
-    const mode = $("videoMode").value;
-    const textOrPrompt = $("videoPrompt").value.trim();
-    if(!textOrPrompt) return;
+  // =========================
+  // Render: Imagen
+  // =========================
+  function renderImage(containerId, imageUrl){
+    const el = $(containerId);
+    if(!el) return;
+    const url = absUrl(imageUrl);
 
-    $("videoBtn").disabled = true;
-    hide($("videoOut"));
+    el.innerHTML = `
+      <div style="
+        margin-top:12px;
+        padding:14px;
+        border:1px solid rgba(255,255,255,.14);
+        border-radius:18px;
+        background: rgba(255,255,255,.06);
+      ">
+        <div style="font-weight:900; margin-bottom:10px;">✅ Imagen lista</div>
+        <img src="${url}" style="width:100%;max-width:520px;border-radius:14px;border:1px solid rgba(255,255,255,.12)" />
+        <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+          <a href="${url}" target="_blank" rel="noopener"
+             style="padding:10px 14px; border-radius:12px; background:#7C5CFF; color:#fff; text-decoration:none; font-weight:900;">
+            ▶️ Abrir
+          </a>
+          <a href="${url}" download
+             style="padding:10px 14px; border-radius:12px; background:rgba(255,255,255,.12); color:#fff; text-decoration:none; font-weight:900; border:1px solid rgba(255,255,255,.16);">
+            ⬇️ Descargar
+          </a>
+        </div>
+      </div>
+    `;
+  }
 
-    try{
-      const payload = { mode };
+  // =========================
+  // Tabs
+  // =========================
+  document.querySelectorAll(".tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab").forEach(b=> b.classList.remove("active"));
+      btn.classList.add("active");
+      const tab = btn.dataset.tab;
 
-      if(mode === "reels"){
-        payload.text = textOrPrompt;
-        payload.duration = Number($("reelsDuration").value || 6);
-        payload.format = $("reelsFormat").value || "9:16";
-      } else {
-        // runway o pika
-        payload.prompt = textOrPrompt;
+      ["cine","reels","imagen","chat"].forEach(t=>{
+        const el = document.getElementById("tab-" + t);
+        if(el) el.style.display = (t === tab) ? "" : "none";
+      });
+    });
+  });
+
+  // =========================
+  // Toggles
+  // =========================
+  function setupToggle(toggleId){
+    const t = $(toggleId);
+    if(!t) return;
+    t.addEventListener("click", ()=> t.classList.toggle("on"));
+  }
+  setupToggle("cineModeToggle");
+  setupToggle("reelsModeToggle");
+
+  function toggleModeValue(toggleId){
+    const t = $(toggleId);
+    return (t && t.classList.contains("on")) ? "narrator_plus_character" : "narrator_only";
+  }
+
+  // =========================
+  // Presets (localStorage)
+  // =========================
+  const PRESET_KEY = "corazon_presets_v1";
+
+  function loadPresets(){
+    try{ return JSON.parse(localStorage.getItem(PRESET_KEY) || "[]"); }
+    catch(e){ return []; }
+  }
+  function savePresets(arr){
+    localStorage.setItem(PRESET_KEY, JSON.stringify(arr));
+  }
+  function refreshPresetSelect(){
+    const select = $("presetSelect");
+    const presets = loadPresets();
+    select.innerHTML = `<option value="">—</option>`;
+    presets.forEach((p, idx)=>{
+      const opt = document.createElement("option");
+      opt.value = String(idx);
+      opt.textContent = p.name;
+      select.appendChild(opt);
+    });
+  }
+  function getCurrentSettings(){
+    return {
+      reels: {
+        text: $("reelsText").value,
+        language: $("reelsLang").value,
+        voice_gender: $("reelsVoiceGender").value,
+        duration: Number($("reelsDuration").value),
+        music: $("reelsMusic").value,
+        mode: toggleModeValue("reelsModeToggle"),
+        format: "9:16"
+      },
+      cine: {
+        text: $("cineText").value,
+        language: $("cineLang").value,
+        voice_gender: $("cineVoiceGender").value,
+        duration: Number($("cineDuration").value),
+        music: $("cineMusic").value,
+        mode: toggleModeValue("cineModeToggle"),
+        format: "9:16"
       }
+    };
+  }
+  function applySettings(s){
+    if(s?.reels){
+      $("reelsText").value = s.reels.text || "";
+      $("reelsLang").value = s.reels.language || "es";
+      $("reelsVoiceGender").value = s.reels.voice_gender || "female";
+      $("reelsDuration").value = String(s.reels.duration || 9);
+      $("reelsMusic").value = s.reels.music || "soft";
+      $("reelsModeToggle").classList.toggle("on", s.reels.mode === "narrator_plus_character");
+    }
+    if(s?.cine){
+      $("cineText").value = s.cine.text || "";
+      $("cineLang").value = s.cine.language || "es";
+      $("cineVoiceGender").value = s.cine.voice_gender || "female";
+      $("cineDuration").value = String(s.cine.duration || 5);
+      $("cineMusic").value = s.cine.music || "soft";
+      $("cineModeToggle").classList.toggle("on", s.cine.mode === "narrator_plus_character");
+    }
+  }
 
-      const r = await fetch(`${API_URL}/video`, {
+  $("btnSavePreset").onclick = () => {
+    const name = $("presetName").value.trim();
+    if(!name){
+      $("presetInfo").textContent = "Pon un nombre primero 🙂";
+      setTimeout(()=> $("presetInfo").textContent = "Se guardan en tu navegador", 1300);
+      return;
+    }
+    const presets = loadPresets();
+    presets.push({name, settings: getCurrentSettings(), createdAt: Date.now()});
+    savePresets(presets);
+    refreshPresetSelect();
+    $("presetName").value = "";
+    $("presetInfo").textContent = "✅ Guardado";
+    setTimeout(()=> $("presetInfo").textContent = "Se guardan en tu navegador", 1200);
+  };
+
+  $("btnApplyPreset").onclick = () => {
+    const idx = $("presetSelect").value;
+    if(idx === "") return;
+    const presets = loadPresets();
+    const p = presets[Number(idx)];
+    if(!p) return;
+    applySettings(p.settings);
+    $("presetInfo").textContent = "✅ Aplicado";
+    setTimeout(()=> $("presetInfo").textContent = "Se guardan en tu navegador", 1200);
+  };
+
+  $("btnDeletePreset").onclick = () => {
+    const idx = $("presetSelect").value;
+    if(idx === "") return;
+    const presets = loadPresets();
+    presets.splice(Number(idx), 1);
+    savePresets(presets);
+    refreshPresetSelect();
+    $("presetInfo").textContent = "🗑️ Eliminado";
+    setTimeout(()=> $("presetInfo").textContent = "Se guardan en tu navegador", 1200);
+  };
+
+  refreshPresetSelect();
+
+  // =========================
+  // Actions: Chat / Image
+  // =========================
+  $("btnChat").onclick = async () => {
+    const msg = $("chatMsg").value.trim();
+    if(!msg) return;
+    setStatus("chatStatus","", "Enviando...");
+    $("btnChat").disabled = true;
+    try{
+      const data = await postJSON("/chat", {message: msg});
+      $("chatResult").innerHTML = `<div class="card" style="margin-top:10px">${(data.reply||"").replaceAll("\n","<br>")}</div>`;
+      setStatus("chatStatus","good", "✅ Listo");
+    }catch(e){
+      setStatus("chatStatus","bad", "❌ " + e.message);
+    }finally{
+      $("btnChat").disabled = false;
+    }
+  };
+
+  $("btnImage").onclick = async () => {
+    const prompt = $("imgPrompt").value.trim();
+    if(!prompt) return;
+    setStatus("imgStatus","", "Generando...");
+    $("btnImage").disabled = true;
+    try{
+      const data = await postJSON("/image", {prompt, size: $("imgSize").value});
+      if(data.image_url){
+        renderImage("imgResult", data.image_url);
+        setStatus("imgStatus","good","✅ Imagen lista");
+      }else{
+        setStatus("imgStatus","bad","❌ No llegó image_url");
+        $("imgResult").textContent = JSON.stringify(data);
+      }
+    }catch(e){
+      setStatus("imgStatus","bad","❌ " + e.message);
+    }finally{
+      $("btnImage").disabled = false;
+    }
+  };
+
+  // =========================
+  // Actions: Reels
+  // =========================
+  $("btnReelsOnly").onclick = async () => {
+    const text = $("reelsText").value.trim();
+    if(!text) return;
+    setStatus("reelsStatus","", "Creando reels...");
+    $("btnReelsOnly").disabled = true;
+    try{
+      // endpoint /reels devuelve FileResponse mp4, NO JSON
+      const res = await fetch("/reels", {
         method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify(payload)
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({text, duration: Number($("reelsDuration").value), format:"9:16", cfg:0.5})
+      });
+      if(!res.ok) throw new Error("HTTP " + res.status);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      $("reelsResult").innerHTML = `
+        <div style="margin-top:12px;padding:14px;border:1px solid rgba(255,255,255,.14);border-radius:18px;background:rgba(255,255,255,.06);">
+          <div style="font-weight:900;margin-bottom:10px;">✅ Reels listo</div>
+          <video controls playsinline style="width:100%;max-width:520px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:#000;">
+            <source src="${url}" type="video/mp4" />
+          </video>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+            <a href="${url}" target="_blank" rel="noopener"
+               style="padding:10px 14px;border-radius:12px;background:#7C5CFF;color:#fff;text-decoration:none;font-weight:900;">▶️ Abrir</a>
+            <a href="${url}" download="reels.mp4"
+               style="padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none;font-weight:900;border:1px solid rgba(255,255,255,.16);">⬇️ Descargar MP4</a>
+          </div>
+          <div style="opacity:.75;font-size:12px;margin-top:10px;">(Este es un archivo temporal en tu navegador)</div>
+        </div>
+      `;
+      setStatus("reelsStatus","good","✅ Listo");
+    }catch(e){
+      setStatus("reelsStatus","bad","❌ " + e.message);
+    }finally{
+      $("btnReelsOnly").disabled = false;
+    }
+  };
+
+  $("btnReels").onclick = async () => {
+    const text = $("reelsText").value.trim();
+    if(!text) return;
+    setStatus("reelsStatus","", "Creando reels con voz+música...");
+    $("btnReels").disabled = true;
+    try{
+      const payload = {
+        text,
+        duration: Number($("reelsDuration").value),
+        format: "9:16",
+        language: $("reelsLang").value,
+        mode: toggleModeValue("reelsModeToggle"),
+        voice_gender: $("reelsVoiceGender").value,
+        music: $("reelsMusic").value
+      };
+      const data = await postJSON("/reels-voice", payload);
+
+      if(data.video_url){
+        renderVideoResult("reelsResult", data.video_url);
+        setStatus("reelsStatus","good","✅ Listo");
+      }else{
+        setStatus("reelsStatus","bad","❌ No llegó video_url");
+        $("reelsResult").textContent = JSON.stringify(data);
+      }
+    }catch(e){
+      setStatus("reelsStatus","bad","❌ " + e.message);
+    }finally{
+      $("btnReels").disabled = false;
+    }
+  };
+
+  // =========================
+  // Actions: Cine
+  // =========================
+  $("btnCineOnly").onclick = async () => {
+    const text = $("cineText").value.trim();
+    if(!text) return;
+    setStatus("cineStatus","", "Creando cine (solo)...");
+
+    $("btnCineOnly").disabled = true;
+    try{
+      const data = await postJSON("/video-cine", {
+        text,
+        duration: Number($("cineDuration").value),
+        format:"9:16",
+        cfg:0.5
       });
 
-      // Si viene como archivo mp4 (Reels), lo descargamos
-      const ct = (r.headers.get("content-type") || "").toLowerCase();
-      const cd = (r.headers.get("content-disposition") || "");
-      const looksLikeFile = ct.includes("video/") || cd.includes("attachment");
-
-      if(looksLikeFile){
-        const blob = await r.blob();
-        const url = URL.createObjectURL(blob);
-        const filename = (cd.match(/filename="([^"]+)"/)?.[1]) || "video.mp4";
-
-        $("videoOut").innerHTML = `
-          ✅ Video listo: <a class="link" href="${url}" download="${filename}">Descargar MP4</a>
-        `;
-        show($("videoOut"));
-        return;
+      // /video-cine devuelve video_url externo (FAL)
+      if(data.video_url){
+        // render también (pero es URL externa)
+        renderVideoResult("cineResult", data.video_url);
+        setStatus("cineStatus","good","✅ Listo");
+      }else{
+        setStatus("cineStatus","bad","❌ No llegó video_url");
+        $("cineResult").textContent = JSON.stringify(data);
       }
-
-      // Si no es archivo, tratamos JSON
-      const data = await r.json();
-
-      // Soporta respuestas con url
-      const url = data?.url || data?.video_url || data?.result?.url;
-      if(url){
-        $("videoOut").innerHTML = `✅ Video listo: <a class="link" href="${url}" target="_blank" rel="noopener">Abrir / Descargar</a>`;
-      } else {
-        $("videoOut").textContent = JSON.stringify(data, null, 2);
-      }
-      show($("videoOut"));
-
     }catch(e){
-      $("videoOut").textContent = "Error en Video: " + (e?.message || e);
-      show($("videoOut"));
+      setStatus("cineStatus","bad","❌ " + e.message);
     }finally{
-      $("videoBtn").disabled = false;
+      $("btnCineOnly").disabled = false;
     }
-  });
+  };
+
+  $("btnCine").onclick = async () => {
+    const text = $("cineText").value.trim();
+    if(!text) return;
+    setStatus("cineStatus","", "Creando cine con voz+música...");
+    $("btnCine").disabled = true;
+
+    try{
+      const payload = {
+        text,
+        duration: Number($("cineDuration").value),
+        format:"9:16",
+        cfg:0.5,
+        language: $("cineLang").value,
+        mode: toggleModeValue("cineModeToggle"),
+        voice_gender: $("cineVoiceGender").value,
+        music: $("cineMusic").value
+      };
+      const data = await postJSON("/video-cine-voice", payload);
+
+      if(data.video_url){
+        renderVideoResult("cineResult", data.video_url);
+        setStatus("cineStatus","good","✅ Listo");
+      }else{
+        setStatus("cineStatus","bad","❌ No llegó video_url");
+        $("cineResult").textContent = JSON.stringify(data);
+      }
+    }catch(e){
+      setStatus("cineStatus","bad","❌ " + e.message);
+    }finally{
+      $("btnCine").disabled = false;
+    }
+  };
+
 </script>
 </body>
 </html>
