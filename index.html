@@ -178,9 +178,7 @@
     .dot.good{background: rgba(34,197,94,.85)}
     .dot.bad{background: rgba(239,68,68,.85)}
 
-    .result{
-      margin-top: 12px;
-    }
+    .result{ margin-top: 12px; }
 
     .chip{
       display:inline-flex;
@@ -205,17 +203,9 @@
       background: rgba(255,255,255,.05);
       margin-top: 10px;
     }
-    .switchRow .left{
-      display:flex; flex-direction:column; gap:2px;
-    }
-    .switchRow .title{
-      font-weight: 800;
-      font-size: 13px;
-    }
-    .switchRow .desc{
-      color: var(--muted);
-      font-size: 12px;
-    }
+    .switchRow .left{ display:flex; flex-direction:column; gap:2px; }
+    .switchRow .title{ font-weight: 800; font-size: 13px; }
+    .switchRow .desc{ color: var(--muted); font-size: 12px; }
     .toggle{
       width: 54px; height: 30px;
       border-radius: 999px;
@@ -239,9 +229,7 @@
     }
     .toggle.on .knob{ left: 28px; background: white; }
 
-    .small{
-      font-size:12px;color:var(--muted);
-    }
+    .small{ font-size:12px;color:var(--muted); }
   </style>
 </head>
 
@@ -482,6 +470,12 @@
 
 <script>
   // =========================
+  // CONFIG: Backend API base
+  // =========================
+  const API_BASE = "https://corazon-studio-ai-backend-3.onrender.com";
+  const api = (path) => `${API_BASE}${path.startsWith("/") ? "" : "/"}${path}`;
+
+  // =========================
   // Helpers
   // =========================
   const $ = (id) => document.getElementById(id);
@@ -497,18 +491,20 @@
     span.textContent = text;
   }
 
+  // IMPORTANT: todas las URLs relativas (ej: /files/...) viven en el backend
   function absUrl(maybeRelative){
     if(!maybeRelative) return "";
     if(maybeRelative.startsWith("http")) return maybeRelative;
-    const base = window.location.origin;
-    return base + (maybeRelative.startsWith("/") ? maybeRelative : "/" + maybeRelative);
+    if(maybeRelative.startsWith("/")) return api(maybeRelative);
+    return api("/" + maybeRelative);
   }
 
   async function postJSON(path, payload){
-    const res = await fetch(path, {
+    const res = await fetch(api(path), {
       method: "POST",
       headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      mode: "cors",
     });
     const data = await res.json().catch(()=> ({}));
     if(!res.ok) throw new Error(data?.message || ("HTTP " + res.status));
@@ -800,11 +796,12 @@
     setStatus("reelsStatus","", "Creando reels...");
     $("btnReelsOnly").disabled = true;
     try{
-      // endpoint /reels devuelve FileResponse mp4, NO JSON
-      const res = await fetch("/reels", {
+      // /reels devuelve FileResponse mp4 (blob)
+      const res = await fetch(api("/reels"), {
         method:"POST",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({text, duration: Number($("reelsDuration").value), format:"9:16", cfg:0.5})
+        body: JSON.stringify({text, duration: Number($("reelsDuration").value), format:"9:16", cfg:0.5}),
+        mode: "cors",
       });
       if(!res.ok) throw new Error("HTTP " + res.status);
       const blob = await res.blob();
@@ -881,9 +878,7 @@
         cfg:0.5
       });
 
-      // /video-cine devuelve video_url externo (FAL)
       if(data.video_url){
-        // render también (pero es URL externa)
         renderVideoResult("cineResult", data.video_url);
         setStatus("cineStatus","good","✅ Listo");
       }else{
@@ -929,7 +924,6 @@
       $("btnCine").disabled = false;
     }
   };
-
 </script>
 </body>
 </html>
