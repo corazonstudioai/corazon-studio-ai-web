@@ -1,929 +1,127 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#fff8f3">
+  <meta name="description" content="Corazón Studio AI convierte tus ideas en contenido listo para compartir.">
   <title>Corazón Studio AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg1:#0B0F1E;
-      --bg2:#1B1536;
-      --card: rgba(255,255,255,.06);
-      --stroke: rgba(255,255,255,.14);
-      --text:#F3F4F6;
-      --muted: rgba(255,255,255,.75);
-      --accent:#7C5CFF;
-      --accent2:#B794F4;
-      --btn: rgba(255,255,255,.10);
-      --btnStroke: rgba(255,255,255,.16);
-      --good:#22c55e;
-      --bad:#ef4444;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      background: radial-gradient(1200px 800px at 20% 10%, #3a2a7a 0%, transparent 60%),
-                  radial-gradient(900px 700px at 80% 30%, #2a6aa6 0%, transparent 55%),
-                  linear-gradient(180deg, var(--bg1), var(--bg2));
-      min-height:100vh;
-      padding: 18px 14px 40px;
-    }
-    .wrap{
-      max-width: 980px;
-      margin: 0 auto;
-    }
-    .hero{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      margin-bottom:14px;
-    }
-    .logo{
-      width:44px;height:44px;border-radius:14px;
-      background: radial-gradient(circle at 30% 30%, var(--accent2), var(--accent));
-      display:flex;align-items:center;justify-content:center;
-      box-shadow: 0 10px 35px rgba(124,92,255,.35);
-      flex:0 0 auto;
-    }
-    .logo span{font-size:20px}
-    h1{
-      font-size: 28px;
-      margin:0;
-      letter-spacing: .2px;
-    }
-    .sub{
-      margin: 3px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .tabs{
-      background: rgba(255,255,255,.06);
-      border: 1px solid var(--stroke);
-      border-radius: 22px;
-      padding: 10px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin: 10px 0 16px;
-      backdrop-filter: blur(10px);
-    }
-    .tab{
-      padding: 10px 14px;
-      border-radius: 16px;
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text);
-      cursor:pointer;
-      font-weight:700;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      opacity:.85;
-    }
-    .tab.active{
-      background: rgba(124,92,255,.22);
-      border-color: rgba(124,92,255,.35);
-      opacity:1;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
-    }
-    @media(min-width: 980px){
-      .grid.two{
-        grid-template-columns: 1.2fr .8fr;
-      }
-    }
-    .card{
-      background: var(--card);
-      border: 1px solid var(--stroke);
-      border-radius: 22px;
-      padding: 14px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 14px 50px rgba(0,0,0,.25);
-    }
-    .card h2{
-      margin:0 0 10px;
-      font-size: 20px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .hint{
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 6px;
-      line-height:1.35;
-    }
-    .row{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    @media(max-width: 520px){
-      .row{grid-template-columns:1fr}
-    }
-    label{
-      display:block;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-    textarea, select, input{
-      width:100%;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      padding: 12px 12px;
-      outline:none;
-    }
-    textarea{min-height: 110px; resize: vertical;}
-    .btnrow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 12px;
-    }
-    button{
-      border-radius: 14px;
-      border: 1px solid var(--btnStroke);
-      background: var(--btn);
-      color: var(--text);
-      padding: 11px 14px;
-      font-weight: 800;
-      cursor:pointer;
-    }
-    button.primary{
-      background: rgba(124,92,255,.30);
-      border-color: rgba(124,92,255,.42);
-    }
-    button:disabled{opacity:.55; cursor:not-allowed}
-    .status{
-      font-size: 13px;
-      margin-top: 10px;
-      color: var(--muted);
-      display:flex;
-      align-items:center;
-      gap:8px;
-      word-break: break-word;
-    }
-    .dot{
-      width:10px;height:10px;border-radius:99px;background: rgba(255,255,255,.25);
-    }
-    .dot.good{background: rgba(34,197,94,.85)}
-    .dot.bad{background: rgba(239,68,68,.85)}
+:root{--ink:#26212b;--muted:#736c79;--paper:#fffaf6;--card:#fff;--rose:#e95d73;--rose-dark:#ce435c;--peach:#ffb98f;--line:#ede5e1;--green:#4b967c;--shadow:0 24px 70px rgba(91,55,59,.12);color-scheme:light}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:linear-gradient(155deg,#fffdfb 0%,#fff7f2 52%,#fffaf7 100%);color:var(--ink);font-family:"DM Sans",sans-serif;overflow-x:hidden}.ambient{position:fixed;border-radius:50%;filter:blur(3px);pointer-events:none;z-index:-1}.ambient-one{width:520px;height:520px;background:radial-gradient(circle,rgba(255,190,164,.25),transparent 68%);top:-190px;left:-160px}.ambient-two{width:600px;height:600px;background:radial-gradient(circle,rgba(237,128,145,.16),transparent 68%);right:-230px;top:200px}.skip-link{position:fixed;top:-50px;left:20px;background:var(--ink);color:#fff;padding:10px 16px;z-index:10}.skip-link:focus{top:10px}.topbar{height:84px;max-width:1240px;margin:auto;padding:0 34px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink)}.brand-mark{width:43px;height:43px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,var(--rose),#ee7a8b);color:#fff;font:800 23px Manrope;box-shadow:0 8px 22px rgba(222,75,99,.25);position:relative}.brand-mark:after{content:"";position:absolute;width:6px;height:6px;border-radius:50%;background:#ffd0b5;right:8px;top:8px}.brand strong{display:block;font:800 20px Manrope;letter-spacing:-.5px}.brand small{display:block;font:700 8px Manrope;letter-spacing:2.4px;color:var(--rose);margin-top:-1px}.top-actions{display:flex;gap:9px}.icon-button,.language-button{height:40px;border:1px solid var(--line);background:rgba(255,255,255,.72);color:var(--ink);border-radius:12px;display:flex;align-items:center;gap:8px;padding:0 13px;font:600 13px inherit;cursor:pointer}.icon-button svg,.tool-button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}.language-button{font-weight:700;color:var(--rose);padding:0 12px}main{width:min(970px,calc(100% - 32px));margin:52px auto 0}.hero{text-align:center}.eyebrow{display:flex;justify-content:center;align-items:center;gap:8px;color:var(--rose);text-transform:uppercase;letter-spacing:2.2px;font-size:10px;font-weight:700}.eyebrow>span:first-child{width:6px;height:6px;border-radius:50%;background:var(--rose)}h1{font:800 clamp(38px,6vw,66px)/1.08 Manrope;margin:18px 0 17px;letter-spacing:-3.6px}h1 em{font-style:normal;background:linear-gradient(90deg,var(--rose-dark),#f18a75);background-clip:text;-webkit-background-clip:text;color:transparent}.hero>p{max-width:590px;margin:auto;color:var(--muted);font-size:16px;line-height:1.65}.composer-shell{margin-top:42px}.mode-picker{display:flex;justify-content:center;gap:6px;margin-bottom:13px}.mode{border:0;background:transparent;color:#817a84;border-radius:13px;padding:9px 14px;display:flex;align-items:center;gap:7px;font:600 12px inherit;cursor:pointer}.mode-icon{font-size:15px}.mode.active{background:#fff;color:var(--rose);box-shadow:0 5px 20px rgba(75,45,49,.09)}.sparkle{font-size:18px}.composer{position:relative;background:rgba(255,255,255,.94);border:1px solid rgba(232,221,216,.9);border-radius:24px;padding:24px;box-shadow:var(--shadow)}textarea{width:100%;min-height:130px;resize:vertical;border:0;outline:0;background:transparent;color:var(--ink);font:500 17px/1.6 inherit;padding:2px}textarea::placeholder{color:#b0a8ae}.suggestions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.suggestions button{border:1px solid var(--line);border-radius:20px;background:#fffaf7;color:#766e75;padding:7px 11px;font:500 11px inherit;cursor:pointer;transition:.2s}.suggestions button:hover{border-color:#f3a2ae;color:var(--rose);transform:translateY(-1px)}.suggestions button span:first-child{color:var(--rose);margin-right:5px}.composer-footer{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:21px;padding-top:17px}.composer-tools{display:flex;align-items:center;gap:15px}.tool-button{border:0;background:transparent;color:#766f78;display:flex;align-items:center;gap:7px;padding:7px 0;font:600 12px inherit;cursor:pointer}.smart-note{display:flex;align-items:center;gap:6px;color:#7e777e;font-size:10px}.smart-note i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(75,150,124,.11)}.create-button{border:0;background:linear-gradient(135deg,var(--rose),#ee7183);color:#fff;border-radius:14px;min-width:153px;height:45px;padding:0 19px;display:flex;align-items:center;justify-content:space-between;font:700 13px inherit;cursor:pointer;box-shadow:0 10px 25px rgba(218,62,88,.23);transition:.2s}.create-button:hover{transform:translateY(-2px);box-shadow:0 13px 30px rgba(218,62,88,.3)}.create-button:disabled{opacity:.6;cursor:wait}.advanced{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;border-top:1px solid var(--line);margin-top:17px;padding-top:17px}.advanced label{font-size:10px;color:var(--muted);font-weight:600}.advanced select{display:block;width:100%;margin-top:6px;border:1px solid var(--line);background:#fffaf7;border-radius:10px;padding:9px;color:var(--ink);font:500 11px inherit}.trust-row{display:flex;justify-content:center;gap:29px;color:#8c848a;font-size:10px;margin-top:14px}.trust-row>span::first-letter{color:var(--green)}.result-panel{margin:30px auto;background:#fff;border:1px solid var(--line);border-radius:22px;padding:25px;box-shadow:var(--shadow)}.result-heading{display:flex;justify-content:space-between;align-items:start}.result-heading h2,.drawer-header h2{font:700 20px Manrope;margin:4px 0 16px}.result-kicker{font-size:9px;letter-spacing:2px;color:var(--rose);font-weight:700}.result-heading button,.drawer-header button{border:0;background:#fff7f3;border-radius:50%;width:33px;height:33px;color:var(--muted);font-size:22px;cursor:pointer}.result-copy{white-space:pre-wrap;line-height:1.65;background:#fffbf8;border-radius:14px;padding:18px}.result-media{width:100%;max-height:580px;object-fit:contain;border-radius:15px;background:#211f23}.result-actions{display:flex;gap:8px;margin-top:13px}.result-actions a,.result-actions button{border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);padding:9px 12px;text-decoration:none;font:600 11px inherit;cursor:pointer}.result-meta{font-size:10px;color:var(--muted);margin-top:14px}.loader{height:100px;display:flex;justify-content:center;align-items:center;gap:7px}.loader span{width:9px;height:9px;border-radius:50%;background:var(--rose);animation:pulse 1s infinite alternate}.loader span:nth-child(2){animation-delay:.2s}.loader span:nth-child(3){animation-delay:.4s}@keyframes pulse{to{opacity:.25;transform:translateY(-7px)}}.promise{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin:54px 0 90px}.promise article{display:flex;gap:13px;padding:8px}.promise article>span{width:32px;height:32px;flex:0 0 32px;border:1px solid #f2ccd0;background:#fff8f5;color:var(--rose);border-radius:11px;display:grid;place-items:center}.promise h2{font:700 13px Manrope;margin:1px 0 5px}.promise p{font-size:10px;line-height:1.5;color:var(--muted);margin:0}.drawer{position:fixed;inset:0;z-index:20;visibility:hidden}.drawer.open{visibility:visible}.drawer-backdrop{position:absolute;inset:0;background:rgba(38,28,35,.3);opacity:0;transition:.25s}.drawer.open .drawer-backdrop{opacity:1}.drawer-panel{position:absolute;right:0;top:0;height:100%;width:min(410px,92%);background:var(--paper);padding:28px;transform:translateX(100%);transition:.3s;overflow:auto}.drawer.open .drawer-panel{transform:none}.drawer-header{display:flex;justify-content:space-between}.project-list{display:grid;gap:9px}.project-item{border:1px solid var(--line);background:#fff;border-radius:13px;padding:13px}.project-item strong{display:block;font-size:12px;margin-bottom:5px}.project-item p{font-size:11px;color:var(--muted);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.project-item small{display:block;color:#a39aa1;margin-top:7px}.empty{text-align:center;color:var(--muted);padding:60px 10px;font-size:13px}.clear-button{width:100%;margin-top:20px;border:1px solid var(--line);background:transparent;color:var(--rose);border-radius:10px;padding:10px;cursor:pointer}.toast{position:fixed;left:50%;bottom:25px;transform:translate(-50%,25px);background:var(--ink);color:#fff;border-radius:12px;padding:11px 17px;font-size:12px;opacity:0;pointer-events:none;transition:.25s;z-index:30}.toast.show{opacity:1;transform:translate(-50%,0)}footer{display:flex;justify-content:center;gap:10px;color:#9a9298;font-size:10px;padding:25px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:700px){.topbar{height:70px;padding:0 18px}.icon-button span{display:none}main{margin-top:33px}.hero>p{font-size:14px}.mode-picker{overflow-x:auto;justify-content:flex-start;padding:0 3px 5px}.mode{flex:0 0 auto;padding:8px 10px}.composer{padding:19px 16px}.suggestions{overflow-x:auto;flex-wrap:nowrap;padding-bottom:3px}.suggestions button{flex:0 0 auto}.composer-footer{align-items:flex-end}.composer-tools{display:block}.smart-note{margin-top:4px}.create-button{min-width:133px}.advanced{grid-template-columns:1fr 1fr}.trust-row{gap:11px;flex-wrap:wrap}.promise{grid-template-columns:1fr;gap:10px;margin:42px 0 55px}h1{letter-spacing:-2.3px}.result-panel{padding:18px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 
-    .result{ margin-top: 12px; }
-
-    .chip{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: var(--muted);
-    }
-
-    .switchRow{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      padding: 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
-      margin-top: 10px;
-    }
-    .switchRow .left{ display:flex; flex-direction:column; gap:2px; }
-    .switchRow .title{ font-weight: 800; font-size: 13px; }
-    .switchRow .desc{ color: var(--muted); font-size: 12px; }
-    .toggle{
-      width: 54px; height: 30px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.20);
-      position:relative;
-      cursor:pointer;
-      flex:0 0 auto;
-    }
-    .toggle .knob{
-      width: 24px; height: 24px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.85);
-      position:absolute;
-      top: 2px; left: 2px;
-      transition: all .18s ease;
-    }
-    .toggle.on{
-      background: rgba(124,92,255,.30);
-      border-color: rgba(124,92,255,.42);
-    }
-    .toggle.on .knob{ left: 28px; background: white; }
-
-    .small{ font-size:12px;color:var(--muted); }
-  </style>
+</style>
 </head>
-
 <body>
-<div class="wrap">
-
-  <div class="hero">
-    <div class="logo"><span>💜</span></div>
-    <div>
-      <h1>Corazón Studio AI</h1>
-      <div class="sub">Chat · Imagen · Reels (voz + música) · Cine (voz + música)</div>
-    </div>
-  </div>
-
-  <div class="tabs">
-    <button class="tab active" data-tab="cine">🎬 Cine</button>
-    <button class="tab" data-tab="reels">📱 Reels</button>
-    <button class="tab" data-tab="imagen">🖼️ Imagen</button>
-    <button class="tab" data-tab="chat">💬 Chat</button>
-  </div>
-
-  <!-- PRESETS -->
-  <div class="card">
-    <h2>⭐ Presets (Reels / Cine)</h2>
-    <div class="row">
-      <div>
-        <label>Selecciona un preset</label>
-        <select id="presetSelect">
-          <option value="">—</option>
-        </select>
+  <a class="skip-link" href="#studio">Saltar al estudio</a>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Corazón Studio AI, inicio"><span class="brand-mark" aria-hidden="true">C</span><span><strong>Corazón</strong><small>STUDIO AI</small></span></a>
+    <nav class="top-actions" aria-label="Acciones principales">
+      <button class="icon-button" id="projectsButton" type="button" aria-label="Abrir proyectos"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 7.5h6l2 2h10v9.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7.5v-2a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v2"/></svg><span data-i18n="projects">Proyectos</span></button>
+      <button class="language-button" id="languageButton" type="button" aria-label="Cambiar idioma">ES</button>
+    </nav>
+  </header>
+  <main id="studio">
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="eyebrow"><span></span><span data-i18n="eyebrow">Tu estudio creativo inteligente</span></div>
+      <h1 id="heroTitle"><span data-i18n="headlineA">Dinos qué quieres crear.</span><br><em data-i18n="headlineB">Corazón hace el resto.</em></h1>
+      <p data-i18n="heroText">Una sola idea puede convertirse en texto, imagen, voz o video. Sin configuraciones complicadas.</p>
+    </section>
+    <section class="composer-shell" aria-label="Estudio de creación">
+      <div class="mode-picker" role="radiogroup" aria-label="Tipo de creación">
+        <button class="mode active" type="button" role="radio" aria-checked="true" data-mode="auto"><span class="mode-icon sparkle">✦</span><span data-i18n="modeAuto">Automático</span></button>
+        <button class="mode" type="button" role="radio" aria-checked="false" data-mode="text"><span class="mode-icon">Aa</span><span data-i18n="modeText">Texto</span></button>
+        <button class="mode" type="button" role="radio" aria-checked="false" data-mode="image"><span class="mode-icon">▧</span><span data-i18n="modeImage">Imagen</span></button>
+        <button class="mode" type="button" role="radio" aria-checked="false" data-mode="video"><span class="mode-icon">▷</span><span data-i18n="modeVideo">Video</span></button>
+        <button class="mode" type="button" role="radio" aria-checked="false" data-mode="voice"><span class="mode-icon">⌁</span><span data-i18n="modeVoice">Voz</span></button>
       </div>
-      <div>
-        <label>Nombre para guardar</label>
-        <input id="presetName" placeholder='Ej: "Reels ES Voz F + Música suave"' />
-      </div>
-    </div>
-    <div class="btnrow">
-      <button class="primary" id="btnSavePreset">Guardar</button>
-      <button id="btnApplyPreset">Aplicar</button>
-      <button id="btnDeletePreset">Eliminar</button>
-      <span class="chip" id="presetInfo">Se guardan en tu navegador</span>
-    </div>
-    <div class="hint">Tip: crea un preset “Reels ES Voz F + Música suave” y otro “Cine EN Voz M + Cinematic”.</div>
-  </div>
-
-  <!-- SECCIONES -->
-  <div id="tab-cine" class="grid two">
-    <div class="card">
-      <h2>🎬 Video Cine (con Voz + Música)</h2>
-
-      <label>Describe el video cine...</label>
-      <textarea id="cineText" placeholder="Ej: Una familia feliz caminando al atardecer, estilo cinematográfico, luz cálida..."></textarea>
-
-      <div class="row">
-        <div>
-          <label>🌍 Idioma</label>
-          <select id="cineLang">
-            <option value="es">Español</option>
-            <option value="en">English</option>
-          </select>
+      <form class="composer" id="createForm">
+        <label class="sr-only" for="ideaInput" data-i18n="ideaLabel">Describe lo que quieres crear</label>
+        <textarea id="ideaInput" maxlength="3000" data-i18n-placeholder="placeholder" placeholder="Ejemplo: Crea un reel inspirador sobre volver a empezar, con voz cálida y música suave..."></textarea>
+        <div class="suggestions" aria-label="Ideas rápidas">
+          <button type="button" data-prompt-es="Un reel inspirador de 20 segundos para redes sociales" data-prompt-en="A 20-second inspiring social media reel"><span>▶</span><span data-i18n="ideaReel">Reel inspirador</span></button>
+          <button type="button" data-prompt-es="Una imagen profesional para promocionar mi negocio" data-prompt-en="A professional image to promote my business"><span>◇</span><span data-i18n="ideaBusiness">Imagen para negocio</span></button>
+          <button type="button" data-prompt-es="Mejora este texto para que sea claro, humano y convincente" data-prompt-en="Improve this text so it feels clear, human and persuasive"><span>✎</span><span data-i18n="ideaImprove">Mejorar un texto</span></button>
         </div>
-        <div>
-          <label>🎙️ Voz</label>
-          <select id="cineVoiceGender">
-            <option value="female">Femenina</option>
-            <option value="male">Masculina</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row">
-        <div>
-          <label>⏱️ Duración</label>
-          <select id="cineDuration">
-            <option value="5">5s</option>
-            <option value="6">6s</option>
-            <option value="7">7s</option>
-            <option value="8">8s</option>
-            <option value="9">9s</option>
-          </select>
-        </div>
-        <div>
-          <label>🎵 Música</label>
-          <select id="cineMusic">
-            <option value="none">Sin música</option>
-            <option value="soft">Suave</option>
-            <option value="cinematic">Cinemática</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Switch premium: Personaje + Narrador -->
-      <div class="switchRow">
-        <div class="left">
-          <div class="title">⭐ Narrador + Personaje</div>
-          <div class="desc">Agrega una línea extra estilo personaje (además del narrador).</div>
-        </div>
-        <div id="cineModeToggle" class="toggle">
-          <div class="knob"></div>
-        </div>
-      </div>
-      <div class="small">Si está apagado: solo narrador. Si está encendido: narrador + personaje.</div>
-
-      <div class="btnrow">
-        <button class="primary" id="btnCine">Crear Cine</button>
-        <button id="btnCineOnly">Crear Cine (sin voz/música)</button>
-      </div>
-
-      <div class="status" id="cineStatus"><span class="dot"></span><span>Listo.</span></div>
-
-      <div class="result" id="cineResult"></div>
-    </div>
-
-    <div class="card">
-      <h2>ℹ️ Tips rápidos</h2>
-      <div class="hint">
-        • Si te sale “Archivo no encontrado”, normalmente es porque estás abriendo solo <b>/files/...</b> sin el dominio completo.<br><br>
-        • Aquí ya lo resolvimos: el botón “Abrir/Descargar” usa la URL completa automáticamente.<br><br>
-        • En Render, los videos se guardan en <b>/tmp</b> y pueden borrarse si reinicia el servicio (normal).
-      </div>
-    </div>
-  </div>
-
-  <div id="tab-reels" class="grid two" style="display:none">
-    <div class="card">
-      <h2>📱 Reels (con Voz + Música)</h2>
-
-      <label>Texto del reels</label>
-      <textarea id="reelsText" placeholder='Ej: "Dios ya estaba trabajando en tu milagro, incluso cuando tú no lo veías..."'></textarea>
-
-      <div class="row">
-        <div>
-          <label>🌍 Idioma</label>
-          <select id="reelsLang">
-            <option value="es">Español</option>
-            <option value="en">English</option>
-          </select>
-        </div>
-        <div>
-          <label>🎙️ Voz</label>
-          <select id="reelsVoiceGender">
-            <option value="female">Femenina</option>
-            <option value="male">Masculina</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row">
-        <div>
-          <label>⏱️ Duración</label>
-          <select id="reelsDuration">
-            <option value="5">5s</option>
-            <option value="6">6s</option>
-            <option value="7">7s</option>
-            <option value="8">8s</option>
-            <option value="9" selected>9s</option>
-          </select>
-        </div>
-        <div>
-          <label>🎵 Música</label>
-          <select id="reelsMusic">
-            <option value="none">Sin música</option>
-            <option value="soft" selected>Suave</option>
-            <option value="cinematic">Cinemática</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="switchRow">
-        <div class="left">
-          <div class="title">⭐ Narrador + Personaje</div>
-          <div class="desc">Agrega una línea extra estilo personaje (además del narrador).</div>
-        </div>
-        <div id="reelsModeToggle" class="toggle">
-          <div class="knob"></div>
-        </div>
-      </div>
-
-      <div class="btnrow">
-        <button class="primary" id="btnReels">Crear Reels (voz + música)</button>
-        <button id="btnReelsOnly">Crear Reels (sin voz/música)</button>
-      </div>
-
-      <div class="status" id="reelsStatus"><span class="dot"></span><span>Listo.</span></div>
-
-      <div class="result" id="reelsResult"></div>
-    </div>
-
-    <div class="card">
-      <h2>✅ Música</h2>
-      <div class="hint">
-        Ya subiste:<br>
-        • <b>assets/music_soft.mp3</b><br>
-        • <b>assets/music_cinematic.mp3</b><br><br>
-        Si la música no se oye: revisa que no sean archivos de 1 byte, y que realmente tengan varios MB.
-      </div>
-    </div>
-  </div>
-
-  <div id="tab-imagen" class="grid" style="display:none">
-    <div class="card">
-      <h2>🖼️ Imagen</h2>
-      <label>Prompt</label>
-      <textarea id="imgPrompt" placeholder="Ej: Imagen publicitaria realista de una clínica dental, luz cálida, estilo premium..."></textarea>
-      <div class="row">
-        <div>
-          <label>Tamaño</label>
-          <select id="imgSize">
-            <option>1024x1024</option>
-            <option>1024x1536</option>
-            <option>1536x1024</option>
-          </select>
-        </div>
-        <div></div>
-      </div>
-      <div class="btnrow">
-        <button class="primary" id="btnImage">Generar Imagen</button>
-      </div>
-      <div class="status" id="imgStatus"><span class="dot"></span><span>Listo.</span></div>
-      <div class="result" id="imgResult"></div>
-    </div>
-  </div>
-
-  <div id="tab-chat" class="grid" style="display:none">
-    <div class="card">
-      <h2>💬 Chat</h2>
-      <label>Mensaje</label>
-      <textarea id="chatMsg" placeholder="Escribe tu mensaje..."></textarea>
-      <div class="btnrow">
-        <button class="primary" id="btnChat">Enviar</button>
-      </div>
-      <div class="status" id="chatStatus"><span class="dot"></span><span>Listo.</span></div>
-      <div class="result" id="chatResult"></div>
-    </div>
-  </div>
-
-</div>
-
-<script>
-  // =========================
-  // CONFIG: Backend API base
-  // =========================
-  const API_BASE = "https://corazon-studio-ai-backend-3.onrender.com";
-  const api = (path) => `${API_BASE}${path.startsWith("/") ? "" : "/"}${path}`;
-
-  // =========================
-  // Helpers
-  // =========================
-  const $ = (id) => document.getElementById(id);
-
-  function setStatus(elId, type, text){
-    const el = $(elId);
-    if(!el) return;
-    const dot = el.querySelector(".dot");
-    const span = el.querySelector("span:last-child");
-    dot.classList.remove("good","bad");
-    if(type === "good") dot.classList.add("good");
-    if(type === "bad") dot.classList.add("bad");
-    span.textContent = text;
-  }
-
-  // IMPORTANT: todas las URLs relativas (ej: /files/...) viven en el backend
-  function absUrl(maybeRelative){
-    if(!maybeRelative) return "";
-    if(maybeRelative.startsWith("http")) return maybeRelative;
-    if(maybeRelative.startsWith("/")) return api(maybeRelative);
-    return api("/" + maybeRelative);
-  }
-
-  async function postJSON(path, payload){
-    const res = await fetch(api(path), {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(payload),
-      mode: "cors",
-    });
-    const data = await res.json().catch(()=> ({}));
-    if(!res.ok) throw new Error(data?.message || ("HTTP " + res.status));
-    return data;
-  }
-
-  // =========================
-  // Render: Video con botones
-  // =========================
-  function renderVideoResult(containerId, videoUrl){
-    const el = $(containerId);
-    if(!el) return;
-    const url = absUrl(videoUrl);
-
-    el.innerHTML = `
-      <div style="
-        margin-top:12px;
-        padding:14px;
-        border:1px solid rgba(255,255,255,.14);
-        border-radius:18px;
-        background: rgba(255,255,255,.06);
-        backdrop-filter: blur(10px);
-      ">
-        <div style="font-weight:900; margin-bottom:10px;">✅ Video listo</div>
-
-        <video controls playsinline style="
-          width:100%;
-          max-width:520px;
-          border-radius:14px;
-          border:1px solid rgba(255,255,255,.12);
-          background:#000;
-        ">
-          <source src="${url}" type="video/mp4" />
-          Tu navegador no puede reproducir este video.
-        </video>
-
-        <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
-          <a href="${url}" target="_blank" rel="noopener"
-             style="padding:10px 14px; border-radius:12px; background:#7C5CFF; color:#fff; text-decoration:none; font-weight:900;">
-            ▶️ Abrir
-          </a>
-
-          <a href="${url}" download
-             style="padding:10px 14px; border-radius:12px; background:rgba(255,255,255,.12); color:#fff; text-decoration:none; font-weight:900; border:1px solid rgba(255,255,255,.16);">
-            ⬇️ Descargar MP4
-          </a>
-
-          <button id="${containerId}-copy"
-             style="padding:10px 14px; border-radius:12px; background:rgba(255,255,255,.08); color:#fff; font-weight:900; border:1px solid rgba(255,255,255,.16); cursor:pointer;">
-            📋 Copiar link
-          </button>
-        </div>
-
-        <div style="opacity:.75; font-size:12px; margin-top:10px; word-break:break-all;">
-          ${url}
-        </div>
-      </div>
-    `;
-
-    const btn = document.getElementById(containerId + "-copy");
-    if(btn){
-      btn.onclick = async () => {
-        try{
-          await navigator.clipboard.writeText(url);
-          btn.textContent = "✅ Copiado";
-          setTimeout(()=> btn.textContent = "📋 Copiar link", 1200);
-        }catch(e){
-          btn.textContent = "❌ No se pudo copiar";
-          setTimeout(()=> btn.textContent = "📋 Copiar link", 1500);
-        }
-      };
-    }
-  }
-
-  // =========================
-  // Render: Imagen
-  // =========================
-  function renderImage(containerId, imageUrl){
-    const el = $(containerId);
-    if(!el) return;
-    const url = absUrl(imageUrl);
-
-    el.innerHTML = `
-      <div style="
-        margin-top:12px;
-        padding:14px;
-        border:1px solid rgba(255,255,255,.14);
-        border-radius:18px;
-        background: rgba(255,255,255,.06);
-      ">
-        <div style="font-weight:900; margin-bottom:10px;">✅ Imagen lista</div>
-        <img src="${url}" style="width:100%;max-width:520px;border-radius:14px;border:1px solid rgba(255,255,255,.12)" />
-        <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
-          <a href="${url}" target="_blank" rel="noopener"
-             style="padding:10px 14px; border-radius:12px; background:#7C5CFF; color:#fff; text-decoration:none; font-weight:900;">
-            ▶️ Abrir
-          </a>
-          <a href="${url}" download
-             style="padding:10px 14px; border-radius:12px; background:rgba(255,255,255,.12); color:#fff; text-decoration:none; font-weight:900; border:1px solid rgba(255,255,255,.16);">
-            ⬇️ Descargar
-          </a>
-        </div>
-      </div>
-    `;
-  }
-
-  // =========================
-  // Tabs
-  // =========================
-  document.querySelectorAll(".tab").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      document.querySelectorAll(".tab").forEach(b=> b.classList.remove("active"));
-      btn.classList.add("active");
-      const tab = btn.dataset.tab;
-
-      ["cine","reels","imagen","chat"].forEach(t=>{
-        const el = document.getElementById("tab-" + t);
-        if(el) el.style.display = (t === tab) ? "" : "none";
-      });
-    });
-  });
-
-  // =========================
-  // Toggles
-  // =========================
-  function setupToggle(toggleId){
-    const t = $(toggleId);
-    if(!t) return;
-    t.addEventListener("click", ()=> t.classList.toggle("on"));
-  }
-  setupToggle("cineModeToggle");
-  setupToggle("reelsModeToggle");
-
-  function toggleModeValue(toggleId){
-    const t = $(toggleId);
-    return (t && t.classList.contains("on")) ? "narrator_plus_character" : "narrator_only";
-  }
-
-  // =========================
-  // Presets (localStorage)
-  // =========================
-  const PRESET_KEY = "corazon_presets_v1";
-
-  function loadPresets(){
-    try{ return JSON.parse(localStorage.getItem(PRESET_KEY) || "[]"); }
-    catch(e){ return []; }
-  }
-  function savePresets(arr){
-    localStorage.setItem(PRESET_KEY, JSON.stringify(arr));
-  }
-  function refreshPresetSelect(){
-    const select = $("presetSelect");
-    const presets = loadPresets();
-    select.innerHTML = `<option value="">—</option>`;
-    presets.forEach((p, idx)=>{
-      const opt = document.createElement("option");
-      opt.value = String(idx);
-      opt.textContent = p.name;
-      select.appendChild(opt);
-    });
-  }
-  function getCurrentSettings(){
-    return {
-      reels: {
-        text: $("reelsText").value,
-        language: $("reelsLang").value,
-        voice_gender: $("reelsVoiceGender").value,
-        duration: Number($("reelsDuration").value),
-        music: $("reelsMusic").value,
-        mode: toggleModeValue("reelsModeToggle"),
-        format: "9:16"
-      },
-      cine: {
-        text: $("cineText").value,
-        language: $("cineLang").value,
-        voice_gender: $("cineVoiceGender").value,
-        duration: Number($("cineDuration").value),
-        music: $("cineMusic").value,
-        mode: toggleModeValue("cineModeToggle"),
-        format: "9:16"
-      }
-    };
-  }
-  function applySettings(s){
-    if(s?.reels){
-      $("reelsText").value = s.reels.text || "";
-      $("reelsLang").value = s.reels.language || "es";
-      $("reelsVoiceGender").value = s.reels.voice_gender || "female";
-      $("reelsDuration").value = String(s.reels.duration || 9);
-      $("reelsMusic").value = s.reels.music || "soft";
-      $("reelsModeToggle").classList.toggle("on", s.reels.mode === "narrator_plus_character");
-    }
-    if(s?.cine){
-      $("cineText").value = s.cine.text || "";
-      $("cineLang").value = s.cine.language || "es";
-      $("cineVoiceGender").value = s.cine.voice_gender || "female";
-      $("cineDuration").value = String(s.cine.duration || 5);
-      $("cineMusic").value = s.cine.music || "soft";
-      $("cineModeToggle").classList.toggle("on", s.cine.mode === "narrator_plus_character");
-    }
-  }
-
-  $("btnSavePreset").onclick = () => {
-    const name = $("presetName").value.trim();
-    if(!name){
-      $("presetInfo").textContent = "Pon un nombre primero 🙂";
-      setTimeout(()=> $("presetInfo").textContent = "Se guardan en tu navegador", 1300);
-      return;
-    }
-    const presets = loadPresets();
-    presets.push({name, settings: getCurrentSettings(), createdAt: Date.now()});
-    savePresets(presets);
-    refreshPresetSelect();
-    $("presetName").value = "";
-    $("presetInfo").textContent = "✅ Guardado";
-    setTimeout(()=> $("presetInfo").textContent = "Se guardan en tu navegador", 1200);
-  };
-
-  $("btnApplyPreset").onclick = () => {
-    const idx = $("presetSelect").value;
-    if(idx === "") return;
-    const presets = loadPresets();
-    const p = presets[Number(idx)];
-    if(!p) return;
-    applySettings(p.settings);
-    $("presetInfo").textContent = "✅ Aplicado";
-    setTimeout(()=> $("presetInfo").textContent = "Se guardan en tu navegador", 1200);
-  };
-
-  $("btnDeletePreset").onclick = () => {
-    const idx = $("presetSelect").value;
-    if(idx === "") return;
-    const presets = loadPresets();
-    presets.splice(Number(idx), 1);
-    savePresets(presets);
-    refreshPresetSelect();
-    $("presetInfo").textContent = "🗑️ Eliminado";
-    setTimeout(()=> $("presetInfo").textContent = "Se guardan en tu navegador", 1200);
-  };
-
-  refreshPresetSelect();
-
-  // =========================
-  // Actions: Chat / Image
-  // =========================
-  $("btnChat").onclick = async () => {
-    const msg = $("chatMsg").value.trim();
-    if(!msg) return;
-    setStatus("chatStatus","", "Enviando...");
-    $("btnChat").disabled = true;
-    try{
-      const data = await postJSON("/chat", {message: msg});
-      $("chatResult").innerHTML = `<div class="card" style="margin-top:10px">${(data.reply||"").replaceAll("\n","<br>")}</div>`;
-      setStatus("chatStatus","good", "✅ Listo");
-    }catch(e){
-      setStatus("chatStatus","bad", "❌ " + e.message);
-    }finally{
-      $("btnChat").disabled = false;
-    }
-  };
-
-  $("btnImage").onclick = async () => {
-    const prompt = $("imgPrompt").value.trim();
-    if(!prompt) return;
-    setStatus("imgStatus","", "Generando...");
-    $("btnImage").disabled = true;
-    try{
-      const data = await postJSON("/image", {prompt, size: $("imgSize").value});
-      if(data.image_url){
-        renderImage("imgResult", data.image_url);
-        setStatus("imgStatus","good","✅ Imagen lista");
-      }else{
-        setStatus("imgStatus","bad","❌ No llegó image_url");
-        $("imgResult").textContent = JSON.stringify(data);
-      }
-    }catch(e){
-      setStatus("imgStatus","bad","❌ " + e.message);
-    }finally{
-      $("btnImage").disabled = false;
-    }
-  };
-
-  // =========================
-  // Actions: Reels
-  // =========================
-  $("btnReelsOnly").onclick = async () => {
-    const text = $("reelsText").value.trim();
-    if(!text) return;
-    setStatus("reelsStatus","", "Creando reels...");
-    $("btnReelsOnly").disabled = true;
-    try{
-      // /reels devuelve FileResponse mp4 (blob)
-      const res = await fetch(api("/reels"), {
-        method:"POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({text, duration: Number($("reelsDuration").value), format:"9:16", cfg:0.5}),
-        mode: "cors",
-      });
-      if(!res.ok) throw new Error("HTTP " + res.status);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-
-      $("reelsResult").innerHTML = `
-        <div style="margin-top:12px;padding:14px;border:1px solid rgba(255,255,255,.14);border-radius:18px;background:rgba(255,255,255,.06);">
-          <div style="font-weight:900;margin-bottom:10px;">✅ Reels listo</div>
-          <video controls playsinline style="width:100%;max-width:520px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:#000;">
-            <source src="${url}" type="video/mp4" />
-          </video>
-          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
-            <a href="${url}" target="_blank" rel="noopener"
-               style="padding:10px 14px;border-radius:12px;background:#7C5CFF;color:#fff;text-decoration:none;font-weight:900;">▶️ Abrir</a>
-            <a href="${url}" download="reels.mp4"
-               style="padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none;font-weight:900;border:1px solid rgba(255,255,255,.16);">⬇️ Descargar MP4</a>
+        <div class="composer-footer">
+          <div class="composer-tools">
+            <button class="tool-button" id="advancedButton" type="button" aria-expanded="false" aria-controls="advancedPanel"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6"/></svg><span data-i18n="preferences">Preferencias</span></button>
+            <span class="smart-note"><i></i><span data-i18n="smartNote">Ahorro inteligente activado</span></span>
           </div>
-          <div style="opacity:.75;font-size:12px;margin-top:10px;">(Este es un archivo temporal en tu navegador)</div>
+          <button class="create-button" id="createButton" type="submit"><span data-i18n="create">Crear ahora</span><span aria-hidden="true">→</span></button>
         </div>
-      `;
-      setStatus("reelsStatus","good","✅ Listo");
-    }catch(e){
-      setStatus("reelsStatus","bad","❌ " + e.message);
-    }finally{
-      $("btnReelsOnly").disabled = false;
-    }
+        <div class="advanced" id="advancedPanel" hidden>
+          <label><span data-i18n="outputLanguage">Idioma del resultado</span><select id="outputLanguage"><option value="es">Español</option><option value="en">English</option></select></label>
+          <label><span data-i18n="format">Formato</span><select id="format"><option value="9:16">Vertical 9:16</option><option value="1:1">Cuadrado 1:1</option><option value="16:9">Horizontal 16:9</option></select></label>
+          <label><span data-i18n="style">Estilo</span><select id="style"><option value="auto" data-i18n="automatic">Automático</option><option value="warm" data-i18n="warm">Cálido</option><option value="professional" data-i18n="professional">Profesional</option><option value="minimal" data-i18n="minimal">Minimalista</option></select></label>
+          <label><span data-i18n="voice">Voz</span><select id="voice"><option value="female" data-i18n="female">Femenina</option><option value="male" data-i18n="male">Masculina</option></select></label>
+        </div>
+      </form>
+      <div class="trust-row"><span>✓ <span data-i18n="safe">Contenido protegido</span></span><span>✓ <span data-i18n="noTech">Sin ajustes técnicos</span></span><span>✓ <span data-i18n="costControl">Control de costo</span></span></div>
+    </section>
+    <section class="result-panel" id="resultPanel" hidden aria-live="polite">
+      <div class="result-heading"><div><span class="result-kicker" data-i18n="result">RESULTADO</span><h2 id="resultTitle" data-i18n="working">Creando con cuidado…</h2></div><button type="button" id="closeResult" aria-label="Cerrar">×</button></div>
+      <div id="resultContent"><div class="loader"><span></span><span></span><span></span></div></div>
+      <div class="result-meta" id="resultMeta"></div>
+    </section>
+    <section class="promise" aria-label="Beneficios">
+      <article><span>♡</span><div><h2 data-i18n="humanTitle">Hecho para personas</h2><p data-i18n="humanText">Habla con naturalidad. No necesitas aprender comandos.</p></div></article>
+      <article><span>⌁</span><div><h2 data-i18n="simpleTitle">Todo en un solo lugar</h2><p data-i18n="simpleText">Corazón elige el mejor camino para cada idea.</p></div></article>
+      <article><span>✓</span><div><h2 data-i18n="safeTitle">Creatividad responsable</h2><p data-i18n="safeText">Protección integrada para crear contenido positivo y seguro.</p></div></article>
+    </section>
+  </main>
+  <aside class="drawer" id="projectsDrawer" aria-hidden="true" aria-labelledby="projectsTitle"><div class="drawer-backdrop" data-close-drawer></div><div class="drawer-panel"><div class="drawer-header"><div><span class="result-kicker" data-i18n="yourSpace">TU ESPACIO</span><h2 id="projectsTitle" data-i18n="myProjects">Mis proyectos</h2></div><button type="button" data-close-drawer aria-label="Cerrar">×</button></div><div class="project-list" id="projectList"></div><button class="clear-button" id="clearProjects" type="button" data-i18n="clearHistory">Borrar historial local</button></div></aside>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <footer><span>Corazón Studio AI</span><span>•</span><span data-i18n="footer">Ideas con propósito, tecnología con corazón.</span></footer>
+  <script>
+// Configure this at deployment time. Never put provider keys in this file.
+window.CORAZON_CONFIG = Object.freeze({
+  apiBase: "https://corazon-studio-ai-backend-3.onrender.com",
+  requestTimeoutMs: 120000,
+  maxLocalProjects: 20
+});
+
+</script><script>
+(() => {
+  "use strict";
+  const cfg = window.CORAZON_CONFIG || {};
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $ = (selector, root = document) => [...root.querySelectorAll(selector)];
+  const state = { language: localStorage.getItem("corazon_language") || "es", mode: "auto", busy: false };
+  const copy = {
+    es:{projects:"Proyectos",eyebrow:"Tu estudio creativo inteligente",headlineA:"Dinos qué quieres crear.",headlineB:"Corazón hace el resto.",heroText:"Una sola idea puede convertirse en texto, imagen, voz o video. Sin configuraciones complicadas.",modeAuto:"Automático",modeText:"Texto",modeImage:"Imagen",modeVideo:"Video",modeVoice:"Voz",ideaLabel:"Describe lo que quieres crear",placeholder:"Ejemplo: Crea un reel inspirador sobre volver a empezar, con voz cálida y música suave...",ideaReel:"Reel inspirador",ideaBusiness:"Imagen para negocio",ideaImprove:"Mejorar un texto",preferences:"Preferencias",smartNote:"Ahorro inteligente activado",create:"Crear ahora",outputLanguage:"Idioma del resultado",format:"Formato",style:"Estilo",automatic:"Automático",warm:"Cálido",professional:"Profesional",minimal:"Minimalista",voice:"Voz",female:"Femenina",male:"Masculina",safe:"Contenido protegido",noTech:"Sin ajustes técnicos",costControl:"Control de costo",result:"RESULTADO",working:"Creando con cuidado…",humanTitle:"Hecho para personas",humanText:"Habla con naturalidad. No necesitas aprender comandos.",simpleTitle:"Todo en un solo lugar",simpleText:"Corazón elige el mejor camino para cada idea.",safeTitle:"Creatividad responsable",safeText:"Protección integrada para crear contenido positivo y seguro.",yourSpace:"TU ESPACIO",myProjects:"Mis proyectos",clearHistory:"Borrar historial local",footer:"Ideas con propósito, tecnología con corazón.",empty:"Aún no hay proyectos guardados.",ready:"Tu creación está lista",download:"Descargar",copyAction:"Copiar",copied:"Copiado",unsafe:"Esta solicitud no cumple las reglas de contenido seguro de Corazón.",missing:"Cuéntame primero qué quieres crear.",connection:"No pudimos conectar con el estudio en este momento. Intenta de nuevo.",cost:"Ruta optimizada por calidad y costo",textType:"Texto",imageType:"Imagen",videoType:"Video",voiceType:"Voz"},
+    en:{projects:"Projects",eyebrow:"Your intelligent creative studio",headlineA:"Tell us what you want to create.",headlineB:"Corazón does the rest.",heroText:"One idea can become text, image, voice, or video. No complicated settings.",modeAuto:"Automatic",modeText:"Text",modeImage:"Image",modeVideo:"Video",modeVoice:"Voice",ideaLabel:"Describe what you want to create",placeholder:"Example: Create an inspiring reel about starting over, with a warm voice and soft music...",ideaReel:"Inspiring reel",ideaBusiness:"Business image",ideaImprove:"Improve a text",preferences:"Preferences",smartNote:"Smart savings enabled",create:"Create now",outputLanguage:"Output language",format:"Format",style:"Style",automatic:"Automatic",warm:"Warm",professional:"Professional",minimal:"Minimal",voice:"Voice",female:"Female",male:"Male",safe:"Protected content",noTech:"No technical setup",costControl:"Cost control",result:"RESULT",working:"Creating with care…",humanTitle:"Made for people",humanText:"Speak naturally. You do not need to learn commands.",simpleTitle:"Everything in one place",simpleText:"Corazón chooses the best path for each idea.",safeTitle:"Responsible creativity",safeText:"Built-in protection for positive, safe content.",yourSpace:"YOUR SPACE",myProjects:"My projects",clearHistory:"Clear local history",footer:"Purposeful ideas, technology with heart.",empty:"No saved projects yet.",ready:"Your creation is ready",download:"Download",copyAction:"Copy",copied:"Copied",unsafe:"This request does not meet Corazón's safe-content rules.",missing:"First, tell me what you want to create.",connection:"We could not connect to the studio right now. Please try again.",cost:"Route optimized for quality and cost",textType:"Text",imageType:"Image",videoType:"Video",voiceType:"Voice"}
   };
+  const t = key => copy[state.language][key] || key;
+  const safeRequest = text => !/(porn|porno|desnud[oa]|nude|sexo explícito|sexual explicit|gore|decapitat|bestial)/i.test(text);
+  const apiUrl = path => `${String(cfg.apiBase || "").replace(/\/$/, "")}${path}`;
+  const validUrl = value => { try { const url = new URL(value, cfg.apiBase); return ["http:","https:"].includes(url.protocol) ? url.href : ""; } catch { return ""; } };
 
-  $("btnReels").onclick = async () => {
-    const text = $("reelsText").value.trim();
-    if(!text) return;
-    setStatus("reelsStatus","", "Creando reels con voz+música...");
-    $("btnReels").disabled = true;
-    try{
-      const payload = {
-        text,
-        duration: Number($("reelsDuration").value),
-        format: "9:16",
-        language: $("reelsLang").value,
-        mode: toggleModeValue("reelsModeToggle"),
-        voice_gender: $("reelsVoiceGender").value,
-        music: $("reelsMusic").value
-      };
-      const data = await postJSON("/reels-voice", payload);
+  function translate(){document.documentElement.lang=state.language;$("#languageButton").textContent=state.language.toUpperCase();$('[data-i18n]').forEach(el=>{const value=t(el.dataset.i18n);if(value)el.textContent=value});$('[data-i18n-placeholder]').forEach(el=>el.placeholder=t(el.dataset.i18nPlaceholder));$("#outputLanguage").value=state.language;renderProjects()}
+  function toast(message){const el=$("#toast");el.textContent=message;el.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove("show"),2600)}
+  function setBusy(value){state.busy=value;$("#createButton").disabled=value;$("#createButton").firstElementChild.textContent=value?t("working"):t("create")}
+  function setMode(mode){state.mode=mode;$('.mode').forEach(el=>{const active=el.dataset.mode===mode;el.classList.toggle("active",active);el.setAttribute("aria-checked",String(active))})}
+  function inferMode(text){if(state.mode!=="auto")return state.mode;if(/\b(reel|video|vídeo|cinematic|cinemático|animación|animation)\b/i.test(text))return "video";if(/\b(imagen|image|foto|photo|poster|flyer|logo)\b/i.test(text))return "image";if(/\b(voz|voice|audio|narración|narration)\b/i.test(text))return "voice";return "text"}
+  async function request(path,payload,blob=false){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),cfg.requestTimeoutMs||120000);try{const response=await fetch(apiUrl(path),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload),signal:controller.signal,mode:"cors"});if(!response.ok){let detail={};try{detail=await response.json()}catch{}throw new Error(detail.detail||detail.message||`HTTP ${response.status}`)}return blob?await response.blob():await response.json()}finally{clearTimeout(timer)}}
+  function payloadFor(text,mode){const lang=$("#outputLanguage").value,format=$("#format").value,style=$("#style").value,voice=$("#voice").value;const enhanced=style==="auto"?text:`${text}. Style: ${style}.`;if(mode==="image")return{path:"/image",payload:{prompt:enhanced,size:format==="1:1"?"1024x1024":format==="16:9"?"1536x1024":"1024x1536"}};if(mode==="video")return{path:"/reels-voice",payload:{text:enhanced,duration:9,format,language:lang,mode:"narrator_only",voice_gender:voice,music:"soft"}};if(mode==="voice")return{path:"/tts",payload:{text:enhanced,language:lang,voice_gender:voice}};return{path:"/chat",payload:{message:enhanced,language:lang}}
+  }
+  function extractResult(data,mode){if(mode==="text")return{kind:"text",value:data.reply||data.message||data.text||JSON.stringify(data,null,2)};const candidate=data.image_url||data.video_url||data.audio_url||data.url;if(candidate)return{kind:mode,value:validUrl(candidate)};return{kind:"text",value:data.message||JSON.stringify(data,null,2)}}
+  function mediaElement(result){if(result.kind==="text"){const div=document.createElement("div");div.className="result-copy";div.textContent=result.value;return div}const tag=result.kind==="image"?"img":result.kind==="voice"?"audio":"video";const media=document.createElement(tag);media.className="result-media";media.src=result.value;if(tag!=="img"){media.controls=true;media.playsInline=true}media.alt=state.language==="es"?"Creación de Corazón Studio AI":"Corazón Studio AI creation";return media}
+  function renderResult(result,mode,elapsed){$("#resultTitle").textContent=t("ready");const content=$("#resultContent");content.replaceChildren(mediaElement(result));const actions=document.createElement("div");actions.className="result-actions";if(result.kind==="text"){const button=document.createElement("button");button.textContent=t("copyAction");button.onclick=async()=>{await navigator.clipboard.writeText(result.value);toast(t("copied"))};actions.append(button)}else{const link=document.createElement("a");link.href=result.value;link.target="_blank";link.rel="noopener";link.download="";link.textContent=t("download");actions.append(link)}content.append(actions);$("#resultMeta").textContent=`${t(`${mode}Type`)} · ${t("cost")} · ${(elapsed/1000).toFixed(1)}s`}
+  function saveProject(project){const items=JSON.parse(localStorage.getItem("corazon_projects_v2")||"[]");items.unshift(project);localStorage.setItem("corazon_projects_v2",JSON.stringify(items.slice(0,cfg.maxLocalProjects||20)));renderProjects()}
+  function renderProjects(){const root=$("#projectList");if(!root)return;const items=JSON.parse(localStorage.getItem("corazon_projects_v2")||"[]");root.replaceChildren();if(!items.length){const empty=document.createElement("div");empty.className="empty";empty.textContent=t("empty");root.append(empty);return}items.forEach(item=>{const card=document.createElement("article");card.className="project-item";const title=document.createElement("strong");title.textContent=t(`${item.mode}Type`);const prompt=document.createElement("p");prompt.textContent=item.prompt;const date=document.createElement("small");date.textContent=new Intl.DateTimeFormat(state.language,{dateStyle:"medium",timeStyle:"short"}).format(new Date(item.createdAt));card.append(title,prompt,date);root.append(card)})}
+  async function create(event){event.preventDefault();if(state.busy)return;const text=$("#ideaInput").value.trim();if(!text){toast(t("missing"));$("#ideaInput").focus();return}if(!safeRequest(text)){toast(t("unsafe"));return}const mode=inferMode(text),spec=payloadFor(text,mode),started=Date.now();$("#resultPanel").hidden=false;$("#resultTitle").textContent=t("working");$("#resultContent").innerHTML='<div class="loader"><span></span><span></span><span></span></div>';$("#resultMeta").textContent=t("cost");$("#resultPanel").scrollIntoView({behavior:"smooth",block:"center"});setBusy(true);try{let data;if(mode==="video"&&spec.path==="/reels")data={url:URL.createObjectURL(await request(spec.path,spec.payload,true))};else data=await request(spec.path,spec.payload);const result=extractResult(data,mode);renderResult(result,mode,Date.now()-started);saveProject({prompt:text,mode,createdAt:Date.now()})}catch(error){$("#resultTitle").textContent=state.language==="es"?"No pudimos terminar":"We could not finish";const message=document.createElement("div");message.className="result-copy";message.textContent=`${t("connection")} (${error.message})`;$("#resultContent").replaceChildren(message);$("#resultMeta").textContent=""}finally{setBusy(false)}}
 
-      if(data.video_url){
-        renderVideoResult("reelsResult", data.video_url);
-        setStatus("reelsStatus","good","✅ Listo");
-      }else{
-        setStatus("reelsStatus","bad","❌ No llegó video_url");
-        $("reelsResult").textContent = JSON.stringify(data);
-      }
-    }catch(e){
-      setStatus("reelsStatus","bad","❌ " + e.message);
-    }finally{
-      $("btnReels").disabled = false;
-    }
-  };
+  $("#createForm").addEventListener("submit",create);$('.mode').forEach(el=>el.addEventListener("click",()=>setMode(el.dataset.mode)));$('.suggestions button').forEach(el=>el.addEventListener("click",()=>{$("#ideaInput").value=el.dataset[`prompt${state.language==="es"?"Es":"En"}`];$("#ideaInput").focus()}));$("#languageButton").addEventListener("click",()=>{state.language=state.language==="es"?"en":"es";localStorage.setItem("corazon_language",state.language);translate()});$("#advancedButton").addEventListener("click",event=>{const panel=$("#advancedPanel"),open=panel.hidden;panel.hidden=!open;event.currentTarget.setAttribute("aria-expanded",String(open))});$("#closeResult").addEventListener("click",()=>$("#resultPanel").hidden=true);
+  const drawer=$("#projectsDrawer");function toggleDrawer(open){drawer.classList.toggle("open",open);drawer.setAttribute("aria-hidden",String(!open));document.body.style.overflow=open?"hidden":""}$("#projectsButton").addEventListener("click",()=>toggleDrawer(true));$('[data-close-drawer]').forEach(el=>el.addEventListener("click",()=>toggleDrawer(false)));$("#clearProjects").addEventListener("click",()=>{localStorage.removeItem("corazon_projects_v2");renderProjects()});document.addEventListener("keydown",event=>{if(event.key==="Escape")toggleDrawer(false)});translate();
+})();
 
-  // =========================
-  // Actions: Cine
-  // =========================
-  $("btnCineOnly").onclick = async () => {
-    const text = $("cineText").value.trim();
-    if(!text) return;
-    setStatus("cineStatus","", "Creando cine (solo)...");
-
-    $("btnCineOnly").disabled = true;
-    try{
-      const data = await postJSON("/video-cine", {
-        text,
-        duration: Number($("cineDuration").value),
-        format:"9:16",
-        cfg:0.5
-      });
-
-      if(data.video_url){
-        renderVideoResult("cineResult", data.video_url);
-        setStatus("cineStatus","good","✅ Listo");
-      }else{
-        setStatus("cineStatus","bad","❌ No llegó video_url");
-        $("cineResult").textContent = JSON.stringify(data);
-      }
-    }catch(e){
-      setStatus("cineStatus","bad","❌ " + e.message);
-    }finally{
-      $("btnCineOnly").disabled = false;
-    }
-  };
-
-  $("btnCine").onclick = async () => {
-    const text = $("cineText").value.trim();
-    if(!text) return;
-    setStatus("cineStatus","", "Creando cine con voz+música...");
-    $("btnCine").disabled = true;
-
-    try{
-      const payload = {
-        text,
-        duration: Number($("cineDuration").value),
-        format:"9:16",
-        cfg:0.5,
-        language: $("cineLang").value,
-        mode: toggleModeValue("cineModeToggle"),
-        voice_gender: $("cineVoiceGender").value,
-        music: $("cineMusic").value
-      };
-      const data = await postJSON("/video-cine-voice", payload);
-
-      if(data.video_url){
-        renderVideoResult("cineResult", data.video_url);
-        setStatus("cineStatus","good","✅ Listo");
-      }else{
-        setStatus("cineStatus","bad","❌ No llegó video_url");
-        $("cineResult").textContent = JSON.stringify(data);
-      }
-    }catch(e){
-      setStatus("cineStatus","bad","❌ " + e.message);
-    }finally{
-      $("btnCine").disabled = false;
-    }
-  };
 </script>
 </body>
 </html>
