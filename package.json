@@ -1,0 +1,11 @@
+{
+  "name": "corazon-studio-ai-web",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node tests/frontend-smoke.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
