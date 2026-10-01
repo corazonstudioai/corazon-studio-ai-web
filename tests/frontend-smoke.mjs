@@ -12,10 +12,16 @@ assert.equal((html.match(/const \$ =/g) || []).length, 1, "Single selector helpe
 assert.equal((html.match(/const \$\$ =/g) || []).length, 1, "Multi selector helper must be declared once");
 assert.match(html, /voice:voice==="male"\?"onyx":"nova"/, "Voice request must match backend schema");
 assert.doesNotMatch(html, /\(\$\{error\.message\}\)/, "Technical errors must not be shown to users");
-assert.match(html, /\/functions\/v1\/\$\{path\}/, "Video must use Supabase Edge Functions");
+assert.match(html, /\/functions\/v1\/\$\{path\}/, "All generation must use Supabase Edge Functions");
+assert.doesNotMatch(html, /onrender\.com/, "The web app must not call the legacy Render backend");
+assert.doesNotMatch(html, /workers\.dev|cloudflare|wrangler/i, "The web app must not depend on Cloudflare");
+assert.match(html, /return edgeRequest\(path,/, "Text, image and voice must use Supabase Edge Functions");
 assert.match(html, /edgeRequest\("video-start"/, "Video must start asynchronously");
 assert.match(html, /edgeRequest\("video-status"/, "Video status must be polled");
 assert.match(html, /corazon_pending_video/, "Pending video must survive a refresh");
+assert.match(html, /edgeRequestTimeoutMs: 120000/, "Edge calls must stop waiting after a bounded timeout");
+assert.match(html, /videoMaxWaitMs: 180000/, "Video polling must not leave the UI waiting indefinitely");
+assert.match(html, /videoPaused/, "Interrupted video jobs must show recovery guidance");
 assert.match(html, /\/auth\/v1\/otp/, "Email verification must request a one-time code");
 assert.match(html, /\/auth\/v1\/verify/, "Email one-time code must be verified");
 assert.doesNotMatch(html, /fal[_-]?key/i, "Provider secret names must not appear in the web app");
