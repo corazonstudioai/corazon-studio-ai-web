@@ -84,13 +84,11 @@
   <script>
 // Configure this at deployment time. Never put provider keys in this file.
 window.CORAZON_CONFIG = Object.freeze({
-  apiBase: "https://corazon-studio-ai-backend-3.onrender.com",
   supabaseUrl: "__SUPABASE_URL__",
   supabasePublishableKey: "__SUPABASE_PUBLISHABLE_KEY__",
-  requestTimeoutMs: 120000,
   videoPollMs: 4000,
   videoMaxWaitMs: 180000,
-  edgeRequestTimeoutMs: 20000,
+  edgeRequestTimeoutMs: 120000,
   maxLocalProjects: 20
 });
 
@@ -107,17 +105,16 @@ window.CORAZON_CONFIG = Object.freeze({
   };
   const t = key => copy[state.language][key] || key;
   const safeRequest = text => !/(porn|porno|desnud[oa]|nude|sexo explícito|sexual explicit|gore|decapitat|bestial)/i.test(text);
-  const apiUrl = path => `${String(cfg.apiBase || "").replace(/\/$/, "")}${path}`;
   const supabaseUrl = path => `${String(cfg.supabaseUrl || "").replace(/\/$/, "")}${path}`;
   const configured = () => /^https:\/\/.+\.supabase\.co$/.test(String(cfg.supabaseUrl||"")) && !String(cfg.supabasePublishableKey||"").startsWith("__");
-  const validUrl = value => { try { const url = new URL(value, cfg.apiBase); return ["http:","https:"].includes(url.protocol) ? url.href : ""; } catch { return ""; } };
+  const validUrl = value => { try { const url = new URL(value, cfg.supabaseUrl); return ["http:","https:","data:"].includes(url.protocol) ? url.href : ""; } catch { return ""; } };
 
   function translate(){document.documentElement.lang=state.language;$("#languageButton").textContent=state.language.toUpperCase();$$('[data-i18n]').forEach(el=>{const value=t(el.dataset.i18n);if(value)el.textContent=value});$$('[data-i18n-placeholder]').forEach(el=>el.placeholder=t(el.dataset.i18nPlaceholder));$("#outputLanguage").value=state.language;renderProjects()}
   function toast(message){const el=$("#toast");el.textContent=message;el.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove("show"),2600)}
   function setBusy(value){state.busy=value;$("#createButton").disabled=value;$("#createButton").firstElementChild.textContent=value?t("working"):t("create")}
   function setMode(mode){state.mode=mode;$$('.mode').forEach(el=>{const active=el.dataset.mode===mode;el.classList.toggle("active",active);el.setAttribute("aria-checked",String(active))})}
   function inferMode(text){if(state.mode!=="auto")return state.mode;if(/\b(reel|video|vídeo|cinematic|cinemático|animación|animation)\b/i.test(text))return "video";if(/\b(imagen|image|foto|photo|poster|flyer|logo)\b/i.test(text))return "image";if(/\b(voz|voice|audio|narración|narration)\b/i.test(text))return "voice";return "text"}
-  async function request(path,payload,blob=false){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),cfg.requestTimeoutMs||120000);try{const response=await fetch(apiUrl(path),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload),signal:controller.signal,mode:"cors"});if(!response.ok){let detail={};try{detail=await response.json()}catch{}throw new Error(detail.detail||detail.message||`HTTP ${response.status}`)}return blob?await response.blob():await response.json()}finally{clearTimeout(timer)}}
+  async function request(path,payload){const session=await requireSession();return edgeRequest(path,{...payload,idempotency_key:payload.idempotency_key||crypto.randomUUID()},session)}
   function readSession(){try{return JSON.parse(localStorage.getItem("corazon_supabase_session")||"null")}catch{return null}}
   function saveSession(session){localStorage.setItem("corazon_supabase_session",JSON.stringify(session))}
   async function authRequest(path,payload){if(!configured())throw new Error("Supabase no está configurado");const response=await fetch(supabaseUrl(path),{method:"POST",headers:{apikey:cfg.supabasePublishableKey,"Content-Type":"application/json"},body:JSON.stringify(payload)});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.msg||data.error_description||data.message||`HTTP ${response.status}`);return data}
@@ -127,7 +124,7 @@ window.CORAZON_CONFIG = Object.freeze({
   const wait = ms => new Promise(resolve=>setTimeout(resolve,ms));
   async function waitForVideo(jobId,session){const deadline=Date.now()+(cfg.videoMaxWaitMs||180000);let connectionFailures=0;while(Date.now()<deadline){try{const status=await edgeRequest("video-status",{job_id:jobId},session);connectionFailures=0;if(status.status==="completed"){localStorage.removeItem("corazon_pending_video");return status}if(status.status==="failed"){localStorage.removeItem("corazon_pending_video");throw new Error(status.error||"Video failed")}}catch(error){if(/Video failed/.test(error.message))throw error;connectionFailures+=1;if(connectionFailures>=3)throw new Error("Video connection paused")}await wait(cfg.videoPollMs||4000)}throw new Error("Video connection paused")}
   async function createVideo(prompt){const session=await requireSession();const idempotencyKey=crypto.randomUUID();const started=await edgeRequest("video-start",{prompt,duration:5,idempotency_key:idempotencyKey},session);localStorage.setItem("corazon_pending_video",JSON.stringify({jobId:started.job_id,prompt,createdAt:Date.now()}));return waitForVideo(started.job_id,session)}
-  function payloadFor(text,mode){const lang=$("#outputLanguage").value,format=$("#format").value,style=$("#style").value,voice=$("#voice").value;const enhanced=style==="auto"?text:`${text}. Style: ${style}.`;if(mode==="image")return{path:"/image",payload:{prompt:enhanced,size:format==="1:1"?"1024x1024":format==="16:9"?"1536x1024":"1024x1536"}};if(mode==="video")return{path:"video-start",payload:{prompt:enhanced,duration:5}};if(mode==="voice")return{path:"/tts",payload:{text:enhanced,voice:voice==="male"?"onyx":"nova",response_format:"mp3"}};return{path:"/chat",payload:{message:enhanced,language:lang}}
+  function payloadFor(text,mode){const lang=$("#outputLanguage").value,format=$("#format").value,style=$("#style").value,voice=$("#voice").value;const enhanced=style==="auto"?text:`${text}. Style: ${style}.`;if(mode==="image")return{path:"image",payload:{prompt:enhanced,size:format==="1:1"?"1024x1024":format==="16:9"?"1536x1024":"1024x1536"}};if(mode==="video")return{path:"video-start",payload:{prompt:enhanced,duration:5}};if(mode==="voice")return{path:"tts",payload:{text:enhanced,voice:voice==="male"?"onyx":"nova",response_format:"mp3"}};return{path:"chat",payload:{message:enhanced,language:lang}}
   }
   function extractResult(data,mode){if(mode==="text")return{kind:"text",value:data.reply||data.message||data.text||JSON.stringify(data,null,2)};const candidate=data.image_url||data.video_url||data.audio_url||data.url;if(candidate)return{kind:mode,value:validUrl(candidate)};return{kind:"text",value:data.message||JSON.stringify(data,null,2)}}
   function mediaElement(result){if(result.kind==="text"){const div=document.createElement("div");div.className="result-copy";div.textContent=result.value;return div}const tag=result.kind==="image"?"img":result.kind==="voice"?"audio":"video";const media=document.createElement(tag);media.className="result-media";media.src=result.value;if(tag!=="img"){media.controls=true;media.playsInline=true}media.alt=state.language==="es"?"Creación de Corazón Studio AI":"Corazón Studio AI creation";return media}
