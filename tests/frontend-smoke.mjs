@@ -21,7 +21,7 @@ assert.match(html, /\{prompt,narration:prompt,voice,duration:5/, "Video request 
 assert.match(html, /edgeRequest\("video-status"/, "Video status must be polled");
 assert.match(html, /corazon_pending_video/, "Pending video must survive a refresh");
 assert.match(html, /edgeRequestTimeoutMs: 120000/, "Edge calls must stop waiting after a bounded timeout");
-assert.match(html, /videoMaxWaitMs: 180000/, "Video polling must not leave the UI waiting indefinitely");
+assert.match(html, /videoMaxWaitMs: 600000/, "Video polling must allow generation plus audio while remaining bounded");
 assert.match(html, /videoPaused/, "Interrupted video jobs must show recovery guidance");
 assert.match(html, /\/auth\/v1\/otp/, "Email verification must request a one-time code");
 assert.match(html, /\/auth\/v1\/verify/, "Email one-time code must be verified");
@@ -33,3 +33,5 @@ assert.doesNotMatch(html, /fal[_-]?key/i, "Provider secret names must not appear
 assert.doesNotMatch(html, /reels-voice/, "Video must no longer call the Render route");
 
 console.log("Frontend smoke checks passed.");
+
+assert.match(html, /Agregando voz al video/, "Video progress must explain the audio stage");
