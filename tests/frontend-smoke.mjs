@@ -35,3 +35,6 @@ assert.doesNotMatch(html, /reels-voice/, "Video must no longer call the Render r
 console.log("Frontend smoke checks passed.");
 
 assert.match(html, /Agregando voz al video/, "Video progress must explain the audio stage");
+
+assert.match(html, /VideoGenerationError/, "Permanent video failures must not be shown as connection pauses");
+assert.match(html, /renderVideoFailure/, "Permanent video failures must explain the refund");
