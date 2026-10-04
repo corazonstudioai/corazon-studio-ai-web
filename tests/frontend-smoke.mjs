@@ -17,6 +17,7 @@ assert.doesNotMatch(html, /onrender\.com/, "The web app must not call the legacy
 assert.doesNotMatch(html, /workers\.dev|cloudflare|wrangler/i, "The web app must not depend on Cloudflare");
 assert.match(html, /return edgeRequest\(path,/, "Text, image and voice must use Supabase Edge Functions");
 assert.match(html, /edgeRequest\("video-start"/, "Video must start asynchronously");
+assert.match(html, /\{prompt,narration:prompt,voice,duration:5/, "Video request must include narration and selected voice");
 assert.match(html, /edgeRequest\("video-status"/, "Video status must be polled");
 assert.match(html, /corazon_pending_video/, "Pending video must survive a refresh");
 assert.match(html, /edgeRequestTimeoutMs: 120000/, "Edge calls must stop waiting after a bounded timeout");
