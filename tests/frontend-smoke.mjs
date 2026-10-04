@@ -24,6 +24,10 @@ assert.match(html, /videoMaxWaitMs: 180000/, "Video polling must not leave the U
 assert.match(html, /videoPaused/, "Interrupted video jobs must show recovery guidance");
 assert.match(html, /\/auth\/v1\/otp/, "Email verification must request a one-time code");
 assert.match(html, /\/auth\/v1\/verify/, "Email one-time code must be verified");
+assert.match(html, /replace\(\/\\D\/g,""\)\.slice\(0,8\)/, "Pasted OTP codes must be normalized before verification");
+assert.match(html, /pattern="\[0-9\]\{6,8\}"/, "OTP input must accept the configured 6 to 8 digit range");
+assert.match(html, /id="authResend"/, "Users must be able to request a fresh OTP");
+assert.match(html, /authErrorMessage/, "Authentication failures must provide actionable guidance");
 assert.doesNotMatch(html, /fal[_-]?key/i, "Provider secret names must not appear in the web app");
 assert.doesNotMatch(html, /reels-voice/, "Video must no longer call the Render route");
 
