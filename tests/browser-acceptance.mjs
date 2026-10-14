@@ -14,13 +14,16 @@ const errors=[],requests=[];
 const fixtureDirectory=fs.mkdtempSync(path.join(os.tmpdir(),"corazon-browser-"));
 const video=Buffer.from(fs.readFileSync(new URL("fixtures/video-with-audio.mp4.b64",import.meta.url),"utf8"),"base64");
 page.on("pageerror",error=>errors.push(error.message));
-let mode="text",failMedia=false;
+let mode="text",failMedia=false,silentPolls=0;
+const silentVideo=Buffer.from(fs.readFileSync(new URL("fixtures/video-silent-vertical.mp4.b64",import.meta.url),"utf8"),"base64");
+assert.equal(silentVideo.includes(Buffer.from("soun")),false);
 const plans={
   text:{action:"text",message:"Dios va adelante.",prompt:"",narration:"",required_features:["text"]},
   voice:{action:"voice",message:"Una voz cálida",prompt:"",narration:"Dios va adelante.",required_features:["voice"]},
   image:{action:"image",message:"Un amanecer",prompt:"Un amanecer tranquilo",narration:"",required_features:["image"]},
   video:{action:"video",message:"Un video",prompt:"Un amanecer tranquilo",narration:"Dios va adelante.",required_features:["video","voice"]},
 };
+plans.silent={...plans.video,narration:"",required_features:["video"],audio_mode:"silent",aspect_ratio:"9:16"};
 const wav=Buffer.alloc(44+8000);
 wav.write("RIFF");wav.writeUInt32LE(wav.length-8,4);wav.write("WAVEfmt ",8);wav.writeUInt32LE(16,16);wav.writeUInt16LE(1,20);wav.writeUInt16LE(1,22);wav.writeUInt32LE(8000,24);wav.writeUInt32LE(8000,28);wav.writeUInt16LE(1,32);wav.writeUInt16LE(8,34);wav.write("data",36);wav.writeUInt32LE(8000,40);wav.fill(128,44);
 await page.route("**/*",async route=>{
@@ -41,8 +44,15 @@ await page.route("**/*",async route=>{
   }
   if(url.pathname==="/media/audio.wav")return route.fulfill({body:wav,contentType:"audio/wav"});
   if(url.pathname.endsWith("/image"))return route.fulfill({json:{image_url:"https://fixture.supabase.co/media/image.png",credits_remaining:3}});
-  if(url.pathname.endsWith("/video-start"))return route.fulfill({json:{job_id:"fixture-video",status:"queued",credits_remaining:3}});
-  if(url.pathname.endsWith("/video-status"))return route.fulfill({json:{status:"completed",video_url:"https://fixture.supabase.co/media/video.mp4",has_audio:true}});
+  if(url.pathname.endsWith("/video-start")){
+    if(mode==="silent"){assert.equal(body.audio_mode,"silent");assert.equal(body.narration,"");assert.equal(body.aspect_ratio,"9:16");assert.equal(body.prompt,"Un amanecer tranquilo");}
+    return route.fulfill({json:{job_id:"fixture-video",status:"queued",credits_remaining:3}});
+  }
+  if(url.pathname.endsWith("/video-status")){
+    if(mode==="silent"&&silentPolls++===0)return route.fulfill({json:{status:"in_progress",stage:"composing_video"}});
+    return route.fulfill({json:{status:"completed",video_url:mode==="silent"?"https://fixture.supabase.co/media/silent.mp4":"https://fixture.supabase.co/media/video.mp4",has_audio:mode!=="silent"}});
+  }
+  if(url.pathname==="/media/silent.mp4")return route.fulfill({body:silentVideo,contentType:"video/mp4"});
   if(url.pathname==="/media/video.mp4")return route.fulfill({body:video,contentType:"video/mp4"});
   if(url.pathname==="/media/image.png")return route.fulfill({body:Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jf/QAAAAASUVORK5CYII=","base64"),contentType:"image/png"});
   throw new Error("Unexpected fixture request: "+url.pathname);
@@ -88,6 +98,23 @@ try{
   const savedPath=path.join(fixtureDirectory,"downloaded.mp4");await download.saveAs(savedPath);
   assert.deepEqual(fs.readFileSync(savedPath),video,"Downloaded bytes must match the generated fixture");
   assert.equal(await page.evaluate(()=>localStorage.getItem("corazon_pending_video")),null);
+
+  mode="silent";
+  const speechBefore=requests.filter(r=>r.path.endsWith("/tts")).length;
+  const plansBefore=requests.filter(r=>r.path.endsWith("/chat")).length;
+  await page.locator('[data-mode="video"]').click();
+  await page.locator("#ideaInput").fill("Crea un video sin texto ni narración");await page.locator("#createButton").click();
+  await page.getByText("Preparando el video…",{exact:true}).waitFor();
+  await page.locator("video").waitFor();await page.waitForFunction(()=>document.querySelector("video")?.readyState>=1);
+  assert.equal(requests.filter(r=>r.path.endsWith("/chat")).length,plansBefore+1,"Selected Video must prepare content instead of speaking the command");
+  assert.equal(requests.filter(r=>r.path.endsWith("/chat")).at(-1).body.preferences.mode,"video");
+  assert.equal(requests.filter(r=>r.path.endsWith("/tts")).length,speechBefore);
+  assert.equal(await page.locator("video").evaluate(el=>el.videoWidth/el.videoHeight),9/16);
+  const silentDownload=page.waitForEvent("download");await page.getByRole("button",{name:"Descargar",exact:true}).click();
+  const savedSilent=path.join(fixtureDirectory,"silent.mp4");await (await silentDownload).saveAs(savedSilent);
+  assert.deepEqual(fs.readFileSync(savedSilent),silentVideo);
+  await page.waitForFunction(()=>!localStorage.getItem("corazon_pending_brain"));
+  await page.locator('[data-mode="auto"]').click();
 
   mode="voice";failMedia=true;
   await page.locator("#ideaInput").fill("Crea una voz cálida");await page.locator("#createButton").click();
