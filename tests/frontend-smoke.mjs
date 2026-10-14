@@ -10,7 +10,7 @@ scripts.forEach((source, index) => new vm.Script(source, { filename: `inline-${i
 
 assert.equal((html.match(/const \$ =/g) || []).length, 1, "Single selector helper must be declared once");
 assert.equal((html.match(/const \$\$ =/g) || []).length, 1, "Multi selector helper must be declared once");
-assert.match(html, /voice:voice==="male"\?"onyx":"nova"/, "Voice request must match backend schema");
+assert.match(html, /CorazonBrain\.speech\(text,voice,style\)/, "Speech must keep raw text separate from style instructions");
 assert.doesNotMatch(html, /\(\$\{error\.message\}\)/, "Technical errors must not be shown to users");
 assert.match(html, /\/functions\/v1\/\$\{path\}/, "All generation must use Supabase Edge Functions");
 assert.doesNotMatch(html, /onrender\.com/, "The web app must not call the legacy Render backend");
@@ -38,3 +38,121 @@ assert.match(html, /Agregando voz al video/, "Video progress must explain the au
 
 assert.match(html, /VideoGenerationError/, "Permanent video failures must not be shown as connection pauses");
 assert.match(html, /renderVideoFailure/, "Permanent video failures must explain the refund");
+
+
+// Execute the actual Brain code, rather than mirroring routing rules in tests.
+const brainScript = scripts.find(source => source.includes("window.CorazonBrain ="));
+const brainContext = { window: {} };
+vm.runInNewContext(brainScript, brainContext);
+const brain = brainContext.window.CorazonBrain;
+for (const [prompt, expected] of [
+  ["Escribe un guion para un video de mi negocio", "text"],
+  ["Create a script for an inspiring reel", "text"],
+  ["Necesito un guion para video", "text"],
+  ["Crea un video con este guion", "video"],
+  ["Crea una imagen con texto para mi negocio", "image"],
+  ["Quiero un afiche de mi tienda", "image"],
+  ["Crea una narración sobre la esperanza", "voice"],
+  ["Create a video with a warm voice", "video"],
+  ["Traduce esta narración al inglés", "text"],
+  ["Necesito promocionar mi negocio", "text"],
+]) assert.equal(brain.route(prompt), expected, prompt);
+assert.equal(brain.route("Escribe un guion", "video"), "video", "Explicit choice takes priority");
+const speech = brain.speech("  Dios va adelante.  ", "male", "warm");
+assert.equal(speech.text, "Dios va adelante.");
+assert.equal(speech.voice, "onyx");
+assert.ok(speech.instructions.includes("warmth"));
+assert.equal(brain.speech("Hello", "female", "auto").voice, "nova");
+assert.equal(brain.speech("Hello", "female", "auto").instructions, undefined);
+assert.doesNotMatch(html, /La solicitud anterior venció y fue cerrada/, "Browser age alone cannot assert server expiry or refund");
+console.log("Brain routing and speech behavior checks passed.");
+
+// Exercise authentication cancellation against the real application functions.
+const elements = new Map();
+function element(selector) {
+  if (!elements.has(selector)) elements.set(selector, {
+    value: "", hidden: false, disabled: false, required: false, textContent: "",
+    listeners: {}, classList: { toggle() {} },
+    addEventListener(name, handler) { this.listeners[name] = handler; },
+    setAttribute() {}, showModal() {}, close() {}, focus() {},
+  });
+  return elements.get(selector);
+}
+const storage = new Map();
+const appContext = {
+  window: { CorazonBrain: brain },
+  localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
+  document: { querySelector: element, querySelectorAll: () => [], addEventListener() {}, body: { style: {} } },
+};
+const appScript = scripts.find(source => source.includes("const state ="));
+vm.runInNewContext(appScript.replace("translate();resumePendingBrain().then(handled=>{if(!handled)return resumePendingVideo()});", "window.__test={state,requireSession,payloadFor,readLocal,extractResult};"), appContext);
+const app = appContext.window.__test;
+element("#voice").value = "male";
+element("#style").value = "warm";
+assert.equal(app.payloadFor("Dios va adelante.", "voice").payload.text, "Dios va adelante.");
+assert.equal(app.payloadFor("Dios va adelante.", "voice").payload.voice, "onyx");
+storage.set("corazon_projects_v2", "broken-json");
+assert.equal(app.readLocal("corazon_projects_v2", "fallback"), "fallback");
+for (const event of ["cancel", "close"]) {
+  const authPromise = app.requireSession();
+  const rejected = assert.rejects(authPromise, error => error.name === "AuthenticationCancelled");
+  await Promise.resolve();
+  element("#authDialog").listeners[event]();
+  await rejected;
+  assert.equal(app.state.authResolve, null, "Closing auth settles the pending creation");
+}
+console.log("Interface payload and authentication cancellation checks passed.");
+
+const makeTask=()=>({prompt:"Crea contenido inspirador",language:"es",format:"9:16",style:"warm",voice:"female",planId:"123e4567-e89b-42d3-a456-426614174000",createId:"123e4567-e89b-42d3-a456-426614174001",createdAt:Date.now()});
+const plans={
+  text:{action:"text",message:"Dios va adelante.",prompt:"",narration:"",required_features:["text"]},
+  image:{action:"image",message:"Una imagen inspiradora",prompt:"Un amanecer tranquilo",narration:"",required_features:["image"]},
+  voice:{action:"voice",message:"Una voz cálida",prompt:"",narration:"Dios va adelante.",required_features:["voice"]},
+  video:{action:"video",message:"Un video inspirador",prompt:"Un amanecer tranquilo",narration:"Dios va delante de ti. Sigue adelante con fe.",required_features:["video","voice"]},
+  clarify:{action:"clarify",message:"La música todavía necesita integración.",prompt:"",narration:"",required_features:["music"]},
+};
+for(const [action,plan] of Object.entries(plans)){
+  const calls=[], checkpoints=[];
+  const task=makeTask();
+  const result=await brain.run(task,{
+    request:async(path,payload)=>{calls.push({path,payload});return path==="chat"?{plan,credits_remaining:4}:{job_id:"video-job",audio_url:"https://example.invalid/audio",image_url:"https://example.invalid/image"}},
+    checkpoint:value=>checkpoints.push(JSON.parse(JSON.stringify(value))),progress:()=>{}
+  });
+  assert.equal(calls[0].payload.idempotency_key,task.planId);
+  assert.equal(calls[0].payload.purpose,"brain");
+  assert.equal(calls[0].payload.language,"es");
+  assert.equal(result.mode,action==="clarify"?"text":action);
+  assert.equal(calls.length,["text","clarify"].includes(action)?1:2);
+  if(action==="voice"){
+    assert.equal(calls[1].payload.text,plan.narration,"Speak the prepared narration, not the user's command");
+    assert.equal(calls[1].payload.voice,"nova");
+  }
+  if(action==="video"){
+    assert.equal(calls[1].payload.narration,plan.narration);
+    assert.equal(task.jobId,"video-job");
+    assert.equal(checkpoints.at(-1).jobId,"video-job");
+  }
+  if(calls[1])assert.equal(calls[1].payload.idempotency_key,task.createId);
+}
+// A persisted plan skips a charged planning call and keeps the exact generation ID.
+const recovered=makeTask();recovered.plan=plans.voice;recovered.creditsRemaining=3;
+const recoveryCalls=[];
+await brain.run(recovered,{request:async(path,payload)=>{recoveryCalls.push({path,payload});return{audio_url:"https://example.invalid/audio"}},checkpoint(){},progress(){}});
+assert.equal(recoveryCalls.length,1);assert.equal(recoveryCalls[0].path,"tts");assert.equal(recoveryCalls[0].payload.idempotency_key,recovered.createId);
+// An existing video job does not start or pay for a second video.
+const pending=makeTask();pending.plan=plans.video;pending.creditsRemaining=2;pending.jobId="existing-video";
+await brain.run(pending,{request:async()=>{throw new Error("must not generate")},checkpoint(){},progress(){}});
+// No second paid call is made when planning used the last available credit.
+const exhausted=makeTask();exhausted.plan=plans.image;exhausted.creditsRemaining=0;
+await assert.rejects(brain.run(exhausted,{request:async()=>{throw new Error("must not generate")},checkpoint(){},progress(){}}),error=>error.status===402&&error.code==="prepared_without_credit");
+// Provider/model JSON is untrusted: invalid plans never reach an executor.
+for(const invalid of [null,{}, {...plans.voice,narration:""}, {...plans.image,prompt:""}, {...plans.video,narration:"word ".repeat(13)}, {...plans.video,required_features:["music"]}, {...plans.text,required_features:"text"}]){
+  assert.throws(()=>brain.validatePlan(invalid));
+}
+const broken=makeTask();delete broken.planId;
+await assert.rejects(brain.run(broken,{request:async()=>{throw new Error("must not generate")},checkpoint(){},progress(){}}),error=>error.code==="invalid_brain_task");
+assert.throws(()=>app.extractResult({image_url:"javascript:alert(1)"},"image"));
+assert.throws(()=>app.extractResult({reply:" "},"text"));
+assert.throws(()=>app.extractResult({message:"not a file"},"voice"));
+assert.equal(app.extractResult({reply:"Dios va adelante."},"text").value,"Dios va adelante.");
+console.log("Brain execution, recovery, budget and invalid-contract checks passed.");
