@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
 import { chromium } from "playwright-core";
 
 const html=fs.readFileSync(new URL("../index.html",import.meta.url),"utf8")
@@ -13,9 +12,7 @@ const context=await browser.newContext({viewport:{width:412,height:915}});
 const page=await context.newPage();
 const errors=[],requests=[];
 const fixtureDirectory=fs.mkdtempSync(path.join(os.tmpdir(),"corazon-browser-"));
-const videoPath=path.join(fixtureDirectory,"fixture.mp4");
-execFileSync("ffmpeg",["-hide_banner","-loglevel","error","-f","lavfi","-i","color=c=blue:s=360x640:r=24","-f","lavfi","-i","anullsrc=r=44100:cl=mono","-t","1","-c:v","libx264","-pix_fmt","yuv420p","-c:a","aac","-shortest","-movflags","+faststart",videoPath]);
-const video=fs.readFileSync(videoPath);
+const video=Buffer.from(fs.readFileSync(new URL("fixtures/video-with-audio.mp4.b64",import.meta.url),"utf8"),"base64");
 page.on("pageerror",error=>errors.push(error.message));
 let mode="text",failMedia=false;
 const plans={
