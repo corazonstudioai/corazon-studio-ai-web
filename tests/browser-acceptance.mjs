@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { chromium } from "playwright-core";
 
 const html=fs.readFileSync(new URL("../index.html",import.meta.url),"utf8")
@@ -9,12 +12,17 @@ const browser=await chromium.launch({headless:true,executablePath:process.env.CH
 const context=await browser.newContext({viewport:{width:412,height:915}});
 const page=await context.newPage();
 const errors=[],requests=[];
+const fixtureDirectory=fs.mkdtempSync(path.join(os.tmpdir(),"corazon-browser-"));
+const videoPath=path.join(fixtureDirectory,"fixture.mp4");
+execFileSync("ffmpeg",["-hide_banner","-loglevel","error","-f","lavfi","-i","color=c=blue:s=360x640:r=24","-f","lavfi","-i","anullsrc=r=44100:cl=mono","-t","1","-c:v","libx264","-pix_fmt","yuv420p","-c:a","aac","-shortest","-movflags","+faststart",videoPath]);
+const video=fs.readFileSync(videoPath);
 page.on("pageerror",error=>errors.push(error.message));
 let mode="text",failMedia=false;
 const plans={
   text:{action:"text",message:"Dios va adelante.",prompt:"",narration:"",required_features:["text"]},
   voice:{action:"voice",message:"Una voz cálida",prompt:"",narration:"Dios va adelante.",required_features:["voice"]},
   image:{action:"image",message:"Un amanecer",prompt:"Un amanecer tranquilo",narration:"",required_features:["image"]},
+  video:{action:"video",message:"Un video",prompt:"Un amanecer tranquilo",narration:"Dios va adelante.",required_features:["video","voice"]},
 };
 const wav=Buffer.alloc(44+8000);
 wav.write("RIFF");wav.writeUInt32LE(wav.length-8,4);wav.write("WAVEfmt ",8);wav.writeUInt32LE(16,16);wav.writeUInt16LE(1,20);wav.writeUInt16LE(1,22);wav.writeUInt32LE(8000,24);wav.writeUInt32LE(8000,28);wav.writeUInt16LE(1,32);wav.writeUInt16LE(8,34);wav.write("data",36);wav.writeUInt32LE(8000,40);wav.fill(128,44);
@@ -36,6 +44,9 @@ await page.route("**/*",async route=>{
   }
   if(url.pathname==="/media/audio.wav")return route.fulfill({body:wav,contentType:"audio/wav"});
   if(url.pathname.endsWith("/image"))return route.fulfill({json:{image_url:"https://fixture.supabase.co/media/image.png",credits_remaining:3}});
+  if(url.pathname.endsWith("/video-start"))return route.fulfill({json:{job_id:"fixture-video",status:"queued",credits_remaining:3}});
+  if(url.pathname.endsWith("/video-status"))return route.fulfill({json:{status:"completed",video_url:"https://fixture.supabase.co/media/video.mp4",has_audio:true}});
+  if(url.pathname==="/media/video.mp4")return route.fulfill({body:video,contentType:"video/mp4"});
   if(url.pathname==="/media/image.png")return route.fulfill({body:Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jf/QAAAAASUVORK5CYII=","base64"),contentType:"image/png"});
   throw new Error("Unexpected fixture request: "+url.pathname);
 });
@@ -69,6 +80,18 @@ try{
   await page.locator("#resultContent img").waitFor();
   await page.waitForFunction(()=>document.querySelector("#resultContent img")?.naturalWidth>0);
 
+  mode="video";
+  await page.locator("#ideaInput").fill("Crea un video inspirador");await page.locator("#createButton").click();
+  await page.locator("video").waitFor();
+  await page.waitForFunction(()=>document.querySelector("video")?.readyState>=1);
+  const downloadEvent=page.waitForEvent("download");
+  await page.getByRole("button",{name:"Descargar",exact:true}).click();
+  const download=await downloadEvent;
+  assert.equal(download.suggestedFilename(),"Corazon_Studio_video.mp4");
+  const savedPath=path.join(fixtureDirectory,"downloaded.mp4");await download.saveAs(savedPath);
+  assert.deepEqual(fs.readFileSync(savedPath),video,"Downloaded bytes must match the generated fixture");
+  assert.equal(await page.evaluate(()=>localStorage.getItem("corazon_pending_video")),null);
+
   mode="voice";failMedia=true;
   await page.locator("#ideaInput").fill("Crea una voz cálida");await page.locator("#createButton").click();
   await page.waitForFunction(()=>!document.querySelector("#createButton").disabled);
@@ -82,5 +105,5 @@ try{
   assert.equal(requests.filter(r=>r.path.endsWith("/chat")).length,before,"Recovery must not charge planning again");
   assert.equal(requests.filter(r=>r.path.endsWith("/tts")).at(-1).body.idempotency_key,previous.createId);
   assert.deepEqual(errors,[]);
-  console.log("Mobile browser acceptance passed: cancellation, spaced eight-digit fixture code, text, audio, image and recovery. Every request intercepted; no real account or provider used.");
-}finally{await browser.close()}
+  console.log("Mobile browser acceptance passed: cancellation, spaced eight-digit fixture code, text, audio, image, video, exact-byte download and recovery. Every request intercepted; no real account or provider used.");
+}finally{await browser.close();fs.rmSync(fixtureDirectory,{recursive:true,force:true})}
