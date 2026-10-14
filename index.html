@@ -108,6 +108,47 @@ window.CorazonBrain = Object.freeze({
     if (/\b(voz|voice|audio|narracion|narration|lee|read|locucion)\b/.test(normalized)) return "voice";
     return "text";
   },
+  validatePlan(value) {
+    if (!value || typeof value !== "object" || !["text","image","voice","video","clarify"].includes(value.action)) throw new Error("invalid_brain_plan");
+    for (const field of ["message","prompt","narration"]) if (typeof value[field] !== "string") throw new Error("invalid_brain_plan");
+    if (!Array.isArray(value.required_features) || value.required_features.length > 12 || value.required_features.some(feature=>typeof feature!=="string" || feature.length>60)) throw new Error("invalid_brain_plan");
+    const plan={...value,message:value.message.trim(),prompt:value.prompt.trim(),narration:value.narration.trim()};
+    if (plan.message.length>4000 || plan.prompt.length>1500 || plan.narration.length>1200) throw new Error("invalid_brain_plan");
+    if (["text","clarify"].includes(plan.action)&&!plan.message) throw new Error("invalid_brain_plan");
+    if (["image","video"].includes(plan.action)&&plan.prompt.length<3) throw new Error("invalid_brain_plan");
+    if (["voice","video"].includes(plan.action)&&!plan.narration) throw new Error("invalid_brain_plan");
+    if (plan.action!=="clarify"&&plan.required_features.some(feature=>!["text","image","voice","video"].includes(feature))) throw new Error("unsupported_brain_plan");
+    if (plan.action==="video"&&plan.narration.split(/\s+/).length>12) throw new Error("invalid_brain_plan");
+    return plan;
+  },
+  validateTask(task) {
+    const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if(!task||typeof task.prompt!=="string"||!task.prompt.trim()||task.prompt.length>4000||!uuid.test(task.planId)||!uuid.test(task.createId)||!["es","en"].includes(task.language)||!["1:1","9:16","16:9"].includes(task.format)||!["female","male"].includes(task.voice)||!["auto","warm","professional","minimal"].includes(task.style)||!Number.isFinite(task.createdAt))throw Object.assign(new Error("invalid_brain_task"),{code:"invalid_brain_task",status:400});
+  },
+  async run(task, dependencies) {
+    this.validateTask(task);
+    if (!task.plan) {
+      const prepared=await dependencies.request("chat",{message:task.prompt,language:task.language,purpose:"brain",preferences:{style:task.style,format:task.format},idempotency_key:task.planId});
+      task.plan=this.validatePlan(prepared.plan);
+      task.creditsRemaining=prepared.credits_remaining;
+      dependencies.checkpoint(task);
+    }
+    const plan=this.validatePlan(task.plan);
+    if (plan.action==="text"||plan.action==="clarify") return {mode:"text",data:{reply:plan.message}};
+    if (!Number.isFinite(task.creditsRemaining)||task.creditsRemaining<1) throw Object.assign(new Error("credits_exhausted"),{status:402,code:"prepared_without_credit"});
+    dependencies.progress(plan.action);
+    let path,payload;
+    if (plan.action==="image") {path="image";payload={prompt:plan.prompt,size:task.format==="1:1"?"1024x1024":task.format==="16:9"?"1536x1024":"1024x1536"};}
+    else if(plan.action==="voice") {path="tts";payload=this.speech(plan.narration,task.voice,task.style);}
+    else {path="video-start";payload={prompt:plan.prompt,narration:plan.narration,voice:task.voice,duration:5};}
+    const data=task.jobId&&plan.action==="video"?{job_id:task.jobId}:await dependencies.request(path,{...payload,idempotency_key:task.createId});
+    if(plan.action==="video") {
+      if(typeof data.job_id!=="string"||!data.job_id) throw new Error("invalid_video_result");
+      task.jobId=data.job_id;
+      dependencies.checkpoint(task);
+    }
+    return {mode:plan.action,data};
+  },
   speech(text, voice, style) {
     const instructions = {
       warm: "Speak with warmth, clarity and a natural pace.",
@@ -126,8 +167,8 @@ window.CorazonBrain = Object.freeze({
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const state = { language: localStorage.getItem("corazon_language") || "es", mode: "auto", busy: false, authResolve: null, otpSent: false };
   const copy = {
-    es:{authTitle:"Verifica tu correo",authEmail:"Correo electrónico",authCode:"Código de verificación",cancel:"Cancelar",resend:"Reenviar código",projects:"Proyectos",eyebrow:"Tu estudio creativo inteligente",headlineA:"Dinos qué quieres crear.",headlineB:"Corazón hace el resto.",heroText:"Una sola idea puede convertirse en texto, imagen, voz o video. Sin configuraciones complicadas.",modeAuto:"Automático",modeText:"Texto",modeImage:"Imagen",modeVideo:"Video",modeVoice:"Voz",ideaLabel:"Describe lo que quieres crear",placeholder:"Ejemplo: Crea un reel inspirador sobre volver a empezar, con voz cálida y música suave...",ideaReel:"Reel inspirador",ideaBusiness:"Imagen para negocio",ideaImprove:"Mejorar un texto",preferences:"Preferencias",smartNote:"Ahorro inteligente activado",create:"Crear ahora",outputLanguage:"Idioma del resultado",format:"Formato",style:"Estilo",automatic:"Automático",warm:"Cálido",professional:"Profesional",minimal:"Minimalista",voice:"Voz",female:"Femenina",male:"Masculina",safe:"Contenido protegido",noTech:"Sin ajustes técnicos",costControl:"Control de costo",result:"RESULTADO",working:"Creando con cuidado…",humanTitle:"Hecho para personas",humanText:"Habla con naturalidad. No necesitas aprender comandos.",simpleTitle:"Todo en un solo lugar",simpleText:"Corazón elige el mejor camino para cada idea.",safeTitle:"Creatividad responsable",safeText:"Protección integrada para crear contenido positivo y seguro.",yourSpace:"TU ESPACIO",myProjects:"Mis proyectos",clearHistory:"Borrar historial local",footer:"Ideas con propósito, tecnología con corazón.",empty:"Aún no hay proyectos guardados.",ready:"Tu creación está lista",download:"Descargar",copyAction:"Copiar",copied:"Copiado",unsafe:"Esta solicitud no cumple las reglas de contenido seguro de Corazón.",missing:"Cuéntame primero qué quieres crear.",connection:"No pudimos conectar con el estudio en este momento. Intenta de nuevo.",videoPaused:"La conexión se interrumpió. Tu solicitud quedó guardada y Corazón revisará el resultado cuando vuelvas a abrir la página. No necesitas crearla otra vez.",cost:"Ruta optimizada por calidad y costo",textType:"Texto",imageType:"Imagen",videoType:"Video",voiceType:"Voz"},
-    en:{authTitle:"Verify your email",authEmail:"Email address",authCode:"Verification code",cancel:"Cancel",resend:"Resend code",projects:"Projects",eyebrow:"Your intelligent creative studio",headlineA:"Tell us what you want to create.",headlineB:"Corazón does the rest.",heroText:"One idea can become text, image, voice, or video. No complicated settings.",modeAuto:"Automatic",modeText:"Text",modeImage:"Image",modeVideo:"Video",modeVoice:"Voice",ideaLabel:"Describe what you want to create",placeholder:"Example: Create an inspiring reel about starting over, with a warm voice and soft music...",ideaReel:"Inspiring reel",ideaBusiness:"Business image",ideaImprove:"Improve a text",preferences:"Preferences",smartNote:"Smart savings enabled",create:"Create now",outputLanguage:"Output language",format:"Format",style:"Style",automatic:"Automatic",warm:"Warm",professional:"Professional",minimal:"Minimal",voice:"Voice",female:"Female",male:"Male",safe:"Protected content",noTech:"No technical setup",costControl:"Cost control",result:"RESULT",working:"Creating with care…",humanTitle:"Made for people",humanText:"Speak naturally. You do not need to learn commands.",simpleTitle:"Everything in one place",simpleText:"Corazón chooses the best path for each idea.",safeTitle:"Responsible creativity",safeText:"Built-in protection for positive, safe content.",yourSpace:"YOUR SPACE",myProjects:"My projects",clearHistory:"Clear local history",footer:"Purposeful ideas, technology with heart.",empty:"No saved projects yet.",ready:"Your creation is ready",download:"Download",copyAction:"Copy",copied:"Copied",unsafe:"This request does not meet Corazón's safe-content rules.",missing:"First, tell me what you want to create.",connection:"We could not connect to the studio right now. Please try again.",videoPaused:"The connection was interrupted. Your request is saved and Corazón will check the result when you reopen the page. You do not need to create it again.",cost:"Route optimized for quality and cost",textType:"Text",imageType:"Image",videoType:"Video",voiceType:"Voice"}
+    es:{authTitle:"Verifica tu correo",authEmail:"Correo electrónico",authCode:"Código de verificación",cancel:"Cancelar",resend:"Reenviar código",projects:"Proyectos",eyebrow:"Tu estudio creativo inteligente",headlineA:"Dinos qué quieres crear.",headlineB:"Corazón hace el resto.",heroText:"Una sola idea puede convertirse en texto, imagen, voz o video. Sin configuraciones complicadas.",modeAuto:"Automático",modeText:"Texto",modeImage:"Imagen",modeVideo:"Video",modeVoice:"Voz",ideaLabel:"Describe lo que quieres crear",placeholder:"Ejemplo: Crea un reel inspirador sobre volver a empezar, con voz cálida y música suave...",ideaReel:"Reel inspirador",ideaBusiness:"Imagen para negocio",ideaImprove:"Mejorar un texto",preferences:"Preferencias",smartNote:"Corazón prepara tu contenido",create:"Crear ahora",outputLanguage:"Idioma del resultado",format:"Formato",style:"Estilo",automatic:"Automático",warm:"Cálido",professional:"Profesional",minimal:"Minimalista",voice:"Voz",female:"Femenina",male:"Masculina",safe:"Contenido protegido",noTech:"Sin ajustes técnicos",costControl:"Control de costo",result:"RESULTADO",working:"Creando con cuidado…",humanTitle:"Hecho para personas",humanText:"Habla con naturalidad. No necesitas aprender comandos.",simpleTitle:"Todo en un solo lugar",simpleText:"Corazón elige el mejor camino para cada idea.",safeTitle:"Creatividad responsable",safeText:"Protección integrada para crear contenido positivo y seguro.",yourSpace:"TU ESPACIO",myProjects:"Mis proyectos",clearHistory:"Borrar historial local",footer:"Ideas con propósito, tecnología con corazón.",empty:"Aún no hay proyectos guardados.",ready:"Tu creación está lista",download:"Descargar",copyAction:"Copiar",copied:"Copiado",unsafe:"Esta solicitud no cumple las reglas de contenido seguro de Corazón.",missing:"Cuéntame primero qué quieres crear.",connection:"No pudimos conectar con el estudio en este momento. Intenta de nuevo.",videoPaused:"La conexión se interrumpió. Tu solicitud quedó guardada y Corazón revisará el resultado cuando vuelvas a abrir la página. No necesitas crearla otra vez.",cost:"Texto: 1 crédito · Preparar y crear archivos: 2 créditos",textType:"Texto",imageType:"Imagen",videoType:"Video",voiceType:"Voz"},
+    en:{authTitle:"Verify your email",authEmail:"Email address",authCode:"Verification code",cancel:"Cancel",resend:"Resend code",projects:"Projects",eyebrow:"Your intelligent creative studio",headlineA:"Tell us what you want to create.",headlineB:"Corazón does the rest.",heroText:"One idea can become text, image, voice, or video. No complicated settings.",modeAuto:"Automatic",modeText:"Text",modeImage:"Image",modeVideo:"Video",modeVoice:"Voice",ideaLabel:"Describe what you want to create",placeholder:"Example: Create an inspiring reel about starting over, with a warm voice and soft music...",ideaReel:"Inspiring reel",ideaBusiness:"Business image",ideaImprove:"Improve a text",preferences:"Preferences",smartNote:"Corazón prepares your content",create:"Create now",outputLanguage:"Output language",format:"Format",style:"Style",automatic:"Automatic",warm:"Warm",professional:"Professional",minimal:"Minimal",voice:"Voice",female:"Female",male:"Male",safe:"Protected content",noTech:"No technical setup",costControl:"Cost control",result:"RESULT",working:"Creating with care…",humanTitle:"Made for people",humanText:"Speak naturally. You do not need to learn commands.",simpleTitle:"Everything in one place",simpleText:"Corazón chooses the best path for each idea.",safeTitle:"Responsible creativity",safeText:"Built-in protection for positive, safe content.",yourSpace:"YOUR SPACE",myProjects:"My projects",clearHistory:"Clear local history",footer:"Purposeful ideas, technology with heart.",empty:"No saved projects yet.",ready:"Your creation is ready",download:"Download",copyAction:"Copy",copied:"Copied",unsafe:"This request does not meet Corazón's safe-content rules.",missing:"First, tell me what you want to create.",connection:"We could not connect to the studio right now. Please try again.",videoPaused:"The connection was interrupted. Your request is saved and Corazón will check the result when you reopen the page. You do not need to create it again.",cost:"Text: 1 credit · Prepare and create media: 2 credits",textType:"Text",imageType:"Image",videoType:"Video",voiceType:"Voice"}
   };
   const t = key => copy[state.language][key] || key;
   const safeRequest = text => !/(porn|porno|desnud[oa]|nude|sexo explícito|sexual explicit|gore|decapitat|bestial)/i.test(text);
@@ -156,7 +197,12 @@ window.CorazonBrain = Object.freeze({
   async function createVideo(prompt){const session=await requireSession();const idempotencyKey=crypto.randomUUID();const voice=$("#voice").value;const started=await edgeRequest("video-start",{prompt,narration:prompt,voice,duration:5,idempotency_key:idempotencyKey},session);localStorage.setItem("corazon_pending_video",JSON.stringify({jobId:started.job_id,prompt,createdAt:Date.now()}));return waitForVideo(started.job_id,session)}
   function payloadFor(text,mode){const lang=$("#outputLanguage").value,format=$("#format").value,style=$("#style").value,voice=$("#voice").value;const enhanced=style==="auto"?text:`${text}. Style: ${style}.`;if(mode==="image")return{path:"image",payload:{prompt:enhanced,size:format==="1:1"?"1024x1024":format==="16:9"?"1536x1024":"1024x1536"}};if(mode==="video")return{path:"video-start",payload:{prompt:enhanced,duration:5}};if(mode==="voice")return{path:"tts",payload:{...window.CorazonBrain.speech(text,voice,style)}};return{path:"chat",payload:{message:enhanced,language:lang}}
   }
-  function extractResult(data,mode){if(mode==="text")return{kind:"text",value:data.reply||data.message||data.text||JSON.stringify(data,null,2)};const candidate=data.image_url||data.video_url||data.audio_url||data.url;if(candidate)return{kind:mode,value:validUrl(candidate)};return{kind:"text",value:data.message||JSON.stringify(data,null,2)}}
+  function extractResult(data,mode){
+    if(mode==="text"){const text=data.reply||data.text;if(typeof text!=="string"||!text.trim())throw new Error("invalid_result");return{kind:"text",value:text}}
+    const candidate=mode==="image"?data.image_url:mode==="video"?data.video_url:data.audio_url;
+    const value=typeof candidate==="string"?validUrl(candidate):"";
+    if(!value)throw new Error("invalid_result");return{kind:mode,value};
+  }
   function mediaElement(result){if(result.kind==="text"){const div=document.createElement("div");div.className="result-copy";div.textContent=result.value;return div}const tag=result.kind==="image"?"img":result.kind==="voice"?"audio":"video";const media=document.createElement(tag);media.className="result-media";media.src=result.value;if(tag!=="img"){media.controls=true;media.playsInline=true}media.alt=state.language==="es"?"Creación de Corazón Studio AI":"Corazón Studio AI creation";return media}
   function renderResult(result,mode,elapsed){$("#resultTitle").textContent=t("ready");const content=$("#resultContent");content.replaceChildren(mediaElement(result));const actions=document.createElement("div");actions.className="result-actions";if(result.kind==="text"){const button=document.createElement("button");button.textContent=t("copyAction");button.onclick=async()=>{await navigator.clipboard.writeText(result.value);toast(t("copied"))};actions.append(button)}else{const link=document.createElement("a");link.href=result.value;link.target="_blank";link.rel="noopener";link.download="";link.textContent=t("download");actions.append(link)}content.append(actions);$("#resultMeta").textContent=`${t(`${mode}Type`)} · ${t("cost")} · ${(elapsed/1000).toFixed(1)}s`}
   function saveProject(project){const items=readLocal("corazon_projects_v2",[]);items.unshift(project);localStorage.setItem("corazon_projects_v2",JSON.stringify(items.slice(0,cfg.maxLocalProjects||20)));renderProjects()}
@@ -164,7 +210,9 @@ window.CorazonBrain = Object.freeze({
   function renderVideoFailure(message){$("#resultTitle").textContent=state.language==="es"?"No se pudo completar":"Could not complete";const notice=document.createElement("div");notice.className="result-copy";notice.textContent=message|| (state.language==="es"?"Tu crédito fue devuelto. Puedes intentarlo nuevamente.":"Your credit was returned. You can try again.");$("#resultContent").replaceChildren(notice);$("#resultMeta").textContent=""}
   function renderRequestFailure(error){
     const es=state.language==="es";
-    const message=error.name==="VideoGenerationError"?error.message:
+    const message=["generation_in_progress","pending_request"].includes(error.code)?(es?"Tu solicitud quedó guardada. Vuelve a abrir la página para recuperar el resultado antes de crear otra.":"Your request is saved. Reopen the page to recover the result before creating another."):
+      error.code==="prepared_without_credit"?(es?"Tu contenido quedó preparado, pero falta un crédito para crear el archivo.":"Your content was prepared, but one more credit is needed to create the file."):
+      error.name==="VideoGenerationError"?error.message:
       error.code==="speech_too_long"?(es?"El texto de voz admite hasta 1200 caracteres. Acórtalo y vuelve a intentar.":"Voice text supports up to 1200 characters. Shorten it and try again."):
       error.status===402?(es?"Tus créditos se terminaron.":"You have no credits remaining."):
       error.status===401?(es?"Tu sesión venció. Vuelve a iniciar sesión.":"Your session expired. Please sign in again."):
@@ -172,11 +220,83 @@ window.CorazonBrain = Object.freeze({
       error.status===400?(es?"Revisa tu solicitud e inténtalo nuevamente.":"Check your request and try again."):
       (es?"No pudimos completar tu solicitud. Inténtalo nuevamente.":"We could not complete your request. Please try again.");
     renderVideoFailure(message);
+    if(readLocal("corazon_pending_brain",null)){
+      const button=document.createElement("button");button.type="button";button.textContent=es?"Recuperar solicitud":"Recover request";
+      button.onclick=async()=>{if(state.busy)return;try{await requireSession();await resumePendingBrain()}catch(error){if(error.name!=="AuthenticationCancelled")renderRequestFailure(error)}};
+      $("#resultContent").append(button);
+    }
   }
   function renderInterruption(isVideo){$("#resultTitle").textContent=state.language==="es"?"Proceso en pausa":"Process paused";const message=document.createElement("div");message.className="result-copy";message.textContent=t(isVideo?"videoPaused":"connection");$("#resultContent").replaceChildren(message);$("#resultMeta").textContent=""}
-  async function create(event){event.preventDefault();if(state.busy)return;const text=$("#ideaInput").value.trim();if(!text){toast(t("missing"));$("#ideaInput").focus();return}if(!safeRequest(text)){toast(t("unsafe"));return}const mode=inferMode(text),spec=payloadFor(text,mode),started=Date.now();$("#resultPanel").hidden=false;$("#resultTitle").textContent=t("working");$("#resultContent").innerHTML='<div class="loader"><span></span><span></span><span></span></div>';$("#resultMeta").textContent=t("cost");$("#resultPanel").scrollIntoView({behavior:"smooth",block:"center"});setBusy(true);try{const data=mode==="video"?await createVideo(spec.payload.prompt):await request(spec.path,spec.payload);const result=extractResult(data,mode);renderResult(result,mode,Date.now()-started);saveProject({prompt:text,mode,createdAt:Date.now()})}catch(error){if(mode==="video"&&(error.name==="VideoGenerationError"||Number.isInteger(error.status)))renderRequestFailure(error);else if(error.name==="AuthenticationCancelled")$("#resultPanel").hidden=true;else if(Number.isInteger(error.status))renderRequestFailure(error);else renderInterruption(mode==="video")}finally{setBusy(false)}}
+  async function requestWithRecovery(path,payload){
+    const session=await requireSession();
+    for(let attempt=0;attempt<6;attempt++){
+      try{return await edgeRequest(path,payload,session)}
+      catch(error){if(error.code!=="generation_in_progress"||attempt===5)throw error;await wait(2000)}
+    }
+  }
+  async function executeBrainTask(task){
+    const result=await window.CorazonBrain.run(task,{
+      request:requestWithRecovery,
+      checkpoint:value=>localStorage.setItem("corazon_pending_brain",JSON.stringify(value)),
+      progress:mode=>{$("#resultTitle").textContent=t("working");}
+    });
+    if(result.mode==="video"){
+      localStorage.setItem("corazon_pending_video",JSON.stringify({jobId:result.data.job_id,prompt:task.prompt,createdAt:task.createdAt}));
+      const session=await requireSession();
+      result.data=await waitForVideo(result.data.job_id,session);
+    }
+    return result;
+  }
+  async function create(event){
+    event.preventDefault();if(state.busy)return;
+    const text=$("#ideaInput").value.trim();
+    if(!text){toast(t("missing"));$("#ideaInput").focus();return}
+    if(!safeRequest(text)){toast(t("unsafe"));return}
+    const started=Date.now();
+    $("#resultPanel").hidden=false;$("#resultTitle").textContent=t("working");
+    $("#resultContent").innerHTML='<div class="loader"><span></span><span></span><span></span></div>';
+    $("#resultMeta").textContent=t("cost");setBusy(true);
+    let mode=state.mode;
+    try{
+      let data;
+      if(mode==="auto"){
+        const existing=readLocal("corazon_pending_brain",null);
+        if(existing)throw Object.assign(new Error("pending_request"),{code:"pending_request",status:409});
+        const task={prompt:text,language:$("#outputLanguage").value,format:$("#format").value,style:$("#style").value,voice:$("#voice").value,planId:crypto.randomUUID(),createId:crypto.randomUUID(),createdAt:started};
+        localStorage.setItem("corazon_pending_brain",JSON.stringify(task));
+        const executed=await executeBrainTask(task);mode=executed.mode;data=executed.data;
+      }else{
+        const spec=payloadFor(text,mode);
+        data=mode==="video"?await createVideo(spec.payload.prompt):await request(spec.path,spec.payload);
+      }
+      const result=extractResult(data,mode);renderResult(result,mode,Date.now()-started);
+      saveProject({prompt:text,mode,createdAt:started});
+      if(state.mode==="auto")localStorage.removeItem("corazon_pending_brain");
+    }catch(error){
+      if(error.name==="AuthenticationCancelled"){localStorage.removeItem("corazon_pending_brain");$("#resultPanel").hidden=true;}
+      else{
+        if(error.code==="generation_already_refunded"||error.name==="VideoGenerationError"||error.status===400||error.status===402||error.status===403)localStorage.removeItem("corazon_pending_brain");
+        renderRequestFailure(error);
+      }
+    }finally{setBusy(false)}
+  }
+  async function resumePendingBrain(){
+    const task=readLocal("corazon_pending_brain",null);if(!task||state.busy)return false;
+    if(!await validSession()){$("#resultPanel").hidden=false;renderRequestFailure({status:401});return true;}
+    setBusy(true);$("#resultPanel").hidden=false;$("#resultTitle").textContent=t("working");
+    try{
+      const executed=await executeBrainTask(task);
+      renderResult(extractResult(executed.data,executed.mode),executed.mode,Date.now()-task.createdAt);
+      saveProject({prompt:task.prompt,mode:executed.mode,createdAt:task.createdAt});
+      localStorage.removeItem("corazon_pending_brain");
+    }catch(error){
+      if(error.name==="VideoGenerationError"||error.code==="generation_already_refunded"||error.code==="idempotency_conflict"||[400,402,403].includes(error.status))localStorage.removeItem("corazon_pending_brain");
+      renderRequestFailure(error);
+    }finally{setBusy(false)}
+    return true;
+  }
 
-  $("#authForm").addEventListener("submit",async event=>{event.preventDefault();const button=$("#authSubmit"),email=$("#authEmail").value.trim(),code=normalizeOtp($("#authCode").value);if(state.otpSent&&code.length<6){toast(state.language==="es"?"Introduce el código completo.":"Enter the complete code.");$("#authCode").focus();return}button.disabled=true;try{if(!state.otpSent){await sendOtp(email);state.otpSent=true;$("#otpStep").hidden=false;$("#authEmail").disabled=true;$("#authCode").required=true;$("#authResend").hidden=false;$("#authHelp").textContent=state.language==="es"?"Introduce el código más reciente que recibiste.":"Enter the newest code you received.";button.textContent=state.language==="es"?"Verificar":"Verify";$("#authCode").focus();toast(state.language==="es"?"Código enviado a tu correo":"Code sent to your email")}else{$("#authCode").value=code;const session=await authRequest("/auth/v1/verify",{email,token:code,type:"email"});session.expires_at=Math.floor(Date.now()/1000)+Number(session.expires_in||3600);saveSession(session);$("#authDialog").close();state.authResolve?.resolve(session);state.authResolve=null}}catch(error){toast(authErrorMessage(error,state.otpSent?"verify":"send"))}finally{button.disabled=false}});
+  $("#authForm").addEventListener("submit",async event=>{event.preventDefault();const button=$("#authSubmit"),email=$("#authEmail").value.trim(),code=normalizeOtp($("#authCode").value);if(state.otpSent&&code.length<6){toast(state.language==="es"?"Introduce el código completo.":"Enter the complete code.");$("#authCode").focus();return}button.disabled=true;try{if(!state.otpSent){await sendOtp(email);state.otpSent=true;$("#otpStep").hidden=false;$("#authEmail").disabled=true;$("#authCode").required=true;$("#authResend").hidden=false;$("#authHelp").textContent=state.language==="es"?"Introduce el código más reciente que recibiste.":"Enter the newest code you received.";button.textContent=state.language==="es"?"Verificar":"Verify";$("#authCode").focus();toast(state.language==="es"?"Código enviado a tu correo":"Code sent to your email")}else{$("#authCode").value=code;const session=await authRequest("/auth/v1/verify",{email,token:code,type:"email"});session.expires_at=Math.floor(Date.now()/1000)+Number(session.expires_in||3600);saveSession(session);const pending=state.authResolve;state.authResolve=null;pending?.resolve(session);$("#authDialog").close()}}catch(error){toast(authErrorMessage(error,state.otpSent?"verify":"send"))}finally{button.disabled=false}});
   $("#authResend").addEventListener("click",async()=>{const email=$("#authEmail").value.trim(),button=$("#authResend");button.disabled=true;try{await sendOtp(email);$("#authCode").value="";$("#authCode").focus();toast(state.language==="es"?"Enviamos un código nuevo. Usa únicamente el más reciente.":"We sent a new code. Use only the newest one.")}catch(error){toast(authErrorMessage(error,"send"))}finally{button.disabled=false}});
   function cancelAuth(){const pending=state.authResolve;state.authResolve=null;pending?.reject(Object.assign(new Error("Authentication cancelled"),{name:"AuthenticationCancelled"}))}
   $("#authCancel").addEventListener("click",()=>{$("#authDialog").close();cancelAuth()});
@@ -184,7 +304,7 @@ window.CorazonBrain = Object.freeze({
   $("#authDialog").addEventListener("close",cancelAuth);
   async function resumePendingVideo(){const pending=readLocal("corazon_pending_video",null);if(!pending||state.busy)return;const session=await validSession();if(!session)return;setBusy(true);$("#resultPanel").hidden=false;$("#resultTitle").textContent=t("working");$("#resultContent").innerHTML='<div class="loader"><span></span><span></span><span></span></div>';try{const status=await waitForVideo(pending.jobId,session);renderResult(extractResult(status,"video"),"video",Date.now()-pending.createdAt);saveProject({prompt:pending.prompt,mode:"video",createdAt:pending.createdAt})}catch(error){if(error.name==="VideoGenerationError")renderVideoFailure(error.message);else renderInterruption(true)}finally{setBusy(false)}}
   $("#createForm").addEventListener("submit",create);$$('.mode').forEach(el=>el.addEventListener("click",()=>setMode(el.dataset.mode)));$$('.suggestions button').forEach(el=>el.addEventListener("click",()=>{$("#ideaInput").value=el.dataset[`prompt${state.language==="es"?"Es":"En"}`];$("#ideaInput").focus()}));$("#languageButton").addEventListener("click",()=>{state.language=state.language==="es"?"en":"es";localStorage.setItem("corazon_language",state.language);translate()});$("#advancedButton").addEventListener("click",event=>{const panel=$("#advancedPanel"),open=panel.hidden;panel.hidden=!open;event.currentTarget.setAttribute("aria-expanded",String(open))});$("#closeResult").addEventListener("click",()=>$("#resultPanel").hidden=true);
-  const drawer=$("#projectsDrawer");function toggleDrawer(open){drawer.classList.toggle("open",open);drawer.setAttribute("aria-hidden",String(!open));document.body.style.overflow=open?"hidden":""}$("#projectsButton").addEventListener("click",()=>toggleDrawer(true));$$('[data-close-drawer]').forEach(el=>el.addEventListener("click",()=>toggleDrawer(false)));$("#clearProjects").addEventListener("click",()=>{localStorage.removeItem("corazon_projects_v2");renderProjects()});document.addEventListener("keydown",event=>{if(event.key==="Escape")toggleDrawer(false)});translate();resumePendingVideo();
+  const drawer=$("#projectsDrawer");function toggleDrawer(open){drawer.classList.toggle("open",open);drawer.setAttribute("aria-hidden",String(!open));document.body.style.overflow=open?"hidden":""}$("#projectsButton").addEventListener("click",()=>toggleDrawer(true));$$('[data-close-drawer]').forEach(el=>el.addEventListener("click",()=>toggleDrawer(false)));$("#clearProjects").addEventListener("click",()=>{localStorage.removeItem("corazon_projects_v2");renderProjects()});document.addEventListener("keydown",event=>{if(event.key==="Escape")toggleDrawer(false)});translate();resumePendingBrain().then(handled=>{if(!handled)return resumePendingVideo()});
 })();
 
 </script>
