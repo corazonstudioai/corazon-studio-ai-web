@@ -10,7 +10,7 @@ scripts.forEach((source, index) => new vm.Script(source, { filename: `inline-${i
 
 assert.equal((html.match(/const \$ =/g) || []).length, 1, "Single selector helper must be declared once");
 assert.equal((html.match(/const \$\$ =/g) || []).length, 1, "Multi selector helper must be declared once");
-assert.match(html, /voice:voice==="male"\?"onyx":"nova"/, "Voice request must match backend schema");
+assert.match(html, /CorazonBrain\.speech\(text,voice,style\)/, "Speech must keep raw text separate from style instructions");
 assert.doesNotMatch(html, /\(\$\{error\.message\}\)/, "Technical errors must not be shown to users");
 assert.match(html, /\/functions\/v1\/\$\{path\}/, "All generation must use Supabase Edge Functions");
 assert.doesNotMatch(html, /onrender\.com/, "The web app must not call the legacy Render backend");
@@ -38,3 +38,67 @@ assert.match(html, /Agregando voz al video/, "Video progress must explain the au
 
 assert.match(html, /VideoGenerationError/, "Permanent video failures must not be shown as connection pauses");
 assert.match(html, /renderVideoFailure/, "Permanent video failures must explain the refund");
+
+
+// Execute the actual Brain code, rather than mirroring routing rules in tests.
+const brainScript = scripts.find(source => source.includes("window.CorazonBrain ="));
+const brainContext = { window: {} };
+vm.runInNewContext(brainScript, brainContext);
+const brain = brainContext.window.CorazonBrain;
+for (const [prompt, expected] of [
+  ["Escribe un guion para un video de mi negocio", "text"],
+  ["Create a script for an inspiring reel", "text"],
+  ["Necesito un guion para video", "text"],
+  ["Crea un video con este guion", "video"],
+  ["Crea una imagen con texto para mi negocio", "image"],
+  ["Quiero un afiche de mi tienda", "image"],
+  ["Crea una narración sobre la esperanza", "voice"],
+  ["Create a video with a warm voice", "video"],
+  ["Traduce esta narración al inglés", "text"],
+  ["Necesito promocionar mi negocio", "text"],
+]) assert.equal(brain.route(prompt), expected, prompt);
+assert.equal(brain.route("Escribe un guion", "video"), "video", "Explicit choice takes priority");
+const speech = brain.speech("  Dios va adelante.  ", "male", "warm");
+assert.equal(speech.text, "Dios va adelante.");
+assert.equal(speech.voice, "onyx");
+assert.ok(speech.instructions.includes("warmth"));
+assert.equal(brain.speech("Hello", "female", "auto").voice, "nova");
+assert.equal(brain.speech("Hello", "female", "auto").instructions, undefined);
+assert.doesNotMatch(html, /La solicitud anterior venció y fue cerrada/, "Browser age alone cannot assert server expiry or refund");
+console.log("Brain routing and speech behavior checks passed.");
+
+// Exercise authentication cancellation against the real application functions.
+const elements = new Map();
+function element(selector) {
+  if (!elements.has(selector)) elements.set(selector, {
+    value: "", hidden: false, disabled: false, required: false, textContent: "",
+    listeners: {}, classList: { toggle() {} },
+    addEventListener(name, handler) { this.listeners[name] = handler; },
+    setAttribute() {}, showModal() {}, close() {}, focus() {},
+  });
+  return elements.get(selector);
+}
+const storage = new Map();
+const appContext = {
+  window: { CorazonBrain: brain },
+  localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
+  document: { querySelector: element, querySelectorAll: () => [], addEventListener() {}, body: { style: {} } },
+};
+const appScript = scripts.find(source => source.includes("const state ="));
+vm.runInNewContext(appScript.replace("translate();resumePendingVideo();", "window.__test={state,requireSession,payloadFor,readLocal};"), appContext);
+const app = appContext.window.__test;
+element("#voice").value = "male";
+element("#style").value = "warm";
+assert.equal(app.payloadFor("Dios va adelante.", "voice").payload.text, "Dios va adelante.");
+assert.equal(app.payloadFor("Dios va adelante.", "voice").payload.voice, "onyx");
+storage.set("corazon_projects_v2", "broken-json");
+assert.equal(app.readLocal("corazon_projects_v2", "fallback"), "fallback");
+for (const event of ["cancel", "close"]) {
+  const authPromise = app.requireSession();
+  const rejected = assert.rejects(authPromise, error => error.name === "AuthenticationCancelled");
+  await Promise.resolve();
+  element("#authDialog").listeners[event]();
+  await rejected;
+  assert.equal(app.state.authResolve, null, "Closing auth settles the pending creation");
+}
+console.log("Interface payload and authentication cancellation checks passed.");
