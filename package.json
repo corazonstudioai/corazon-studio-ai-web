@@ -3,9 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "test": "node tests/frontend-smoke.mjs"
+    "test": "node tests/frontend-smoke.mjs",
+    "test:browser": "node tests/browser-acceptance.mjs"
   },
-  "engines": {
-    "node": ">=20"
-  }
+  "engines": { "node": ">=20" },
+  "devDependencies": { "playwright-core": "1.62.1" }
 }
