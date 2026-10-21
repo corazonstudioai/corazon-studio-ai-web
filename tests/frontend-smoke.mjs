@@ -16,8 +16,7 @@ assert.match(html, /\/functions\/v1\/\$\{path\}/, "All generation must use Supab
 assert.doesNotMatch(html, /onrender\.com/, "The web app must not call the legacy Render backend");
 assert.doesNotMatch(html, /workers\.dev|cloudflare|wrangler/i, "The web app must not depend on Cloudflare");
 assert.match(html, /return edgeRequest\(path,/, "Text, image and voice must use Supabase Edge Functions");
-assert.match(html, /edgeRequest\("video-start"/, "Video must start asynchronously");
-assert.match(html, /\{prompt,narration:prompt,voice,duration:5/, "Video request must include narration and selected voice");
+assert.match(html, /path="video-start"/, "Video must start asynchronously");
 assert.match(html, /edgeRequest\("video-status"/, "Video status must be polled");
 assert.match(html, /corazon_pending_video/, "Pending video must survive a refresh");
 assert.match(html, /edgeRequestTimeoutMs: 120000/, "Edge calls must stop waiting after a bounded timeout");
@@ -85,7 +84,7 @@ const appContext = {
   document: { querySelector: element, querySelectorAll: () => [], addEventListener() {}, body: { style: {} } },
 };
 const appScript = scripts.find(source => source.includes("const state ="));
-vm.runInNewContext(appScript.replace("translate();resumePendingBrain().then(handled=>{if(!handled)return resumePendingVideo()});", "window.__test={state,requireSession,payloadFor,readLocal,extractResult};"), appContext);
+vm.runInNewContext(appScript.replace("translate();resumePendingBrain().then(handled=>{if(!handled)return resumePendingVideo()});", "window.__test={state,requireSession,payloadFor,readLocal,extractResult,shouldDiscardPending};"), appContext);
 const app = appContext.window.__test;
 element("#voice").value = "male";
 element("#style").value = "warm";
@@ -156,3 +155,19 @@ assert.throws(()=>app.extractResult({reply:" "},"text"));
 assert.throws(()=>app.extractResult({message:"not a file"},"voice"));
 assert.equal(app.extractResult({reply:"Dios va adelante."},"text").value,"Dios va adelante.");
 console.log("Brain execution, recovery, budget and invalid-contract checks passed.");
+
+const silent={...plans.video,audio_mode:"silent",narration:"",required_features:["video"],aspect_ratio:"16:9"};
+const silentTask={...makeTask(),prompt:"Crea un video sin texto ni narración",selectedMode:"video"};
+const silentCalls=[];
+await brain.run(silentTask,{request:async(path,payload)=>{silentCalls.push({path,payload});return path==="chat"?{plan:silent,credits_remaining:4}:{job_id:"silent-job"}},checkpoint(){},progress(){}});
+assert.equal(silentCalls[0].path,"chat");assert.equal(silentCalls[0].payload.preferences.mode,"video");assert.equal(silentCalls[1].path,"video-start");assert.equal(silentCalls[1].payload.audio_mode,"silent");assert.equal(silentCalls[1].payload.narration,"");assert.equal(silentTask.jobId,"silent-job");assert.equal(silentCalls[1].payload.aspect_ratio,"16:9","Explicit plan ratio must override the default format");
+const old={...makeTask(),plan:plans.video,creditsRemaining:4};const oldCalls=[];
+await brain.run(old,{request:async(path,payload)=>{oldCalls.push(payload);return{job_id:"old-job"}},checkpoint(){},progress(){}});
+assert.equal("audio_mode" in oldCalls[0],false,"Recovery must retain the exact legacy request hash");
+const wrong={...makeTask(),prompt:"Video sin voz",plan:plans.video,creditsRemaining:4};
+await assert.rejects(brain.run(wrong,{request:async()=>{throw Error("must not create media")},checkpoint(){},progress(){}}),e=>e.code==="stored_plan_requires_review");
+for(const invalid of [{...silent,narration:"Hola"},{...silent,required_features:["video","voice"]},{...silent,audio_mode:null}])assert.throws(()=>brain.validatePlan(invalid));
+console.log("Silent video, explicit mode, safe legacy replay and contradictory intent checks passed.");
+
+for(const code of ["stored_plan_requires_review","invalid_brain_plan","unsupported_brain_plan","idempotency_conflict"])assert.equal(app.shouldDiscardPending({code}),true);
+for(const error of [{status:401},{status:503},{code:"generation_in_progress"}])assert.equal(app.shouldDiscardPending(error),false);

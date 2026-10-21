@@ -109,38 +109,52 @@ window.CorazonBrain = Object.freeze({
     return "text";
   },
   validatePlan(value) {
-    if (!value || typeof value !== "object" || !["text","image","voice","video","clarify"].includes(value.action)) throw new Error("invalid_brain_plan");
-    for (const field of ["message","prompt","narration"]) if (typeof value[field] !== "string") throw new Error("invalid_brain_plan");
-    if (!Array.isArray(value.required_features) || value.required_features.length > 12 || value.required_features.some(feature=>typeof feature!=="string" || feature.length>60)) throw new Error("invalid_brain_plan");
+    if (!value || typeof value !== "object" || !["text","image","voice","video","clarify"].includes(value.action)) throw Object.assign(new Error("invalid_brain_plan"),{code:"invalid_brain_plan",status:400});
+    for (const field of ["message","prompt","narration"]) if (typeof value[field] !== "string") throw Object.assign(new Error("invalid_brain_plan"),{code:"invalid_brain_plan",status:400});
+    if (!Array.isArray(value.required_features) || value.required_features.length > 12 || value.required_features.some(feature=>typeof feature!=="string" || feature.length>60)) throw Object.assign(new Error("invalid_brain_plan"),{code:"invalid_brain_plan",status:400});
     const plan={...value,message:value.message.trim(),prompt:value.prompt.trim(),narration:value.narration.trim()};
-    if (plan.message.length>4000 || plan.prompt.length>1500 || plan.narration.length>1200) throw new Error("invalid_brain_plan");
-    if (["text","clarify"].includes(plan.action)&&!plan.message) throw new Error("invalid_brain_plan");
-    if (["image","video"].includes(plan.action)&&plan.prompt.length<3) throw new Error("invalid_brain_plan");
-    if (["voice","video"].includes(plan.action)&&!plan.narration) throw new Error("invalid_brain_plan");
-    if (plan.action!=="clarify"&&plan.required_features.some(feature=>!["text","image","voice","video"].includes(feature))) throw new Error("unsupported_brain_plan");
-    if (plan.action==="video"&&plan.narration.split(/\s+/).length>12) throw new Error("invalid_brain_plan");
+    if (plan.message.length>4000 || plan.prompt.length>1500 || plan.narration.length>1200) throw Object.assign(new Error("invalid_brain_plan"),{code:"invalid_brain_plan",status:400});
+    if (["text","clarify"].includes(plan.action)&&!plan.message) throw Object.assign(new Error("invalid_brain_plan"),{code:"invalid_brain_plan",status:400});
+    if (["image","video"].includes(plan.action)&&plan.prompt.length<3) throw Object.assign(new Error("invalid_brain_plan"),{code:"invalid_brain_plan",status:400});
+    if(plan.aspect_ratio!==undefined&&!["9:16","16:9","1:1"].includes(plan.aspect_ratio))throw Object.assign(new Error("invalid_brain_plan"),{code:"invalid_brain_plan",status:400});
+    const audioMode=plan.audio_mode===undefined?"narrated":plan.audio_mode;
+    if (!["silent","narrated"].includes(audioMode)) throw Object.assign(new Error("invalid_brain_plan"),{code:"invalid_brain_plan",status:400});
+    if (audioMode==="silent"&&(plan.action!=="video"||plan.narration||plan.required_features.includes("voice"))) throw Object.assign(new Error("invalid_brain_plan"),{code:"invalid_brain_plan",status:400});
+    if ((plan.action==="voice"||(plan.action==="video"&&audioMode!=="silent"))&&!plan.narration) throw Object.assign(new Error("invalid_brain_plan"),{code:"invalid_brain_plan",status:400});
+    if (plan.action!=="clarify"&&plan.required_features.some(feature=>!["text","image","voice","video"].includes(feature))) throw Object.assign(new Error("unsupported_brain_plan"),{code:"unsupported_brain_plan",status:400});
+    if (plan.action==="video"&&plan.narration.split(/\s+/).length>12) throw Object.assign(new Error("invalid_brain_plan"),{code:"invalid_brain_plan",status:400});
     return plan;
   },
+  wantsSilentVideo(request) {
+    const text=request.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+    return /\b(?:sin|without|no)\s+(?:(?:ningun[oa]?|any|a)\s+)?(?:(?:texto(?: en pantalla)?|(?:on[- ]screen )?text|musica|music)\s*(?:,\s*|(?:ni|or|and|y)\s+))*(?:(?:ningun[oa]?|any|a)\s+)?(?:narracion(?:es)?|narrations?|vo(?:z|ces)|voice(?:[ -]?over)?s?|audios?|sonidos?|sounds?)\b|\b(?:silent video|video (?:silencioso|mudo))\b/.test(text);
+  },
+  validateIntent(plan, task) {
+    if ((task.selectedMode==="video"&&!["video","clarify"].includes(plan.action))||(plan.action==="video"&&this.wantsSilentVideo(task.prompt)&&plan.audio_mode!=="silent")) throw Object.assign(new Error("stored_plan_requires_review"),{code:"stored_plan_requires_review",status:409});
+  },
   validateTask(task) {
+    if(task?.selectedMode!==undefined&&task.selectedMode!=="video")throw Object.assign(new Error("invalid_brain_task"),{code:"invalid_brain_task",status:400});
     const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     if(!task||typeof task.prompt!=="string"||!task.prompt.trim()||task.prompt.length>4000||!uuid.test(task.planId)||!uuid.test(task.createId)||!["es","en"].includes(task.language)||!["1:1","9:16","16:9"].includes(task.format)||!["female","male"].includes(task.voice)||!["auto","warm","professional","minimal"].includes(task.style)||!Number.isFinite(task.createdAt))throw Object.assign(new Error("invalid_brain_task"),{code:"invalid_brain_task",status:400});
   },
   async run(task, dependencies) {
     this.validateTask(task);
     if (!task.plan) {
-      const prepared=await dependencies.request("chat",{message:task.prompt,language:task.language,purpose:"brain",preferences:{style:task.style,format:task.format},idempotency_key:task.planId});
+      const prepared=await dependencies.request("chat",{message:task.prompt,language:task.language,purpose:"brain",preferences:{style:task.style,format:task.format,...(task.selectedMode?{mode:task.selectedMode}:{})},idempotency_key:task.planId});
       task.plan=this.validatePlan(prepared.plan);
+      this.validateIntent(task.plan,task);
       task.creditsRemaining=prepared.credits_remaining;
       dependencies.checkpoint(task);
     }
     const plan=this.validatePlan(task.plan);
+    this.validateIntent(plan,task);
     if (plan.action==="text"||plan.action==="clarify") return {mode:"text",data:{reply:plan.message}};
     if (!Number.isFinite(task.creditsRemaining)||task.creditsRemaining<1) throw Object.assign(new Error("credits_exhausted"),{status:402,code:"prepared_without_credit"});
     dependencies.progress(plan.action);
     let path,payload;
     if (plan.action==="image") {path="image";payload={prompt:plan.prompt,size:task.format==="1:1"?"1024x1024":task.format==="16:9"?"1536x1024":"1024x1536"};}
     else if(plan.action==="voice") {path="tts";payload=this.speech(plan.narration,task.voice,task.style);}
-    else {path="video-start";payload={prompt:plan.prompt,narration:plan.narration,voice:task.voice,duration:5};}
+    else {path="video-start";payload={prompt:plan.prompt,narration:plan.narration,voice:task.voice,duration:5,...(plan.audio_mode!==undefined?{audio_mode:plan.audio_mode,aspect_ratio:plan.aspect_ratio||task.format}:{})};}
     const data=task.jobId&&plan.action==="video"?{job_id:task.jobId}:await dependencies.request(path,{...payload,idempotency_key:task.createId});
     if(plan.action==="video") {
       if(typeof data.job_id!=="string"||!data.job_id) throw new Error("invalid_video_result");
@@ -193,8 +207,7 @@ window.CorazonBrain = Object.freeze({
   async function requireSession(){const session=await validSession();if(session)return session;return new Promise((resolve,reject)=>{state.authResolve={resolve,reject};state.otpSent=false;$("#otpStep").hidden=true;$("#authCode").value="";$("#authCode").required=false;$("#authEmail").disabled=false;$("#authResend").hidden=true;$("#authHelp").textContent=state.language==="es"?"Te enviaremos un código de verificación. No necesitas contraseña.":"We will send you a verification code. No password needed.";$("#authSubmit").textContent=state.language==="es"?"Enviar código":"Send code";$("#authDialog").showModal()})}
   async function edgeRequest(path,payload,session,timeoutMs=cfg.edgeRequestTimeoutMs||20000){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeoutMs);try{const response=await fetch(supabaseUrl(`/functions/v1/${path}`),{method:"POST",headers:{apikey:cfg.supabasePublishableKey,Authorization:`Bearer ${session.access_token}`,"Content-Type":"application/json"},body:JSON.stringify(payload),signal:controller.signal});const data=await response.json().catch(()=>({}));if(!response.ok){const failure=new Error(data.error||data.message||`HTTP ${response.status}`);failure.status=response.status;failure.code=data.code||data.reason;throw failure}return data}finally{clearTimeout(timer)}}
   const wait = ms => new Promise(resolve=>setTimeout(resolve,ms));
-  async function waitForVideo(jobId,session){const deadline=Date.now()+(cfg.videoMaxWaitMs||600000);let connectionFailures=0;while(Date.now()<deadline){try{const status=await edgeRequest("video-status",{job_id:jobId},session,Math.max(cfg.edgeRequestTimeoutMs||20000,70000));connectionFailures=0;if(status.stage==="adding_audio")$("#resultTitle").textContent=state.language==="es"?"Agregando voz al video…":"Adding voice to the video…";if(status.status==="completed"){localStorage.removeItem("corazon_pending_video");return status}if(status.status==="failed"){localStorage.removeItem("corazon_pending_video");const failure=new Error(status.message||"No pudimos completar el video. Tu crédito fue devuelto.");failure.name="VideoGenerationError";throw failure}}catch(error){if(error.name==="VideoGenerationError")throw error;connectionFailures+=1;if(connectionFailures>=5)throw new Error("Video connection paused")}await wait(cfg.videoPollMs||4000)}throw new Error("Video connection paused")}
-  async function createVideo(prompt){const session=await requireSession();const idempotencyKey=crypto.randomUUID();const voice=$("#voice").value;const started=await edgeRequest("video-start",{prompt,narration:prompt,voice,duration:5,idempotency_key:idempotencyKey},session);localStorage.setItem("corazon_pending_video",JSON.stringify({jobId:started.job_id,prompt,createdAt:Date.now()}));return waitForVideo(started.job_id,session)}
+  async function waitForVideo(jobId,session){const deadline=Date.now()+(cfg.videoMaxWaitMs||600000);let connectionFailures=0;while(Date.now()<deadline){try{const status=await edgeRequest("video-status",{job_id:jobId},session,Math.max(cfg.edgeRequestTimeoutMs||20000,70000));connectionFailures=0;if(status.stage==="adding_audio")$("#resultTitle").textContent=state.language==="es"?"Agregando voz al video…":"Adding voice to the video…";if(status.stage==="composing_video")$("#resultTitle").textContent=state.language==="es"?"Preparando el video…":"Preparing the video…";if(status.status==="completed"){localStorage.removeItem("corazon_pending_video");return status}if(status.status==="failed"){localStorage.removeItem("corazon_pending_video");const failure=new Error(status.message||"No pudimos completar el video. Tu crédito fue devuelto.");failure.name="VideoGenerationError";throw failure}}catch(error){if(error.name==="VideoGenerationError")throw error;connectionFailures+=1;if(connectionFailures>=5)throw new Error("Video connection paused")}await wait(cfg.videoPollMs||4000)}throw new Error("Video connection paused")}
   function payloadFor(text,mode){const lang=$("#outputLanguage").value,format=$("#format").value,style=$("#style").value,voice=$("#voice").value;const enhanced=style==="auto"?text:`${text}. Style: ${style}.`;if(mode==="image")return{path:"image",payload:{prompt:enhanced,size:format==="1:1"?"1024x1024":format==="16:9"?"1536x1024":"1024x1536"}};if(mode==="video")return{path:"video-start",payload:{prompt:enhanced,duration:5}};if(mode==="voice")return{path:"tts",payload:{...window.CorazonBrain.speech(text,voice,style)}};return{path:"chat",payload:{message:enhanced,language:lang}}
   }
   function extractResult(data,mode){
@@ -222,9 +235,11 @@ window.CorazonBrain = Object.freeze({
   function saveProject(project){const saved=readLocal("corazon_projects_v2",[]);const items=Array.isArray(saved)?saved:[];items.unshift(project);try{localStorage.setItem("corazon_projects_v2",JSON.stringify(items.slice(0,cfg.maxLocalProjects||20)));renderProjects()}catch{toast(state.language==="es"?"Tu creación está lista, pero no pudimos guardar el historial en este navegador.":"Your creation is ready, but we could not save this browser history.")}}
   function renderProjects(){const root=$("#projectList");if(!root)return;const saved=readLocal("corazon_projects_v2",[]);const items=Array.isArray(saved)?saved.filter(item=>item&&typeof item.prompt==="string"&&["text","image","voice","video"].includes(item.mode)&&Number.isFinite(new Date(item.createdAt).getTime())):[];root.replaceChildren();if(!items.length){const empty=document.createElement("div");empty.className="empty";empty.textContent=t("empty");root.append(empty);return}items.forEach(item=>{const card=document.createElement("article");card.className="project-item";const title=document.createElement("strong");title.textContent=t(`${item.mode}Type`);const prompt=document.createElement("p");prompt.textContent=item.prompt;const date=document.createElement("small");date.textContent=new Intl.DateTimeFormat(state.language,{dateStyle:"medium",timeStyle:"short"}).format(new Date(item.createdAt));card.append(title,prompt,date);root.append(card)})}
   function renderVideoFailure(message){$("#resultTitle").textContent=state.language==="es"?"No se pudo completar":"Could not complete";const notice=document.createElement("div");notice.className="result-copy";notice.textContent=message|| (state.language==="es"?"Tu crédito fue devuelto. Puedes intentarlo nuevamente.":"Your credit was returned. You can try again.");$("#resultContent").replaceChildren(notice);$("#resultMeta").textContent=""}
+  function shouldDiscardPending(error){return ["stored_plan_requires_review","invalid_brain_plan","unsupported_brain_plan","generation_already_refunded","idempotency_conflict"].includes(error.code)||error.name==="VideoGenerationError"||[400,402,403].includes(error.status)}
   function renderRequestFailure(error){
     const es=state.language==="es";
-    const message=["generation_in_progress","pending_request"].includes(error.code)?(es?"Tu solicitud quedó guardada. Vuelve a abrir la página para recuperar el resultado antes de crear otra.":"Your request is saved. Reopen the page to recover the result before creating another."):
+    const message=error.code==="stored_plan_requires_review"?(es?"La preparación guardada no coincide con tu pedido. Crea una nueva solicitud.":"The saved preparation does not match your request. Start a new request."):
+      ["generation_in_progress","pending_request"].includes(error.code)?(es?"Tu solicitud quedó guardada. Vuelve a abrir la página para recuperar el resultado antes de crear otra.":"Your request is saved. Reopen the page to recover the result before creating another."):
       error.code==="prepared_without_credit"?(es?"Tu contenido quedó preparado, pero falta un crédito para crear el archivo.":"Your content was prepared, but one more credit is needed to create the file."):
       error.name==="VideoGenerationError"?error.message:
       error.code==="speech_too_long"?(es?"El texto de voz admite hasta 1200 caracteres. Acórtalo y vuelve a intentar.":"Voice text supports up to 1200 characters. Shorten it and try again."):
@@ -270,18 +285,18 @@ window.CorazonBrain = Object.freeze({
     $("#resultPanel").hidden=false;$("#resultTitle").textContent=t("working");
     $("#resultContent").innerHTML='<div class="loader"><span></span><span></span><span></span></div>';
     $("#resultMeta").textContent=t("cost");setBusy(true);
-    const automatic=state.mode==="auto";let mode=state.mode;
+    const automatic=["auto","video"].includes(state.mode);let mode=state.mode;
     try{
       let data;
-      if(mode==="auto"){
+      if(mode==="auto"||mode==="video"){
         const existing=readLocal("corazon_pending_brain",null);
         if(existing)throw Object.assign(new Error("pending_request"),{code:"pending_request",status:409});
-        const task={prompt:text,language:$("#outputLanguage").value,format:$("#format").value,style:$("#style").value,voice:$("#voice").value,planId:crypto.randomUUID(),createId:crypto.randomUUID(),createdAt:started};
+        const task={prompt:text,...(mode==="video"?{selectedMode:"video"}:{}),language:$("#outputLanguage").value,format:$("#format").value,style:$("#style").value,voice:$("#voice").value,planId:crypto.randomUUID(),createId:crypto.randomUUID(),createdAt:started};
         localStorage.setItem("corazon_pending_brain",JSON.stringify(task));
         const executed=await executeBrainTask(task);mode=executed.mode;data=executed.data;
       }else{
         const spec=payloadFor(text,mode);
-        data=mode==="video"?await createVideo(spec.payload.prompt):await request(spec.path,spec.payload);
+        data=await request(spec.path,spec.payload);
       }
       const result=extractResult(data,mode);renderResult(result,mode,Date.now()-started);
       saveProject({prompt:text,mode,createdAt:started});
@@ -289,7 +304,7 @@ window.CorazonBrain = Object.freeze({
     }catch(error){
       if(error.name==="AuthenticationCancelled"){const pending=readLocal("corazon_pending_brain",null);if(!pending?.plan){localStorage.removeItem("corazon_pending_brain");$("#resultPanel").hidden=true;}else renderRequestFailure({code:"pending_request"});}
       else{
-        if(error.code==="generation_already_refunded"||error.name==="VideoGenerationError"||error.status===400||error.status===402||error.status===403)localStorage.removeItem("corazon_pending_brain");
+        if(shouldDiscardPending(error))localStorage.removeItem("corazon_pending_brain");
         renderRequestFailure(error);
       }
     }finally{setBusy(false)}
@@ -304,7 +319,7 @@ window.CorazonBrain = Object.freeze({
       saveProject({prompt:task.prompt,mode:executed.mode,createdAt:task.createdAt});
       localStorage.removeItem("corazon_pending_brain");
     }catch(error){
-      if(error.name==="VideoGenerationError"||error.code==="generation_already_refunded"||error.code==="idempotency_conflict"||[400,402,403].includes(error.status))localStorage.removeItem("corazon_pending_brain");
+      if(shouldDiscardPending(error))localStorage.removeItem("corazon_pending_brain");
       renderRequestFailure(error);
     }finally{setBusy(false)}
     return true;
