@@ -84,7 +84,7 @@ const appContext = {
   document: { querySelector: element, querySelectorAll: () => [], addEventListener() {}, body: { style: {} } },
 };
 const appScript = scripts.find(source => source.includes("const state ="));
-vm.runInNewContext(appScript.replace("translate();resumePendingBrain().then(handled=>{if(!handled)return resumePendingVideo()});", "window.__test={state,requireSession,payloadFor,readLocal,extractResult,shouldDiscardPending};"), appContext);
+vm.runInNewContext(appScript.replace("translate();resumePendingBrain().then(handled=>{if(!handled)return resumePendingVideo()});", "window.__test={state,requireSession,payloadFor,readLocal,extractResult,shouldDiscardPending,projectItems,validReference};"), appContext);
 const app = appContext.window.__test;
 element("#voice").value = "male";
 element("#style").value = "warm";
@@ -171,3 +171,13 @@ console.log("Silent video, explicit mode, safe legacy replay and contradictory i
 
 for(const code of ["stored_plan_requires_review","invalid_brain_plan","unsupported_brain_plan","idempotency_conflict"])assert.equal(app.shouldDiscardPending({code}),true);
 for(const error of [{status:401},{status:503},{code:"generation_in_progress"}])assert.equal(app.shouldDiscardPending(error),false);
+
+assert.equal(app.validReference({type:"video",id:"22222222-2222-4222-8222-222222222222"}),true);
+for(const reference of [null,{type:"video",id:"not-an-id"},{type:"tts",id:"22222222-2222-4222-8222-222222222222"}])assert.equal(app.validReference(reference),false);
+const historyOwner="11111111-1111-4111-8111-111111111111";
+storage.set("corazon_supabase_session",JSON.stringify({user:{id:historyOwner}}));
+const saved={ownerId:historyOwner,prompt:"Un video",mode:"video",createdAt:Date.now(),reference:{type:"video",id:"22222222-2222-4222-8222-222222222222"}};
+storage.set("corazon_projects_v2",JSON.stringify([saved,{...saved,ownerId:"other"},{...saved,createdAt:1e100},{...saved,reference:{type:"video",id:"bad"}},{prompt:"legacy entry",mode:"video",createdAt:Date.now()}]));
+assert.equal(app.projectItems().length,1,"History filters other owners, malformed dates, missing references, and legacy unowned records");
+storage.delete("corazon_supabase_session");assert.equal(app.projectItems().length,0);
+console.log("History reference validation and account isolation checks passed.");
