@@ -127,7 +127,7 @@ try{
   mode="silent";
   const speechBefore=requests.filter(r=>r.path.endsWith("/tts")).length;
   const plansBefore=requests.filter(r=>r.path.endsWith("/chat")).length;
-  await page.locator('[data-mode="video"]').click();
+  await page.locator('.mode[data-mode="video"]').click();
   await page.locator("#ideaInput").fill("Crea un video sin texto ni narración");await page.locator("#createButton").click();
   await page.getByText("Preparando el video…",{exact:true}).waitFor();
   await page.locator("video").waitFor();await page.waitForFunction(()=>document.querySelector("video")?.readyState>=1);
