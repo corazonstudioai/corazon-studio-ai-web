@@ -75,6 +75,15 @@ await page.route("**/*",async route=>{
 });
 try{
   await page.goto("https://fixture.supabase.co/studio");
+  // Quick ideas configure the supported creation mode without charging anything.
+  await page.getByRole("button",{name:"Video cinematográfico"}).click();
+  assert.equal(await page.locator('[data-mode="video"].mode').getAttribute("aria-checked"),"true");
+  assert.equal(await page.locator("#format").inputValue(),"16:9");
+  assert.match(await page.locator("#ideaInput").inputValue(),/5 segundos/);
+  await page.getByRole("button",{name:"Reel visual"}).click();
+  assert.equal(await page.locator("#format").inputValue(),"9:16");
+  assert.equal(requests.length,0,"Choosing a creative preset must not call paid services");
+  await page.locator('.mode[data-mode="auto"]').click();
   await page.locator("#ideaInput").fill("Escribe un mensaje inspirador");
   await page.locator("#createButton").click();
   await page.locator("#authDialog").waitFor({state:"visible"});
@@ -118,7 +127,7 @@ try{
   mode="silent";
   const speechBefore=requests.filter(r=>r.path.endsWith("/tts")).length;
   const plansBefore=requests.filter(r=>r.path.endsWith("/chat")).length;
-  await page.locator('[data-mode="video"]').click();
+  await page.locator('.mode[data-mode="video"]').click();
   await page.locator("#ideaInput").fill("Crea un video sin texto ni narración");await page.locator("#createButton").click();
   await page.getByText("Preparando el video…",{exact:true}).waitFor();
   await page.locator("video").waitFor();await page.waitForFunction(()=>document.querySelector("video")?.readyState>=1);
