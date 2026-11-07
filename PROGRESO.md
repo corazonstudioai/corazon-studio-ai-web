@@ -158,3 +158,10 @@
 - Cómo se comprobó: La usuaria compartió una captura en la que aparece el nombre VIDEO_TEST_USER_ID entre los secretos del entorno de GitHub. El valor no se leyó ni se registró.
 - Próxima tarea: Tras la autorización, ejecutar únicamente el modo deploy de la rama codex/video-test-temporary y comprobar el resultado.
 - Decisiones pendientes de la usuaria: Autorizar la publicación con «autorizo el despliegue de la función temporal». La generación requiere una autorización posterior y una sesión válida de la cuenta técnica.
+
+## Sesión 07/11/2026
+- Tarea: Publicar únicamente la función temporal video-test-once.
+- Estado: PENDIENTE
+- Cómo se comprobó: La usuaria autorizó la publicación. Se verificó que el modo deploy de codex/video-test-temporary publica solo la función temporal y omite los modos generate y cleanup. El flujo manual aún no se ha ejecutado.
+- Próxima tarea: La usuaria iniciará el modo deploy desde GitHub Actions y se verificará el resultado.
+- Decisiones pendientes de la usuaria: La generación de video requiere autorización separada.
