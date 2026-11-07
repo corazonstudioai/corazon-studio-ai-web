@@ -137,3 +137,10 @@
 - Cómo se comprobó: La usuaria indicó que reconoce una cuenta en Supabase Auth para la prueba. Falta configurar su identificador en GitHub y comprobar que su sesión sea válida.
 - Próxima tarea: La usuaria localizará el User UID en Supabase y lo guardará de forma privada como VIDEO_TEST_USER_ID en GitHub.
 - Decisiones pendientes de la usuaria: Autorizar por separado la publicación de la función temporal y la generación del video.
+
+## Sesión 07/11/2026
+- Tarea: Confirmar una cuenta exclusiva para la prueba de video.
+- Estado: BLOQUEADO
+- Cómo se comprobó: La usuaria aclaró que la cuenta restante es la que usa habitualmente para Corazón Studio AI. No se configuró su identificador para la prueba ni se desplegó la función temporal.
+- Próxima tarea: Confirmar si la usuaria desea crear una cuenta separada para pruebas en Supabase Auth.
+- Decisiones pendientes de la usuaria: Decidir si crea la cuenta de prueba. La publicación de la función y la generación requieren autorizaciones separadas.
