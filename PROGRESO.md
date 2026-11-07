@@ -81,3 +81,10 @@
 - Cómo se comprobó: La usuaria autorizó el despliegue limitado. Se verificó que la rama codex/deploy-video-only contiene solo los dos comandos de despliegue y no aplica migraciones ni SQL. El acceso disponible no permite iniciar este flujo manual y todavía no hay resultado de despliegue.
 - Próxima tarea: Iniciar el flujo en la rama codex/deploy-video-only, modo deploy, y revisar el resultado en GitHub Actions. Para otra sesión: revisar por qué el plan gratis tiene 2 imágenes y no 3.
 - Decisiones pendientes de la usuaria: La generación del video aún requiere autorización separada.
+
+## Sesión 07/11/2026
+- Tarea: Ejecutar el despliegue limitado de video-status y video-start.
+- Estado: BLOQUEADO
+- Cómo se comprobó: GitHub Actions, ejecución 42376042268, aprobó la confirmación y 9 pruebas. Supabase CLI pidió confirmación interactiva antes de la primera publicación y reportó «This run can't ask because stdout is not a terminal. Nothing was changed.» No hubo cambios en Supabase que revertir.
+- Próxima tarea: Iniciar una ejecución nueva del modo deploy en codex/deploy-video-only. Se añadió la opción --yes únicamente a los dos comandos de publicación y se conserva la confirmación escrita del flujo. No volver a ejecutar el intento anterior, que usa el código previo.
+- Decisiones pendientes de la usuaria: La generación de video requiere autorización separada.
