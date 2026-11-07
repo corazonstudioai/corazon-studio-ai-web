@@ -130,3 +130,10 @@
 - Cómo se comprobó: Se guardaron la función, sus pruebas y el flujo manual en codex/video-test-temporary. Pasaron cuatro pruebas simuladas de acceso, bloqueo de duplicados, motores fijos y fallo sin reintento. También se verificó localmente el MP4 final de 480p, cinco segundos y audio. El marcador de un solo uso está diseñado para crearse en GitHub antes de cualquier llamada de generación. No se publicó la función ni se llamó a los proveedores.
 - Próxima tarea: Confirmar que existe una cuenta técnica con sesión válida y, con autorización, publicar solo video-test-once. Después, esperar autorización separada para generar. El flujo prevé eliminar la función al terminar. Para otra sesión: revisar por qué el plan gratis tiene 2 imágenes y no 3.
 - Decisiones pendientes de la usuaria: Escribir «autorizo el despliegue de la función temporal» para publicar y después «autorizado» para generar. La usuaria aceptó usar el saldo prepagado sin recarga automática como protección de gasto.
+
+## Sesión 07/11/2026
+- Tarea: Identificar una cuenta técnica existente para la prueba.
+- Estado: PENDIENTE
+- Cómo se comprobó: La usuaria indicó que reconoce una cuenta en Supabase Auth para la prueba. Falta configurar su identificador en GitHub y comprobar que su sesión sea válida.
+- Próxima tarea: La usuaria localizará el User UID en Supabase y lo guardará de forma privada como VIDEO_TEST_USER_ID en GitHub.
+- Decisiones pendientes de la usuaria: Autorizar por separado la publicación de la función temporal y la generación del video.
