@@ -39,3 +39,10 @@
 - Cómo se comprobó: El flujo de producción ejecuta todo el SQL y despliega siete funciones. La migración 001 sobrescribe límites del plan gratis y la 004 completa períodos faltantes de generaciones existentes. El último despliegue verde de referencia corresponde a 73ae34f. No se verificaron los valores actuales en producción ni un respaldo para revertir cambios de datos.
 - Próxima tarea: Preparar un despliegue limitado a las dos funciones de video y verificar cómo volver a la versión anterior sin reaplicar migraciones.
 - Decisiones pendientes de la usuaria: Autorizar la fusión cuando se aclare el despliegue y, por separado, autorizar la prueba.
+
+## Sesión 06/11/2026
+- Tarea: Preparar un despliegue manual limitado a video-start y video-status, con opción de reversión.
+- Estado: PROBADO
+- Cómo se comprobó: Se guardó el flujo en la rama codex/deploy-video-only y se validaron localmente la sintaxis, la confirmación obligatoria y los dos únicos comandos de despliegue. El flujo no aplica migraciones ni escribe datos de la app. No se fusionó el borrador #17 ni se ejecutó el despliegue.
+- Próxima tarea: La usuaria puede guardar los límites del plan gratis con la consulta de solo lectura. Tras la autorización, comprobar el permiso de la rama y ejecutar el flujo limitado.
+- Decisiones pendientes de la usuaria: Escribir «autorizo el despliegue limitado» para desplegar. La prueba de video requiere autorización separada.
