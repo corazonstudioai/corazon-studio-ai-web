@@ -123,3 +123,10 @@
 - Cómo se comprobó: La usuaria autorizó un intento. El flujo narrado del borrador usa una cuenta técnica y un crédito de esa cuenta. La app normal pasa por el planificador y no activa el bloqueo de motores. El flujo técnico necesita publicar una función auxiliar temporal y el código no impone un límite monetario por solicitud. No se inició la generación, no se gastaron créditos y no hay identificadores de solicitudes.
 - Próxima tarea: Preparar una ejecución técnica con un límite de US$0.15 verificable y acceso a los identificadores de fal. Para otra sesión: revisar por qué el plan gratis tiene 2 imágenes y no 3.
 - Decisiones pendientes de la usuaria: Cualquier publicación adicional de una función auxiliar queda fuera del despliegue limitado autorizado.
+
+## Sesión 07/11/2026
+- Tarea: Preparar la función temporal autenticada y su limpieza para un único video narrado.
+- Estado: PROBADO
+- Cómo se comprobó: Se guardaron la función, sus pruebas y el flujo manual en codex/video-test-temporary. Pasaron cuatro pruebas simuladas de acceso, bloqueo de duplicados, motores fijos y fallo sin reintento. También se verificó localmente el MP4 final de 480p, cinco segundos y audio. El marcador de un solo uso está diseñado para crearse en GitHub antes de cualquier llamada de generación. No se publicó la función ni se llamó a los proveedores.
+- Próxima tarea: Confirmar que existe una cuenta técnica con sesión válida y, con autorización, publicar solo video-test-once. Después, esperar autorización separada para generar. El flujo prevé eliminar la función al terminar. Para otra sesión: revisar por qué el plan gratis tiene 2 imágenes y no 3.
+- Decisiones pendientes de la usuaria: Escribir «autorizo el despliegue de la función temporal» para publicar y después «autorizado» para generar. La usuaria aceptó usar el saldo prepagado sin recarga automática como protección de gasto.
