@@ -25,3 +25,10 @@
 - Cómo se comprobó: Las respuestas de generación no documentan un importe por solicitud. El código preparado registra identificadores y unidades reportadas cuando existen. El importe sigue pendiente del reporte de facturación. No se desplegaron los cambios ni se consumió el intento.
 - Próxima tarea: Confirmar el tope de US$0.15 y cómo atribuir el cobro real al único video de prueba.
 - Decisiones pendientes de la usuaria: La usuaria deberá autorizar de nuevo la ejecución cuando se cumplan las condiciones.
+
+## Sesión 06/11/2026
+- Tarea: Verificar el borrador del backend en GitHub Actions.
+- Estado: PROBADO
+- Cómo se comprobó: GitHub Actions aprobó Backend quality y Supabase Edge quality para el borrador. La verificación de integración y base de datos seguía en curso al consultar.
+- Próxima tarea: Revisar la verificación de integración y confirmar cómo conciliar el costo por proveedor.
+- Decisiones pendientes de la usuaria: La usuaria deberá autorizar de nuevo la generación cuando se cumplan las condiciones.
