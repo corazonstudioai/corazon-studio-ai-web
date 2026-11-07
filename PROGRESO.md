@@ -144,3 +144,10 @@
 - Cómo se comprobó: La usuaria aclaró que la cuenta restante es la que usa habitualmente para Corazón Studio AI. No se configuró su identificador para la prueba ni se desplegó la función temporal.
 - Próxima tarea: Confirmar si la usuaria desea crear una cuenta separada para pruebas en Supabase Auth.
 - Decisiones pendientes de la usuaria: Decidir si crea la cuenta de prueba. La publicación de la función y la generación requieren autorizaciones separadas.
+
+## Sesión 07/11/2026
+- Tarea: Crear una cuenta separada para la prueba de video.
+- Estado: TERMINADO
+- Cómo se comprobó: La usuaria confirmó que Supabase Auth creó la cuenta de prueba. Aún no se ha comprobado la sesión de esa cuenta.
+- Próxima tarea: La usuaria copiará el User ID de la cuenta de prueba y lo guardará de forma privada como VIDEO_TEST_USER_ID en GitHub.
+- Decisiones pendientes de la usuaria: Autorizar por separado la publicación de la función temporal y la generación del video.
