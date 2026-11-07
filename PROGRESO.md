@@ -32,3 +32,10 @@
 - Cómo se comprobó: GitHub Actions aprobó Backend quality y Supabase Edge quality para el borrador. La verificación de integración y base de datos seguía en curso al consultar.
 - Próxima tarea: Revisar la verificación de integración y confirmar cómo conciliar el costo por proveedor.
 - Decisiones pendientes de la usuaria: La usuaria deberá autorizar de nuevo la generación cuando se cumplan las condiciones.
+
+## Sesión 06/11/2026
+- Tarea: Auditar la reaplicación de migraciones y preparar la reversión del despliegue del borrador #17.
+- Estado: BLOQUEADO
+- Cómo se comprobó: El flujo de producción ejecuta todo el SQL y despliega siete funciones. La migración 001 sobrescribe límites del plan gratis y la 004 completa períodos faltantes de generaciones existentes. El último despliegue verde de referencia corresponde a 73ae34f. No se verificaron los valores actuales en producción ni un respaldo para revertir cambios de datos.
+- Próxima tarea: Preparar un despliegue limitado a las dos funciones de video y verificar cómo volver a la versión anterior sin reaplicar migraciones.
+- Decisiones pendientes de la usuaria: Autorizar la fusión cuando se aclare el despliegue y, por separado, autorizar la prueba.
