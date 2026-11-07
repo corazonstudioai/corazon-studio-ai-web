@@ -102,3 +102,10 @@
 - Cómo se comprobó: La ejecución 42376839368 de GitHub Actions terminó en verde. Pasaron las 9 pruebas y el registro de Supabase confirmó la publicación de ambas funciones. El flujo no ejecutó migraciones ni SQL. No se fusionó el borrador #17 ni se generó video.
 - Próxima tarea: La usuaria comprobará que la app sigue abriendo en el teléfono. Después se compararán los límites del plan gratis con la referencia anterior. Para otra sesión: revisar por qué el plan gratis tiene 2 imágenes y no 3.
 - Decisiones pendientes de la usuaria: La generación de video requiere autorización separada.
+
+## Sesión 07/11/2026
+- Tarea: Comprobar que la app sigue abriendo después del despliegue limitado.
+- Estado: PROBADO
+- Cómo se comprobó: La usuaria compartió una captura de la pantalla principal de Corazón Studio AI abierta en Chrome desde su teléfono después del despliegue 42376839368.
+- Próxima tarea: Repetir la consulta de solo lectura en Supabase y comparar los cinco límites con la referencia anterior.
+- Decisiones pendientes de la usuaria: La generación de video requiere autorización separada.
