@@ -67,3 +67,10 @@
 - Cómo se comprobó: La consulta de solo lectura devolvió cinco filas en Supabase. La captura de la usuaria permite verificar images = 2, songs = 1, text_requests = 5 y video_minutes = 0.1667. La quinta fila quedó cubierta en la captura.
 - Próxima tarea: Mostrar la quinta fila y completar la referencia para comparar después del despliegue.
 - Decisiones pendientes de la usuaria: Autorizar por separado el despliegue limitado y la generación de video.
+
+## Sesión 06/11/2026
+- Tarea: Guardar los cinco límites del plan gratis antes del despliegue limitado.
+- Estado: TERMINADO
+- Cómo se comprobó: La usuaria compartió el resultado completo de la consulta de solo lectura en Supabase: images = 2.0000, songs = 1.0000, text_requests = 5.0000, video_minutes = 0.1667 y voice_minutes = 1.0000.
+- Próxima tarea: Tras la autorización, desplegar únicamente video-start y video-status. Después, comparar los cinco límites con esta referencia.
+- Decisiones pendientes de la usuaria: Escribir «autorizo el despliegue limitado» para desplegar. La generación de video requiere un «autorizado» por separado.
