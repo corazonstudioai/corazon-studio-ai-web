@@ -46,3 +46,10 @@
 - Cómo se comprobó: Se guardó el flujo en la rama codex/deploy-video-only y se validaron localmente la sintaxis, la confirmación obligatoria y los dos únicos comandos de despliegue. El flujo no aplica migraciones ni escribe datos de la app. No se fusionó el borrador #17 ni se ejecutó el despliegue.
 - Próxima tarea: La usuaria puede guardar los límites del plan gratis con la consulta de solo lectura. Tras la autorización, comprobar el permiso de la rama y ejecutar el flujo limitado.
 - Decisiones pendientes de la usuaria: Escribir «autorizo el despliegue limitado» para desplegar. La prueba de video requiere autorización separada.
+
+## Sesión 06/11/2026
+- Tarea: Consultar y guardar los límites actuales del plan gratis.
+- Estado: BLOQUEADO
+- Cómo se comprobó: La usuaria compartió una captura del panel de Supabase que muestra el proyecto en pausa. La consulta de solo lectura aún no se ejecutó.
+- Próxima tarea: Revisar la opción para reanudar el proyecto antes de consultar los límites.
+- Decisiones pendientes de la usuaria: Decidir si reanuda el proyecto. El despliegue limitado y la generación de video siguen sujetos a autorizaciones separadas.
