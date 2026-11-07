@@ -95,3 +95,10 @@
 - Cómo se comprobó: En la ejecución 42376674276, GitHub Actions detectó un espacio en blanco adicional en la frase de confirmación. La rama y el modo eran correctos. El paso de despliegue quedó omitido y no hubo cambios en Supabase que revertir.
 - Próxima tarea: Iniciar una ejecución nueva en codex/deploy-video-only, modo deploy, con la confirmación exacta sin espacios al final.
 - Decisiones pendientes de la usuaria: La generación de video requiere autorización separada.
+
+## Sesión 07/11/2026
+- Tarea: Desplegar únicamente video-status y video-start en Supabase.
+- Estado: TERMINADO
+- Cómo se comprobó: La ejecución 42376839368 de GitHub Actions terminó en verde. Pasaron las 9 pruebas y el registro de Supabase confirmó la publicación de ambas funciones. El flujo no ejecutó migraciones ni SQL. No se fusionó el borrador #17 ni se generó video.
+- Próxima tarea: La usuaria comprobará que la app sigue abriendo en el teléfono. Después se compararán los límites del plan gratis con la referencia anterior. Para otra sesión: revisar por qué el plan gratis tiene 2 imágenes y no 3.
+- Decisiones pendientes de la usuaria: La generación de video requiere autorización separada.
