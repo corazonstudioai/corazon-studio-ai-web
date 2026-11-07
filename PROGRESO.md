@@ -88,3 +88,10 @@
 - Cómo se comprobó: GitHub Actions, ejecución 42376042268, aprobó la confirmación y 9 pruebas. Supabase CLI pidió confirmación interactiva antes de la primera publicación y reportó «This run can't ask because stdout is not a terminal. Nothing was changed.» No hubo cambios en Supabase que revertir.
 - Próxima tarea: Iniciar una ejecución nueva del modo deploy en codex/deploy-video-only. Se añadió la opción --yes únicamente a los dos comandos de publicación y se conserva la confirmación escrita del flujo. No volver a ejecutar el intento anterior, que usa el código previo.
 - Decisiones pendientes de la usuaria: La generación de video requiere autorización separada.
+
+## Sesión 07/11/2026
+- Tarea: Ejecutar el flujo corregido de despliegue limitado.
+- Estado: BLOQUEADO
+- Cómo se comprobó: En la ejecución 42376674276, GitHub Actions detectó un espacio en blanco adicional en la frase de confirmación. La rama y el modo eran correctos. El paso de despliegue quedó omitido y no hubo cambios en Supabase que revertir.
+- Próxima tarea: Iniciar una ejecución nueva en codex/deploy-video-only, modo deploy, con la confirmación exacta sin espacios al final.
+- Decisiones pendientes de la usuaria: La generación de video requiere autorización separada.
