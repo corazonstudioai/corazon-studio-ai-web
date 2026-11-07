@@ -60,3 +60,10 @@
 - Cómo se comprobó: La usuaria compartió una captura del panel con el estado Healthy después de reanudar el proyecto. Todavía no se verificaron los límites guardados mediante SQL.
 - Próxima tarea: Ejecutar la consulta de solo lectura y guardar los límites del plan gratis.
 - Decisiones pendientes de la usuaria: Autorizar por separado el despliegue limitado y la generación de video.
+
+## Sesión 06/11/2026
+- Tarea: Verificar los límites del plan gratis antes del despliegue limitado.
+- Estado: PROBADO
+- Cómo se comprobó: La consulta de solo lectura devolvió cinco filas en Supabase. La captura de la usuaria permite verificar images = 2, songs = 1, text_requests = 5 y video_minutes = 0.1667. La quinta fila quedó cubierta en la captura.
+- Próxima tarea: Mostrar la quinta fila y completar la referencia para comparar después del despliegue.
+- Decisiones pendientes de la usuaria: Autorizar por separado el despliegue limitado y la generación de video.
