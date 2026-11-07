@@ -74,3 +74,10 @@
 - Cómo se comprobó: La usuaria compartió el resultado completo de la consulta de solo lectura en Supabase: images = 2.0000, songs = 1.0000, text_requests = 5.0000, video_minutes = 0.1667 y voice_minutes = 1.0000.
 - Próxima tarea: Tras la autorización, desplegar únicamente video-start y video-status. Después, comparar los cinco límites con esta referencia.
 - Decisiones pendientes de la usuaria: Escribir «autorizo el despliegue limitado» para desplegar. La generación de video requiere un «autorizado» por separado.
+
+## Sesión 06/11/2026
+- Tarea: Iniciar el despliegue limitado de video-status y video-start.
+- Estado: PENDIENTE
+- Cómo se comprobó: La usuaria autorizó el despliegue limitado. Se verificó que la rama codex/deploy-video-only contiene solo los dos comandos de despliegue y no aplica migraciones ni SQL. El acceso disponible no permite iniciar este flujo manual y todavía no hay resultado de despliegue.
+- Próxima tarea: Iniciar el flujo en la rama codex/deploy-video-only, modo deploy, y revisar el resultado en GitHub Actions. Para otra sesión: revisar por qué el plan gratis tiene 2 imágenes y no 3.
+- Decisiones pendientes de la usuaria: La generación del video aún requiere autorización separada.
