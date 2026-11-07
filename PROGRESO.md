@@ -151,3 +151,10 @@
 - Cómo se comprobó: La usuaria confirmó que Supabase Auth creó la cuenta de prueba. Aún no se ha comprobado la sesión de esa cuenta.
 - Próxima tarea: La usuaria copiará el User ID de la cuenta de prueba y lo guardará de forma privada como VIDEO_TEST_USER_ID en GitHub.
 - Decisiones pendientes de la usuaria: Autorizar por separado la publicación de la función temporal y la generación del video.
+
+## Sesión 07/11/2026
+- Tarea: Configurar el identificador de la cuenta técnica para la función temporal.
+- Estado: PROBADO
+- Cómo se comprobó: La usuaria compartió una captura en la que aparece el nombre VIDEO_TEST_USER_ID entre los secretos del entorno de GitHub. El valor no se leyó ni se registró.
+- Próxima tarea: Tras la autorización, ejecutar únicamente el modo deploy de la rama codex/video-test-temporary y comprobar el resultado.
+- Decisiones pendientes de la usuaria: Autorizar la publicación con «autorizo el despliegue de la función temporal». La generación requiere una autorización posterior y una sesión válida de la cuenta técnica.
