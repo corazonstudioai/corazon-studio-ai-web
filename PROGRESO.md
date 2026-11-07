@@ -53,3 +53,10 @@
 - Cómo se comprobó: La usuaria compartió una captura del panel de Supabase que muestra el proyecto en pausa. La consulta de solo lectura aún no se ejecutó.
 - Próxima tarea: Revisar la opción para reanudar el proyecto antes de consultar los límites.
 - Decisiones pendientes de la usuaria: Decidir si reanuda el proyecto. El despliegue limitado y la generación de video siguen sujetos a autorizaciones separadas.
+
+## Sesión 06/11/2026
+- Tarea: Reanudar el proyecto de Supabase.
+- Estado: PROBADO
+- Cómo se comprobó: La usuaria compartió una captura del panel con el estado Healthy después de reanudar el proyecto. Todavía no se verificaron los límites guardados mediante SQL.
+- Próxima tarea: Ejecutar la consulta de solo lectura y guardar los límites del plan gratis.
+- Decisiones pendientes de la usuaria: Autorizar por separado el despliegue limitado y la generación de video.
