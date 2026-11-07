@@ -109,3 +109,10 @@
 - Cómo se comprobó: La usuaria compartió una captura de la pantalla principal de Corazón Studio AI abierta en Chrome desde su teléfono después del despliegue 42376839368.
 - Próxima tarea: Repetir la consulta de solo lectura en Supabase y comparar los cinco límites con la referencia anterior.
 - Decisiones pendientes de la usuaria: La generación de video requiere autorización separada.
+
+## Sesión 07/11/2026
+- Tarea: Comparar los límites del plan gratis antes y después del despliegue limitado.
+- Estado: TERMINADO
+- Cómo se comprobó: La usuaria compartió el resultado de la misma consulta de solo lectura después del despliegue. Coinciden los cinco valores: images = 2.0000, songs = 1.0000, text_requests = 5.0000, video_minutes = 0.1667 y voice_minutes = 1.0000.
+- Próxima tarea: Confirmar cómo respetar el tope de US$0.15 y verificar el cobro real antes de la prueba narrada. Para otra sesión: revisar por qué el plan gratis tiene 2 imágenes y no 3.
+- Decisiones pendientes de la usuaria: La prueba de video requiere autorización separada.
