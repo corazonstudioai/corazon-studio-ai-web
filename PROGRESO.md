@@ -116,3 +116,10 @@
 - Cómo se comprobó: La usuaria compartió el resultado de la misma consulta de solo lectura después del despliegue. Coinciden los cinco valores: images = 2.0000, songs = 1.0000, text_requests = 5.0000, video_minutes = 0.1667 y voice_minutes = 1.0000.
 - Próxima tarea: Confirmar cómo respetar el tope de US$0.15 y verificar el cobro real antes de la prueba narrada. Para otra sesión: revisar por qué el plan gratis tiene 2 imágenes y no 3.
 - Decisiones pendientes de la usuaria: La prueba de video requiere autorización separada.
+
+## Sesión 07/11/2026
+- Tarea: Iniciar un único video narrado con Wan 2.2 Turbo y GPT-4o mini TTS.
+- Estado: BLOQUEADO
+- Cómo se comprobó: La usuaria autorizó un intento. El flujo narrado del borrador usa una cuenta técnica y un crédito de esa cuenta. La app normal pasa por el planificador y no activa el bloqueo de motores. El flujo técnico necesita publicar una función auxiliar temporal y el código no impone un límite monetario por solicitud. No se inició la generación, no se gastaron créditos y no hay identificadores de solicitudes.
+- Próxima tarea: Preparar una ejecución técnica con un límite de US$0.15 verificable y acceso a los identificadores de fal. Para otra sesión: revisar por qué el plan gratis tiene 2 imágenes y no 3.
+- Decisiones pendientes de la usuaria: Cualquier publicación adicional de una función auxiliar queda fuera del despliegue limitado autorizado.
