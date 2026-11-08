@@ -172,3 +172,10 @@
 - Cómo se comprobó: La ejecución 42448880187 del modo deploy en codex/video-test-temporary terminó en verde. Pasaron cuatro pruebas y el registro de Supabase confirmó la publicación de video-test-once. GitHub omitió los trabajos generate y cleanup.
 - Próxima tarea: Preparar una sesión válida de la cuenta técnica para la prueba, sin exponer credenciales. Después de la autorización, generar un solo video y comprobar la eliminación de la función temporal.
 - Decisiones pendientes de la usuaria: La generación requiere la autorización separada «autorizado».
+
+## Sesión 07/11/2026
+- Tarea: Preparar la comprobación privada de la sesión de la cuenta técnica.
+- Estado: PROBADO
+- Cómo se comprobó: Se añadió el modo verify-session a codex/video-test-temporary. Pasaron comprobaciones simuladas de autenticación, rechazo de cuentas ajenas, acceso anónimo, clave pública y separación de modos. El modo realiza solo el inicio de sesión y consultas sin generación; no se ejecutó en producción.
+- Próxima tarea: La usuaria guardará los secretos VIDEO_TEST_EMAIL y VIDEO_TEST_PASSWORD en el entorno de GitHub. Después se ejecutará verify-session sin llamar a los proveedores de video o voz.
+- Decisiones pendientes de la usuaria: La generación requiere la autorización separada «autorizado».
