@@ -165,3 +165,10 @@
 - Cómo se comprobó: La usuaria autorizó la publicación. Se verificó que el modo deploy de codex/video-test-temporary publica solo la función temporal y omite los modos generate y cleanup. El flujo manual aún no se ha ejecutado.
 - Próxima tarea: La usuaria iniciará el modo deploy desde GitHub Actions y se verificará el resultado.
 - Decisiones pendientes de la usuaria: La generación de video requiere autorización separada.
+
+## Sesión 07/11/2026
+- Tarea: Publicar únicamente la función temporal video-test-once.
+- Estado: TERMINADO
+- Cómo se comprobó: La ejecución 42448880187 del modo deploy en codex/video-test-temporary terminó en verde. Pasaron cuatro pruebas y el registro de Supabase confirmó la publicación de video-test-once. GitHub omitió los trabajos generate y cleanup.
+- Próxima tarea: Preparar una sesión válida de la cuenta técnica para la prueba, sin exponer credenciales. Después de la autorización, generar un solo video y comprobar la eliminación de la función temporal.
+- Decisiones pendientes de la usuaria: La generación requiere la autorización separada «autorizado».
