@@ -179,3 +179,10 @@
 - Cómo se comprobó: Se añadió el modo verify-session a codex/video-test-temporary. Pasaron comprobaciones simuladas de autenticación, rechazo de cuentas ajenas, acceso anónimo, clave pública y separación de modos. El modo realiza solo el inicio de sesión y consultas sin generación; no se ejecutó en producción.
 - Próxima tarea: La usuaria guardará los secretos VIDEO_TEST_EMAIL y VIDEO_TEST_PASSWORD en el entorno de GitHub. Después se ejecutará verify-session sin llamar a los proveedores de video o voz.
 - Decisiones pendientes de la usuaria: La generación requiere la autorización separada «autorizado».
+
+## Sesión 11/11/2026
+- Tarea: Recuperar el acceso a la cuenta técnica de la prueba.
+- Estado: BLOQUEADO
+- Cómo se comprobó: La usuaria abrió el enlace de recuperación y el navegador recibió ERR_CONNECTION_REFUSED en localhost:3000. La revisión de la página principal del repositorio no encontró un formulario de restablecimiento. No se verificó la sesión ni se ejecutó la generación.
+- Próxima tarea: Preparar una cuenta técnica con una contraseña conocida para continuar la prueba. Registrar la configuración de recuperación de la app como pendiente separado.
+- Decisiones pendientes de la usuaria: La generación de video requiere autorización separada.
